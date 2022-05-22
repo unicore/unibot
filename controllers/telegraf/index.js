@@ -7,6 +7,8 @@ module.exports.botUpdate = async (req) => {
     return {};
   }
   const telegrafInstance = await bot.getTelegrafInstance();
-  await telegrafInstance.handleUpdate(req.body);
+  if (telegrafInstance) {
+    await telegrafInstance.handleUpdate(req.body);
+  }
   return {};
 };
