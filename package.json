@@ -1,8 +1,8 @@
 {
-  "name": "tgbotfastify",
+  "name": "unimultibot",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "Unlicense",
   "scripts": {
     "watch": "nodemon app.js",
     "start": "node app.js",
