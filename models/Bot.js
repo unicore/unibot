@@ -22,18 +22,34 @@ const botSchema = new Schema({
   botSecret: { type: String, unique: true, index: true },
   mode: { type: String, default: 'base' },
   env: Schema.Types.Mixed,
+  version: { type: Number, default: 0 },
 });
 
 const BOT_INSTANCES = {};
 
-botSchema.methods.getTelegrafInstance = async function getTelegrafInstance(workerMode) {
+botSchema.methods.getTelegrafInstance = async function getTelegrafInstance(workerMode, softMode) {
   if (!this.isActive) {
+    BOT_INSTANCES[this.token] = null;
     return null;
   }
-  if (!BOT_INSTANCES[this.token] || workerMode) {
-    console.log('INIT BOT', this.name, this.mode, 'IN PROGRESS...');
+
+  const needUpdateHook = !workerMode && (!softMode || !BOT_INSTANCES[this.token]);
+  const hasNewVersion = (
+    BOT_INSTANCES[this.token] && BOT_INSTANCES[this.token].instanceVersion !== this.version
+  );
+  if (softMode && hasNewVersion) {
+    console.log('Bot', this.name, 'has new version. Old:', BOT_INSTANCES[this.token].instanceVersion, ' New:', this.version);
+  }
+
+  if (
+    !BOT_INSTANCES[this.token]
+      || workerMode
+      || (hasNewVersion && softMode)
+  ) {
+    console.log('INIT BOT', this.name, this.mode, this.version, 'IN PROGRESS...');
     BOT_INSTANCES[this.token] = new Telegraf(this.token);
     BOT_INSTANCES[this.token].instanceName = this.name;
+    BOT_INSTANCES[this.token].instanceVersion = this.version;
     BOT_INSTANCES[this.token].getEnv = () => {
       const { env } = this;
 
@@ -45,7 +61,7 @@ botSchema.methods.getTelegrafInstance = async function getTelegrafInstance(worke
     };
     const clearFunc = await Bots.initBot(this, this.mode, BOT_INSTANCES[this.token]);
     BOT_INSTANCES[this.token].clearFunc = clearFunc || (() => {});
-    if (!workerMode) {
+    if (needUpdateHook) {
       this.botSecret = BOT_INSTANCES[this.token].secretPathComponent();
       await this.save();
       try {
@@ -64,6 +80,11 @@ botSchema.methods.deleteTelegrafInstance = function deleteTelegrafInstance() {
   if (BOT_INSTANCES[this.token]) {
     BOT_INSTANCES[this.token] = null;
   }
+};
+
+botSchema.methods.incVersion = async function deleteTelegrafInstance() {
+  this.version += 1;
+  await this.save();
 };
 
 const Bot = mongoose.model('bot', botSchema);

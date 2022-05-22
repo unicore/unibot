@@ -74,6 +74,7 @@ module.exports.setBotToken = async (req) => {
 
   bot.token = token;
   await bot.save();
+  await bot.incVersion();
 
   return { ok: true };
 };
@@ -94,6 +95,7 @@ module.exports.enableBot = async (req) => {
 
   bot.isActive = true;
   await bot.save();
+  await bot.incVersion();
   await bot.getTelegrafInstance();
 
   return { ok: true };
@@ -122,6 +124,8 @@ module.exports.disableBot = async (req) => {
     bot.deleteTelegrafInstance();
   }
 
+  await bot.incVersion();
+
   return { ok: true };
 };
 
@@ -147,6 +151,7 @@ module.exports.changeBotMode = async (req) => {
   bot.mode = mode;
   await bot.save();
   const telegrafInstance = await bot.getTelegrafInstance();
+  await bot.incVersion();
   if (telegrafInstance) {
     await telegrafInstance.clearFunc();
     await telegrafInstance.telegram.deleteWebhook();
@@ -175,6 +180,7 @@ module.exports.setEnv = async (req) => {
   bot.env = env;
   await bot.save();
   const telegrafInstance = await bot.getTelegrafInstance();
+  await bot.incVersion();
   if (telegrafInstance) {
     await telegrafInstance.clearFunc();
     await telegrafInstance.telegram.deleteWebhook();
