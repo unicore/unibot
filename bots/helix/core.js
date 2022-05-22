@@ -160,16 +160,24 @@ async function getLiquidBalance(bot, username, symbol, contract = 'eosio.token')
 }
 
 async function printHelixWallet(bot, ctx, user, hostname) {
-  const params = await getHelixParams(bot, hostname);
-  const balances = await getUserHelixBalances(bot, hostname, user.eosname, params);
-  const myTail = await getTail(bot, user.eosname, hostname);
+  const paramsPromise = getHelixParams(bot, hostname);
+  const [
+    params,
+    balances,
+    myTail,
+    maxDeposit,
+    userPower,
+  ] = await Promise.all([
+    paramsPromise,
+    paramsPromise.then((p) => getUserHelixBalances(bot, hostname, user.eosname, p)),
+    getTail(bot, user.eosname, hostname),
+    getCondition(bot, hostname, 'maxdeposit'),
+    bot.uni.coreContract.getUserPower(user.eosname, hostname),
+  ]);
 
   let contract;
 
-  const maxDeposit = await getCondition(bot, hostname, 'maxdeposit');
-
   const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-  const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
   const totalSharesAsset = `${((Number(userPower.power) / parseFloat(totalShares)) * parseFloat(params.host.quote_amount)).toFixed(4)} ${params.host.quote_symbol}`;
   const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
