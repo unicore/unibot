@@ -135,13 +135,45 @@ async function saveDbHost(suffix, params) {
   }
 }
 
-async function getUser(suffix, id) {
+const getRestoredUserFromAnyBots = async (currentBotName, id) => {
+  // eslint-disable-next-line global-require
+  const Bot = require('../../models/Bot');
+  const bots = await Bot.find({ mode: 'helix', name: { $ne: currentBotName } });
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const bot of bots) {
+    // eslint-disable-next-line no-await-in-loop,no-use-before-define
+    const user = await getUser(bot.name, id, null, true);
+
+    if (user) {
+      // eslint-disable-next-line no-await-in-loop
+      await saveUser(currentBotName, user);
+      return;
+    }
+  }
+
+  // eslint-disable-next-line no-use-before-define
+  const user = await getUser(null, id, 'users', true);
+  if (user) {
+    // eslint-disable-next-line no-await-in-loop
+    await saveUser(currentBotName, user);
+  }
+};
+
+async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
   try {
     const db = await loadDB();
 
-    const collection = db.collection(`helixUsers_${suffix}`);
+    const collection = db.collection(collectionName || `helixUsers_${suffix}`);
 
-    return await collection.findOne({ id });
+    const user = await collection.findOne({ id });
+    if (user) {
+      return user;
+    }
+    if (!disableRestoreFromAnyBots) {
+      await getRestoredUserFromAnyBots(suffix, id);
+      return await getUser(suffix, id, null, true);
+    }
   } catch (e) {
     console.log('error: ', e.message);
   }
