@@ -133,6 +133,7 @@ module.exports.changeBotMode = async (req) => {
   const ALLOWED_MODES = {
     base: 1,
     helix: 1,
+    dacom: 1,
   };
   const {
     name,

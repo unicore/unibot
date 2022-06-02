@@ -23,7 +23,7 @@ async function fetchConditions(bot, hostname) {
 }
 
 
-async function printGoalsMenu(ctx, user, hostname){
+async function printGoalsMenu(bot, ctx, user, hostname){
   let cfund = await fetchCommunityFund(bot, hostname)
   console.log("cfund", cfund)
   let goals = await fetchGoals(bot, hostname)

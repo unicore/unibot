@@ -6,7 +6,7 @@ async function getUserHelixBalance(suffix, username) {
   try {
     const db = await loadDB();
 
-    const collection = await db.collection(`helixBalances_${suffix}`);
+    const collection = await db.collection(`dacomBalances_${suffix}`);
 
     return await collection.find({ username }).toArray();
   } catch (e) {
@@ -18,12 +18,75 @@ async function getUserHelixBalance(suffix, username) {
 async function saveUser(suffix, user) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixUsers_${suffix}`);
+    const collection = db.collection(`dacomUsers_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     user.join_at = new Date().getTime();
     await collection.updateOne(
       { id: user.id },
       { $set: user },
+      { upsert: true },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function getQuiz(suffix, id) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    return await collection.findOne({ id });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
+async function getAllQuizzes(suffix) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    return await collection.find({});
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
+async function saveHost(suffix, user, env) {
+  try {
+    const db = await loadDB();
+    const hosts = db.collection(`dacomHosts_${suffix}`);
+
+    await hosts.updateOne(
+      { id: user.id },
+      {
+        $set: {
+          eosname: user.eosname,
+          env,
+        },
+      },
+      { upsert: true },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function saveQuiz(suffix, user, quiz) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    await collection.updateOne(
+      { id: quiz.id },
+      { $set: quiz },
       { upsert: true },
     );
   } catch (e) {
@@ -39,7 +102,7 @@ async function addUserHelixBalance(suffix, username, balance) {
       // eslint-disable-next-line no-param-reassign
       balance.username = username;
 
-      const collection = db.collection(`helixBalances_${suffix}`);
+      const collection = db.collection(`dacomBalances_${suffix}`);
 
       await collection.updateOne(
         { username, id: balance.id },
@@ -56,7 +119,7 @@ async function delUserHelixBalance(suffix, username, balanceId) {
   try {
     const db = await loadDB();
 
-    const collection = db.collection(`helixBalances_${suffix}`);
+    const collection = db.collection(`dacomBalances_${suffix}`);
 
     await collection.deleteOne({ id: balanceId, username });
   } catch (e) {
@@ -67,7 +130,7 @@ async function delUserHelixBalance(suffix, username, balanceId) {
 async function getUserByEosName(suffix, eosname) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixUsers_${suffix}`);
+    const collection = db.collection(`dacomUsers_${suffix}`);
 
     return await collection.findOne({ eosname });
   } catch (e) {
@@ -79,7 +142,7 @@ async function getUserByEosName(suffix, eosname) {
 async function getNicknameByEosName(suffix, eosname) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixUsers_${suffix}`);
+    const collection = db.collection(`dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ eosname });
 
@@ -96,7 +159,7 @@ async function getNicknameByEosName(suffix, eosname) {
 async function getTelegramByEosName(suffix, eosname) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixUsers_${suffix}`);
+    const collection = db.collection(`dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ eosname });
     if (user) return `@${user.username}`;
@@ -110,7 +173,7 @@ async function getDbHost(suffix, hostname) {
   try {
     const db = await loadDB();
 
-    const collection = db.collection(`helixHosts_${suffix}`);
+    const collection = db.collection(`dacomHosts_${suffix}`);
 
     return await collection.findOne({ username: hostname });
   } catch (e) {
@@ -123,7 +186,7 @@ async function getDbHost(suffix, hostname) {
 async function saveDbHost(suffix, params) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixHosts_${suffix}`);
+    const collection = db.collection(`dacomHosts_${suffix}`);
 
     await collection.updateOne(
       { username: params.host.username },
@@ -168,7 +231,7 @@ async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
   try {
     const db = await loadDB();
 
-    const collection = db.collection(collectionName || `helixUsers_${suffix}`);
+    const collection = db.collection(collectionName || `dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ id });
     if (user) {
@@ -185,11 +248,25 @@ async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
   return null;
 }
 
+async function getHost(suffix, id) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomHosts_${suffix}`);
+
+    return await collection.findOne({ id });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
 async function getSubscribers(bot, hostname) {
   try {
     const db = await loadDB();
 
-    const collection = db.collection(`helixUsers_${bot.instanceName}`);
+    const collection = db.collection(`dacomUsers_${bot.instanceName}`);
     let users;
 
     // eslint-disable-next-line max-len
@@ -202,6 +279,52 @@ async function getSubscribers(bot, hostname) {
   }
 
   return [];
+}
+
+// eslint-disable-next-line camelcase
+async function insertMessage(suffix, user, from, message, message_id, type) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomChats_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      type, message_id, id: user.id, eosname: user.eosname, from, message, time: new Date(),
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+// eslint-disable-next-line camelcase
+async function getMessage(suffix, message_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomChats_${suffix}`);
+
+    console.log('find message_id', message_id);
+
+    // eslint-disable-next-line camelcase
+    const message = await collection.findOne({ message_id });
+    return message;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
+async function getChat(suffix, eosname) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomChats_${suffix}`);
+
+    return await collection.find({ eosname }).toArray();
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
 }
 
 module.exports = {
@@ -217,4 +340,12 @@ module.exports = {
   getDbHost,
   saveDbHost,
   getSubscribers,
+  getQuiz,
+  getAllQuizzes,
+  saveQuiz,
+  saveHost,
+  getHost,
+  insertMessage,
+  getMessage,
+  getChat,
 };

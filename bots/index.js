@@ -1,9 +1,11 @@
 const BaseBot = require('./base');
 const HelixBot = require('./helix');
+const DacomBot = require('./dacom');
 
 const BOTS = {
   base: BaseBot,
   helix: HelixBot,
+  dacom: DacomBot,
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {

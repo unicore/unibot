@@ -1,10 +1,8 @@
-const bearerAuthPlugin = require('@fastify/bearer-auth');
-
-const keys = new Set([process.env.TOKEN]);
 const Admin = require('../../controllers/admin');
+const { registerAdminAuth } = require('../../common/adminAuth');
 
 module.exports = (fastify, opts, done) => {
-  fastify.register(bearerAuthPlugin, { keys });
+  registerAdminAuth(fastify);
 
   fastify.post('/add-bot', Admin.addBot);
   fastify.get('/list-bots', Admin.listBots);
@@ -14,6 +12,9 @@ module.exports = (fastify, opts, done) => {
   fastify.post('/disable-bot', Admin.disableBot);
   fastify.post('/change-bot-mode', Admin.changeBotMode);
   fastify.post('/set-bot-env', Admin.setEnv);
+
+  // eslint-disable-next-line global-require
+  fastify.register(require('../../bots/dacom/routes'), { prefix: '/dacom' });
 
   done();
 };

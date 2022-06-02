@@ -181,7 +181,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   const totalSharesAsset = `${((Number(userPower.power) / parseFloat(totalShares)) * parseFloat(params.host.quote_amount)).toFixed(4)} ${params.host.quote_symbol}`;
   const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
-  const skipForDemo = user.is_demo === false || !user.is_demo;
+  const skipForDemo = (user.is_demo === false || !user.is_demo) && bot.getEnv().MODE !== 'community';
 
   let toPrint = '';
   toPrint += `\nКасса ${params.host.username.toUpperCase()}`;
@@ -233,7 +233,9 @@ async function printHelixWallet(bot, ctx, user, hostname) {
     // buttons.push(Markup.button.callback('Цели', `showgoals ${hostname} `));
   }
 
-  buttons.push(Markup.button.callback('Очередь', `tail ${hostname}`));
+  if (bot.getEnv().MODE !== 'community') {
+    buttons.push(Markup.button.callback('Очередь', `tail ${hostname}`));
+  }
 
   buttons.push(Markup.button.callback('Мои взносы', `mybalances ${hostname} `));
 
@@ -343,18 +345,24 @@ async function withdrawAllUserRefBalances(bot, user) {
   await Promise.all(messagePromises);
 }
 
-async function printWallet(bot, user) {
+async function printWallet(bot, user, ctx) {
   const buttons = [];
 
   buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+
+  if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
+    buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+    buttons.push(Markup.button.callback('вывести', 'gethelp'));
+  }
+
   if (user && user.eosname) {
-    const account = await bot.uni.readApi.getAccount(user.eosname);
+    // const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
     const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
-    const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
+    // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
     const balances = await getUserHelixBalances(bot, null, user.eosname);
 
@@ -371,12 +379,13 @@ async function printWallet(bot, user) {
     text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
     text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
     text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
-    text += `\n| Память: ${ram}`;
+    // text += `\n| Память: ${ram}`;
 
     text += '\n---------------------------------';
     text += `\n\nДля приглашения партнёров используйте реферальную ссылку: ${link}\n`; //
     // eslint-disable-next-line max-len
-    await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 3 }).resize());
+    if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+    else ctx.reply(text);
   }
 }
 
@@ -513,7 +522,7 @@ async function internalRefreshAction(bot, balance, username) {
 async function refreshAllBalances(bot, hostname, baseUser, skip) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`helixUsers_${bot.instanceName}`);
+    const collection = db.collection(`dacomUsers_${bot.instanceName}`);
     let ahosts;
     let users;
 
