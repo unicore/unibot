@@ -671,7 +671,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     const quest = ctx.match[1];
     
     let text = ""
-    text = `Локация: кафе у моря\n\n`
+    // text = `Локация: кафе у моря\n\n`
     text += `Пришедший не откуда
 Идущий в никуда
 Узнавший мир невидимый
@@ -747,14 +747,14 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     await ctx.reply(text)
 
     text = ""
-    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью. Все признания анонимно публикуются здесь: @sin_. Пришлите мне 100 сообщений с грехами или признаниями для перехода на следующую локацию.\n\n `
+    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются <a href="https://t.me/+J5ct9rVmQ_owNDUy">ЗДЕСЬ</a. \n\n `
     
     user.state = "quest"
     user.quest = "faith_island"
 
     await saveUser(bot.instanceName, user)
 
-    await ctx.reply(text)
+    await ctx.replyWithHTML(text)
   
   })
 
