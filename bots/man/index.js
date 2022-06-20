@@ -747,7 +747,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     await ctx.reply(text)
 
     text = ""
-    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются <a href="https://t.me/+J5ct9rVmQ_owNDUy">ЗДЕСЬ</a. \n\n `
+    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются <a href="https://t.me/+J5ct9rVmQ_owNDUy">ЗДЕСЬ</a> \n\n `
     
     user.state = "quest"
     user.quest = "faith_island"
