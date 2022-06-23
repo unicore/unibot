@@ -328,6 +328,11 @@ module.exports.init = async (botModel, bot) => {
           await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
         
         }
+        
+        user.resume_chat_id = null
+        user.resume_channel_id = null
+        
+        await saveUser(bot.instanceName, user)
 
         await startQuiz(bot, ctx, user);
       }
@@ -410,7 +415,7 @@ module.exports.init = async (botModel, bot) => {
           //SEND FROM USER IN BOT TO PUB CHANNEL
           // console.log("\n\non here2")
           if (user.state === 'chat') {
-            console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
+            // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
@@ -430,7 +435,7 @@ module.exports.init = async (botModel, bot) => {
               user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
               if (user && !user.resume_chat_id){
-                console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+                // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
                 user.resume_chat_id = ctx.update.message.message_id
                 await saveUser(bot.instanceName, user);  
               }
