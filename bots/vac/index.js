@@ -216,7 +216,7 @@ async function nextQuiz(bot, user, ctx) {
     await saveQuiz(bot.instanceName, user, quiz);
 
     const menu = Markup // , "цели", "действия"
-      .keyboard(['🏫 Об Институте'], { columns: 1 }).resize();
+      .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
 
 
 
@@ -365,6 +365,16 @@ module.exports.init = async (botModel, bot) => {
   });
 
 
+
+
+
+  bot.hears('🪙 кошелёк', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    if (ctx.update.message.chat.type === 'private') {
+      await printWallet(bot, user);
+    } 
+
+  });
 
 
   bot.on('message', async (ctx) => {
