@@ -1792,7 +1792,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 
             await saveUser(bot.instanceName, user);
 
-            await ctx.reply(`Принято ${user.sins_count} сообщения из ${100}`);
+            await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
             if (user.sins_count >= 100)
               await ctx.reply("Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!")

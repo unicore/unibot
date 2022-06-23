@@ -499,7 +499,7 @@ module.exports.init = async (botModel, bot) => {
             user.app = bot.getEnv().APP;
 
             await saveUser(bot.instanceName, user);
-            user.eosname = await generateAccount(ctx, false, ref);
+            user.eosname = await generateAccount(bot, ctx, false, ref);
             await saveUser(bot.instanceName, user);
 
             await ctx.deleteMessage(msg2.message_id);
