@@ -176,9 +176,16 @@ async function startQuiz(bot, ctx, user) {
 
   await saveQuiz(bot.instanceName, user, q);
 
-  const buttons = [Markup.button.contactRequest('📱 Поделиться контактом')];
-  const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('Здравствуйте! Институт Коллективного Разума готов принять вашу заявку на сотрудничество. У нас к вам всего 5 вопросов. Пожалуйста, поделитесь контактом для продолжения. 🌐', request);
+  const buttons = [];
+
+  buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
+  
+
+  await ctx.reply('Институт Коллективного Разума готов принять вашу заявку на сотрудничество.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
+  return ctx.reply('У нас к вам будет всего 5 вопросов. После ответа на них, вы будете приглашаться к деятельности лабораторий Института в обмен на вознаграждение.\n\nПожалуйста, поделитесь контактом для продолжения. 🌐', request);
+
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -245,7 +252,13 @@ async function nextQuiz(bot, user, ctx) {
     
     user.state = "chat"
     user.resume_channel_id = id
-    await saveUser(bot.instanceName, user)
+
+    if (!user.eosname) {
+      user.eosname = await generateAccount(bot, ctx, false, user.ref);
+    } 
+  
+    await saveUser(bot.instanceName, user)  
+    
     
   }
 }
@@ -315,23 +328,18 @@ module.exports.init = async (botModel, bot) => {
         let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
         if (!user) {
-          msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
-
           user = ctx.update.message.from;
           user.app = bot.getEnv().APP;
+          user.ref = ref
 
           await saveUser(bot.instanceName, user);
-          user.eosname = await generateAccount(bot, ctx, false, ref);
-          await saveUser(bot.instanceName, user);
 
-          await ctx.deleteMessage(msg2.message_id);
-          await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
-        
+        } else {
+
+          user.resume_chat_id = null
+          user.resume_channel_id = null
         }
-        
-        user.resume_chat_id = null
-        user.resume_channel_id = null
-        
+
         await saveUser(bot.instanceName, user)
 
         await startQuiz(bot, ctx, user);
@@ -462,7 +470,7 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     await printPartners(bot, user);
   });
-    
+
   bot.action('sendtoall', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
