@@ -348,13 +348,13 @@ async function withdrawAllUserRefBalances(bot, user) {
 async function printWallet(bot, user, ctx) {
   const buttons = [];
 
-  buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
-  buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+  // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
+  // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
-  if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-    buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-    buttons.push(Markup.button.callback('вывести', 'gethelp'));
-  }
+  // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
+  //   buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+  //   buttons.push(Markup.button.callback('вывести', 'gethelp'));
+  // }
 
   if (user && user.eosname) {
     // const account = await bot.uni.readApi.getAccount(user.eosname);
@@ -376,13 +376,13 @@ async function printWallet(bot, user, ctx) {
     text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
     text += `\n| Цветки: ${totalBal}`;
-    text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
-    text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
+    // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
+    // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
     text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
     // text += `\n| Память: ${ram}`;
 
     text += '\n---------------------------------';
-    text += `\n\nДля приглашения партнёров используйте реферальную ссылку: ${link}\n`; //
+    text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else ctx.reply(text);

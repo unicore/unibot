@@ -457,6 +457,12 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
+
+  bot.action('mypartners', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    await printPartners(bot, user);
+  });
+    
   bot.action('sendtoall', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
