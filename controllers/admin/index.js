@@ -137,7 +137,8 @@ module.exports.changeBotMode = async (req) => {
     loto: 1,
     auction: 1,
     man: 1,
-    vac: 1
+    vac: 1,
+    knouni: 1
   };
   const {
     name,
