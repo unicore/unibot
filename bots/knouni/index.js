@@ -347,7 +347,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    console.log('catch user', user);
+    // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
 
@@ -385,7 +385,7 @@ module.exports.init = async (botModel, bot) => {
             await catchRequest(bot, user, ctx, text)
 
           } else if (user.state === 'chat') {
-            // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
+            console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.request_chat_id});
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
