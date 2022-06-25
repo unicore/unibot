@@ -6,6 +6,7 @@ const AuctionBot = require('./auction');
 const ManBot = require('./man');
 const VacBot = require('./vac')
 const KnouniBot = require('./knouni')
+const SeBot = require('./se')
 
 const BOTS = {
   base: BaseBot,
@@ -15,7 +16,8 @@ const BOTS = {
   auction: AuctionBot,
   man: ManBot,
   vac: VacBot,
-  knouni: KnouniBot
+  knouni: KnouniBot,
+  se: SeBot
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {
