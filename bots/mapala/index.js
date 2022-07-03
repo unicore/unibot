@@ -157,8 +157,11 @@ async function checkForExistBCAccount(bot, ctx) {
 
 const quizDefinition = [
   { message: 'Contants' },
-  { message: 'Как можно к вам обращаться?' },
-  { message: 'Задайте ваш вопрос:' },  
+  { message: 'Как вас зовут?' },
+  { message: 'Из какого вы города?' },
+  { message: 'Какая ваша профессиональная специализация?'},
+  { message: 'В чём хотели бы развиваться?' },
+  { message: 'Расскажите о себе, и почему вы хотите сотрудничать с Институтом?' },
 ];
 
 async function startQuiz(bot, ctx, user) {
@@ -175,13 +178,13 @@ async function startQuiz(bot, ctx, user) {
 
   const buttons = [];
 
-  buttons.push(Markup.button.url('🏫 перейти на сайт', 'https://simply.estate'));
+  // buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://coordinator.mapala.net'));
   
-  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
-  
-  await ctx.reply('Добро пожаловать! Специалисты Simply.ESTATE готовы ответить на любой ваш вопрос. Пожалуйста, поделитесь контактом для продолжения 📱', request);
 
-  // return ctx.reply('', request);
+  // await ctx.reply('Академия Кайфа ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+  const request = Markup.keyboard([Markup.button.contactRequest('🌐 Поделиться геопозицией')], { columns: 1 }).resize();
+  return ctx.reply('Добро пожаловать в Академию Кайфа.\n\n Пожалуйста, поделитесь геопозицией для продолжения. 🌐', request);
 
 }
 
@@ -219,20 +222,30 @@ async function nextQuiz(bot, user, ctx) {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
 
-    // const menu = Markup // , "цели", "действия"
-    //   .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
+    const menu = Markup // , "цели", "действия"
+      .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
 
 
 
-    const t = 'Благодарим! Мы ответим вам в ближайшее время.';
+    const t = 'Благодарим за отклик! Мы свяжемся с вами в ближайшее время.';
 
-    await sendMessageToUser(bot, user, { text: t });
+    await sendMessageToUser(bot, user, { text: t }, menu);
 
     //send message to Channel
     let text = `${quiz.answers[1].answer}, `
+    text += `${quiz.answers[2].answer}, `
     text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`
-    text += `${quiz.answers[2].answer}`
     
+    k = 0
+
+    for (const answer of quiz.answers) {
+      if (k > 2){
+        text += `\n${answer.message}`
+        text += `\n${answer.answer}\n`
+      }
+      k++
+    }
+  
     let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
@@ -330,7 +343,6 @@ module.exports.init = async (botModel, bot) => {
         await saveUser(bot.instanceName, user)
 
         await startQuiz(bot, ctx, user);
-
       }
     } else {
       //dont have any reactions on public chats
@@ -422,17 +434,13 @@ module.exports.init = async (botModel, bot) => {
           // console.log("\n\non here2")
           if (user.state === 'chat') {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
-            
-            try{
-              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
 
-              await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
+            await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
-              await saveUser(bot.instanceName, user);
-            } catch(e) {
-              // ctx.reply();
-            }
-            // 
+            await saveUser(bot.instanceName, user);
+
+            // ctx.reply('Сообщение отправлено');
           } 
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
