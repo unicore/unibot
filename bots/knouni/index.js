@@ -362,7 +362,7 @@ module.exports.init = async (botModel, bot) => {
         
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
-          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id);
+          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
           
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
@@ -384,11 +384,13 @@ module.exports.init = async (botModel, bot) => {
           //SEND FROM USER IN BOT TO PUB CHANNEL
           // console.log("\n\non here2")
           if (user.state === 'newrequest'){
-
+            // console.log("HERE 1")
             await catchRequest(bot, user, ctx, text)
 
           } else if (user.state === 'chat') {
-            console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
+            // console.log("user: ", user)
+            // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
+            
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.request_chat_id});
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
@@ -397,7 +399,7 @@ module.exports.init = async (botModel, bot) => {
 
             // ctx.reply('Сообщение отправлено');
           } else {
-
+            // console.log("HERE 3")
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
             
             await ctx.reply("Коллективный Разум решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.", request)
@@ -419,7 +421,7 @@ module.exports.init = async (botModel, bot) => {
           if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
             if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
               user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
-
+              
               if (user && !user.request_chat_id){
                 // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
                 user.request_chat_id = ctx.update.message.message_id

@@ -161,7 +161,8 @@ const quizDefinition = [
   { message: 'Из какого вы города?' },
   { message: 'Какая ваша профессиональная специализация?'},
   { message: 'В чём хотели бы развиваться?' },
-  { message: 'Расскажите о себе, и почему вы хотите сотрудничать с Институтом?' },
+  { message: 'Расскажите о себе в свободной форме' },
+  { message: 'Почему вы хотите сотрудничать с Институтом?'}
 ];
 
 async function startQuiz(bot, ctx, user) {
@@ -176,15 +177,17 @@ async function startQuiz(bot, ctx, user) {
 
   await saveQuiz(bot.instanceName, user, q);
 
-  const buttons = [];
+  
+  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
+  
+  await ctx.reply('Добро пожаловать!.', request);
 
+  
+  const buttons = [];
   buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
   
 
-  await ctx.reply('Институт Коллективного Разума готов принять вашу заявку на сотрудничество.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
-  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
-  return ctx.reply('У нас к вам будет всего 5 вопросов. После ответа на них, вы будете приглашаться к деятельности лабораторий Института в обмен на вознаграждение.\n\nПожалуйста, поделитесь контактом для продолжения. 🌐', request);
+  return ctx.reply('Институт Коллективного Разума готов принять вашу заявку на сотрудничество. У нас к вам будет всего несколько вопросов. После ответа на них, вы будете приглашены к деятельности лабораторий Института за вознаграждение.\n\nПожалуйста, поделитесь контактом для продолжения. 🌐', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
 }
 
@@ -395,17 +398,19 @@ module.exports.init = async (botModel, bot) => {
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
         
-        // console.log('tyL: ', ctx.update.message.reply_to_message);
+        // console.log('need find reply: ', ctx.update.message.reply_to_message);
         
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
-          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id);
+          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
           
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
+
+            
           }
         
 
