@@ -15,6 +15,21 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
+
+async function insertRequest(suffix, user, message_id, message) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomRequests_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 async function saveUser(suffix, user) {
   try {
     const db = await loadDB();
@@ -361,5 +376,6 @@ module.exports = {
   insertMessage,
   getMessage,
   getChat,
-  getUserByResumeChannelId
+  getUserByResumeChannelId,
+  insertRequest
 };

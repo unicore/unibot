@@ -139,7 +139,8 @@ module.exports.changeBotMode = async (req) => {
     man: 1,
     vac: 1,
     knouni: 1,
-    se: 1
+    se: 1,
+    mapala: 1
   };
   const {
     name,

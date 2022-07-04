@@ -159,9 +159,10 @@ const quizDefinition = [
   { message: 'Contants' },
   { message: 'Как вас зовут?' },
   { message: 'Из какого вы города?' },
+  { message: 'Сколько вам лет?' },
   { message: 'Какая ваша профессиональная специализация?'},
   { message: 'В чём хотели бы развиваться?' },
-  { message: 'Расскажите о себе в свободной форме' },
+  { message: 'Расскажите о себе или пришлите ссылку на резюме' },
   { message: 'Почему вы хотите сотрудничать с Институтом?'}
 ];
 
@@ -237,7 +238,7 @@ async function nextQuiz(bot, user, ctx) {
     //send message to Channel
     let text = `${quiz.answers[1].answer}, `
     text += `${quiz.answers[2].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`
+    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username}\n`
     
     k = 0
 
@@ -410,7 +411,7 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
 
-            
+
           }
         
 

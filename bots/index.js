@@ -7,6 +7,8 @@ const ManBot = require('./man');
 const VacBot = require('./vac')
 const KnouniBot = require('./knouni')
 const SeBot = require('./se')
+const MapalaBot = require('./mapala')
+
 
 const BOTS = {
   base: BaseBot,
@@ -17,7 +19,8 @@ const BOTS = {
   man: ManBot,
   vac: VacBot,
   knouni: KnouniBot,
-  se: SeBot
+  se: SeBot,
+  mapala: MapalaBot
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {

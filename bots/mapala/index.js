@@ -80,7 +80,8 @@ const {
   saveQuiz,
   insertMessage,
   getMessage,
-  getUserByResumeChannelId
+  getUserByResumeChannelId,
+  insertRequest
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -157,11 +158,10 @@ async function checkForExistBCAccount(bot, ctx) {
 
 const quizDefinition = [
   { message: 'Contants' },
-  { message: 'Как вас зовут?' },
   { message: 'Из какого вы города?' },
-  { message: 'Какая ваша профессиональная специализация?'},
-  { message: 'В чём хотели бы развиваться?' },
-  { message: 'Расскажите о себе, и почему вы хотите сотрудничать с Институтом?' },
+  // { message: 'Как вас зовут?' },
+  // { message: 'Из какого вы города?' },
+  // { message: 'Напишите свой рецепт кайфа:' },
 ];
 
 async function startQuiz(bot, ctx, user) {
@@ -175,18 +175,52 @@ async function startQuiz(bot, ctx, user) {
   };
 
   await saveQuiz(bot.instanceName, user, q);
-
-  const buttons = [];
-
-  // buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://coordinator.mapala.net'));
   
+  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
+  
+  await ctx.reply('Добро пожаловать в Академию Кайфа!.\nМы собираем рецепты удовольствий от мастеров кайфологии и варим их, соединяя людей по интересам в своих городах:\n🛶🚁🎢🎡🌄🌅🏑🏏🏸🏒🥋🤿🏹🪁⛳️🥅🪃🥌⛸🏂🪂🤸‍♂️🤺🚵‍♂️🎯\n\nПожалуйста, поделитесь контактом для продолжения. 📱', request);
 
-  // await ctx.reply('Академия Кайфа ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
-  const request = Markup.keyboard([Markup.button.contactRequest('🌐 Поделиться геопозицией')], { columns: 1 }).resize();
-  return ctx.reply('Добро пожаловать в Академию Кайфа.\n\n Пожалуйста, поделитесь геопозицией для продолжения. 🌐', request);
+  // const buttons = [];
+  // buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
+  
+  // return ctx.reply('');
+  //Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
 
 }
+
+
+async function catchRequest(bot, user, ctx, text){
+
+    const reply = 'Ваш рецепт принят! Мы благодарим вас за расширение базы знаний.';
+    // const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); //, '🪙 кошелёк'
+        
+    await sendMessageToUser(bot, user, { text: reply });
+
+    let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+
+    await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
+    
+    user.state = "chat"
+    user.request_channel_id = id
+
+    if (!user.eosname) {
+      user.eosname = await generateAccount(bot, ctx, false, user.ref);
+    } 
+  
+    await saveUser(bot.instanceName, user)  
+    
+    await insertRequest(bot.instanceName, user, id, text)
+    
+}
+
+
+  async function addRequestAction(bot, user, ctx){
+    
+    ctx.reply("Введите текст рецепта:")
+    user.state = 'newrequest'
+    await saveUser(bot.instanceName, user);
+  }
+
 
 async function nextQuiz(bot, user, ctx) {
   const quiz = await getQuiz(bot.instanceName, user.id);
@@ -223,18 +257,16 @@ async function nextQuiz(bot, user, ctx) {
     await saveQuiz(bot.instanceName, user, quiz);
 
     const menu = Markup // , "цели", "действия"
-      .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
+      .keyboard(['🪙 кошелёк', '🆕 добавить рецепт', '💝 кайфовый канал', '💭 чат кайфологов'], { columns: 2 }).resize();
 
 
-
-    const t = 'Благодарим за отклик! Мы свяжемся с вами в ближайшее время.';
+    const t = 'Мы здесь для того, чтобы получать удовольствие от жизни. Так давайте же кайфовать вместе!.';
 
     await sendMessageToUser(bot, user, { text: t }, menu);
 
     //send message to Channel
     let text = `${quiz.answers[1].answer}, `
-    text += `${quiz.answers[2].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`
+    text += `+${quiz.answers[0].answer.phone_number || quiz.answers[0].answer}, @${user.username}\n`
     
     k = 0
 
@@ -350,10 +382,12 @@ module.exports.init = async (botModel, bot) => {
   });
 
 
-  bot.on('contact', async (ctx) => {
+
+   bot.on('contact', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     const quiz = await getQuiz(bot.instanceName, user.id);
 
+    console.log(ctx.tg)
     quiz.answers.map((el, index) => {
       if (index === quiz.current_quiz) {
         el.answer = ctx.update.message.contact;
@@ -372,6 +406,36 @@ module.exports.init = async (botModel, bot) => {
     ctx.reply('Главный Вход: https://intellect.run');
   });
 
+
+
+
+ bot.hears('🆕 добавить рецепт', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    await addRequestAction(bot, user, ctx)
+
+  });
+
+
+ bot.hears('💝 кайфовый канал', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    ctx.reply("Ссылка: ")
+    
+  });
+
+ bot.hears('💭 чат кайфологов', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    ctx.reply("Ссылка: ")
+    
+  });
+
+
+ bot.hears('🆕 добавить рецепт', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    await addRequestAction(bot, user, ctx)
+    
+  });
 
 
 
@@ -395,17 +459,19 @@ module.exports.init = async (botModel, bot) => {
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
         
-        // console.log('tyL: ', ctx.update.message.reply_to_message);
+        // console.log('need find reply: ', ctx.update.message.reply_to_message);
         
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
-          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id);
+          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
           
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
+
+            
           }
         
 
@@ -430,9 +496,11 @@ module.exports.init = async (botModel, bot) => {
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
 
-          //SEND FROM USER IN BOT TO PUB CHANNEL
-          // console.log("\n\non here2")
-          if (user.state === 'chat') {
+          if (user.state === 'newrequest'){
+            // console.log("HERE 1")
+            await catchRequest(bot, user, ctx, text)
+
+          } else if (user.state === 'chat') {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
 
