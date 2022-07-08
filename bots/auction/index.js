@@ -129,6 +129,8 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
     }
   } catch (e) {
+    console.log("error: ", e.message)
+
     await saveUser(bot.instanceName, user);
     return user.eosname;
   }
@@ -490,33 +492,28 @@ module.exports.init = async (botModel, bot) => {
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
 
-   let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+   let user = await getUser(bot.instanceName, ctx.update.message.from.id, null, true);
    
-   console.log("\n\nTEST!\n\n")
 
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
-      console.log("\n\nTEST 2!\n\n")
-      if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
-        console.log("\n\nTEST 3!\n\n")
-        user = ctx.update.message.from;
-        user.app = bot.getEnv().APP;
+      user = ctx.update.message.from;
+      user.app = bot.getEnv().APP;
 
-        await saveUser(bot.instanceName, user);
-        user.eosname = await generateAccount(bot, ctx, false, ref);
-        await saveUser(bot.instanceName, user);
+      await saveUser(bot.instanceName, user);
+      user.eosname = await generateAccount(bot, ctx, false, ref);
+      await saveUser(bot.instanceName, user);
 
-        await ctx.deleteMessage(msg2.message_id);
-        await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
-      } else {
-        console.log("\n\nTEST 4!\n\n")
-      }
+      await ctx.deleteMessage(msg2.message_id);
+      await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
+    
     }
 
-    
-    const buttons = ["🎫 купить билет"];
+    const buttons = ["🎫 спонсировать"];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-    return ctx.reply('Добро пожаловать в лото.\n\nКупив билет всего за 1 USD - вы гарантированно исполните свою мечту.\n\n', request);
+
+    return ctx.reply('Добро пожаловать в комнату спонсоров Института Коллективного Разума.\n\n', request);
+
 
   });
 
@@ -593,7 +590,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
 
-  bot.hears('🎫 купить билет', async (ctx) => {
+  bot.hears('🎫 спонсировать', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log("купить билет")
     // await setBuyMenu(ctx)
