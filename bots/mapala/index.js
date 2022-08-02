@@ -1001,7 +1001,7 @@ bot.action('nextwelcome6', async (ctx) => {
 
     buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
   
-    user.del_msg = (await ctx.reply('Таким образом, все участники осуществляют свои кайфовые цели здесь, пока .', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+    user.del_msg = (await ctx.reply('Таким образом, участники осуществляют свои кайфовые цели здесь, пока покупают билеты Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
     await saveUser(bot.instanceName, user);
 
 });
