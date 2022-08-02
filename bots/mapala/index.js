@@ -959,7 +959,7 @@ bot.action('nextwelcome3', async (ctx) => {
 
     buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome4`));
   
-    user.del_msg = (await ctx.reply('Каждые 3 дня среди новых покупателей билетов проводится розыгрыш: \n- прибыль от 100% на стоимость билета.\n- фракции Академии, представляющие цифровое право требования.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+    user.del_msg = (await ctx.reply('Каждые 3 дня среди новых покупателей билетов проводится розыгрыш: \n- возврат стоимости билета и прибыль от 25% на стоимость билета.\n- фракции Академии, представляющие цифровое право требования прибыли Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
     await saveUser(bot.instanceName, user);
 
   });
@@ -972,7 +972,7 @@ bot.action('nextwelcome4', async (ctx) => {
 
     buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome5`));
   
-    user.del_msg = (await ctx.reply('Академия осуществляет кайфовые цели обладателей фракций в порядке живой очереди их приоритетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+    user.del_msg = (await ctx.reply('Академия осуществляет кайфовые цели участников в порядке живой очереди их приоритетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
     await saveUser(bot.instanceName, user);
 
 });
@@ -984,14 +984,12 @@ bot.action('nextwelcome5', async (ctx) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('🎫 купить билет', `nextwelcome6`));
+    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome6`));
   
-    user.del_msg = (await ctx.reply('На ваш приоритет и скорость осуществления мечты влияет количество фракций и количество проданных сетью билетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+    user.del_msg = (await ctx.reply('На приоритет и скорость осуществления вашей кайфовой цели влияет количество фракций и количество проданных сетью билетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
     await saveUser(bot.instanceName, user);
 
 });
-
-
 
 
 
@@ -1003,7 +1001,7 @@ bot.action('nextwelcome6', async (ctx) => {
 
     buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
   
-    user.del_msg = (await ctx.reply('Таким образом, все участники осуществляют свои мечты со временем.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+    user.del_msg = (await ctx.reply('Таким образом, все участники осуществляют свои кайфовые цели здесь, пока .', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
     await saveUser(bot.instanceName, user);
 
 });
