@@ -9,6 +9,5 @@ module.exports = (fastify, opts, done) => {
   fastify.post('/quiz/get-requests', Quiz.getRequests);
   fastify.post('/users/send-message', Users.sendMessage);
   fastify.post('/chats/get-chat', Chats.getChat);
-
   done();
 };

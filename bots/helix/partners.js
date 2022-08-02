@@ -230,7 +230,7 @@ async function requestPromoBudgetAction(bot, user, from) {
     await continueDemo(bot, user, from);
   } catch (e) {
     await sendMessageToUser(bot, user, { text: `Произошла ошибка на дарении. Пожалуйста, обратитесь в службу поддержки с сообщением: ${e.message}` });
-
+    await continueDemo(bot, user, from);
     console.error(e);
   }
 }

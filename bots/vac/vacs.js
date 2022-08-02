@@ -19,7 +19,7 @@ async function generateTaskOutput(task) {
 
 
 
-async function printTasks(ctx, user, hostname, next_id){
+async function printVacs(ctx, user, hostname, next_id){
   if (!hostname)
     hostname = "core"
 
@@ -104,5 +104,5 @@ async function get_tasks(bot, username, hostname, reports) {
 
 
 module.exports = {
-    generateTaskOutput
+    printVacs
 }

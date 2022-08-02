@@ -130,23 +130,23 @@ async function sendStructureFileToUser(bot, user, data) {
 }
 
 async function printPartners(bot, user) {
-  const me = await getPartner(bot, user.eosname);
-  const ref = await getNicknameByEosName(bot.instanceName, me.referer) || ' не определен';
-  const telegram = await getTelegramByEosName(bot.instanceName, me.referer);
-  const promoBudget = await getPromoBudget(bot, user.eosname);
+  // const me = await getPartner(bot, user.eosname);
+  // const ref = await getNicknameByEosName(bot.instanceName, me.ref) || ' не определен';
+  // const telegram = await getTelegramByEosName(bot.instanceName, me.ref);
+  // const promoBudget = await getPromoBudget(bot, user.eosname);
 
-  // eslint-disable-next-line no-param-reassign
-  user.promo_budget = parseFloat(promoBudget);
-  await saveUser(bot.instanceName, user);
+  // // eslint-disable-next-line no-param-reassign
+  // user.promo_budget = parseFloat(promoBudget);
+  // await saveUser(bot.instanceName, user);
 
-  const buttons = [];
-  buttons.push(Markup.button.callback('Пополнить спонсорский бюджет', 'startpromotion'));
+  // const buttons = [];
+  // buttons.push(Markup.button.callback('Пополнить спонсорский бюджет', 'startpromotion'));
 
-  await sendMessageToUser(bot, user, { text: `Ваш старший партнёр\n\t\t\tНикнейм:${ref}\n\t\t\tСистемное имя: ${me.referer}\n\t\t\tТелеграм: ${telegram}\n\nВаш рекламный бюджет: ${promoBudget}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+  // await sendMessageToUser(bot, user, { text: `Ваш старший партнёр\n\t\t\tНикнейм:${ref}\n\t\t\tСистемное имя: ${me.referer}\n\t\t\tТелеграм: ${telegram}\n\nВаш рекламный бюджет: ${promoBudget}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-  await getStructure(bot, user.eosname).then(async (structure) => {
-    await sendStructureFileToUser(bot, user, structure);
-  });
+  // await getStructure(bot, user.eosname).then(async (structure) => {
+  //   await sendStructureFileToUser(bot, user, structure);
+  // });
 }
 
 async function addPromoBudgetAction(bot, ctx, user, budget) {

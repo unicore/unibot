@@ -404,7 +404,7 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
-          
+          t
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });

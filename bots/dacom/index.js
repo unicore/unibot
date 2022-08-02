@@ -413,6 +413,7 @@ async function nextQuiz(bot, user, ctx) {
 
     await saveQuiz(bot.instanceName, user, quiz);
   } else {
+    
     const menu = Markup // , "цели", "действия"
       .keyboard(['🪙 кошелёк', '🌀 касса', '🙋‍♂️ задать вопрос', '🆕 создать предложение', '📒 открыть журнал'], { columns: 2 }).resize();
 
@@ -499,7 +500,7 @@ module.exports.init = async (botModel, bot) => {
             user.app = bot.getEnv().APP;
 
             await saveUser(bot.instanceName, user);
-            user.eosname = await generateAccount(bot, ctx, false, ref);
+            user.eosname = (await generateAccount(bot, ctx, false, ref)).eosname;
             await saveUser(bot.instanceName, user);
 
             await ctx.deleteMessage(msg2.message_id);
@@ -1845,6 +1846,7 @@ module.exports.init = async (botModel, bot) => {
       ctx.editMessageText('Ордер не найден');
     }
   });
+
 
   bot.action(/transfer/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);

@@ -8,6 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
+  getTickets
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -61,6 +62,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
   let totalWhiteBalances = '0.0000 FLOWER';
   let totalBlackBalances = '0.0000 FLOWER';
   let totalBalances = '0.0000 FLOWER';
+  let totalPurchaseAmount = "0.0000 FLOWER"
 
   const priorityBalances = [];
   const winBalances = [];
@@ -70,6 +72,10 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
   let totalLoseBalances = '0.0000 FLOWER';
 
   balances.forEach((balance) => {
+    if (helix) {
+      balance.is_refreshed = balance.last_recalculated_win_pool_id == helix.host.current_pool_id
+    }
+
     if (balance.pool_color === 'white') {
       whiteBalances.push(balance);
       totalWhiteBalances = `${(parseFloat(totalWhiteBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
@@ -79,6 +85,9 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
       totalBlackBalances = `${(parseFloat(totalBlackBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
       totalBalances = `${(parseFloat(totalBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
     }
+
+    totalPurchaseAmount = `${(parseFloat(totalPurchaseAmount) + parseFloat(balance.purchase_amount)).toFixed(4)} FLOWER`;
+  
 
     if (hostname) {
       if (parseFloat(balance.available) < parseFloat(balance.purchase_amount)) {
@@ -109,6 +118,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     totalWhiteBalances,
     totalBlackBalances,
     totalBalances,
+    totalPurchaseAmount
   };
 }
 
@@ -207,14 +217,14 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   }
 
   toPrint += `\n\t🔗 В очереди: ${myTail.totalUserInTail}`;
-  if (hostname === bot.getEnv().DEMO_HOST) {
-    contract = 'faketoken';
-    const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
-    toPrint += `\n\nВаш демо-баланс: ${bal}`;
-  } else {
-    const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+  // if (hostname === bot.getEnv().DEMO_HOST) {
+  //   contract = 'faketoken';
+  //   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
+  //   toPrint += `\n\nВаш демо-баланс: ${bal}`;
+  // } else {
+    const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().TARGET);
     toPrint += `\n\nВаш доступный баланс: ${bal}`;
-  }
+  // }
 
   const buttons = [];
   let subscribedNow = false;
@@ -345,52 +355,90 @@ async function withdrawAllUserRefBalances(bot, user) {
   await Promise.all(messagePromises);
 }
 
+async function cantBuyTicket(bot, user) {
+
+  const params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
+
+  ctx.reply(`Покупка билетов станет доступа через: ${10} секунд`)
+  // }
+}
+
 async function printWallet(bot, user, ctx) {
   const buttons = [];
 
-  // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
-  // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+    // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
+    // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
-  // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-  //   buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-  //   buttons.push(Markup.button.callback('вывести', 'gethelp'));
-  // }
-
+    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+    
   if (user && user.eosname) {
     // const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
-    const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
-    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+    await refreshAllBalances(bot, bot.getEnv().CORE_HOST, user, true)
+
+    const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
+
+
+
+    // let tickets = await getTickets(bot.instanceName, user)
+    // let currentTicket = tickets[0]
+
+    buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
+    
+    if (balances.length == 0)
+      buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
+    // else
+      // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
+
+    buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
+    
+
+    const refStat = await getRefStat(bot, user.eosname, bot.getEnv().SYMBOL);
+    const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    const balances = await getUserHelixBalances(bot, null, user.eosname);
+    
+    const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
     const assetBlockedNow = balances.totalBalances;
 
-    const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
+    const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} ${bot.getEnv().SYMBOL}`;
 
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    text += '\n---------------------------------';
-    text += `\n| Имя аккаунта: ${user.eosname}`;
-    text += `\n| Цветки: ${totalBal}`;
-    // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
-    // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
-    text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
-    // text += `\n| Память: ${ram}`;
+    const userPower = await bot.uni.coreContract.getUserPower(user.eosname, bot.getEnv().CORE_HOST);
+    const totalShares = helix.host.total_shares > 0 ? helix.host.total_shares : 1;
+    const totalSharesAsset = `${((Number(userPower.power) / parseFloat(totalShares)) * parseFloat(helix.host.quote_amount)).toFixed(4)} ${helix.host.quote_symbol}`;
+    const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
     text += '\n---------------------------------';
+    text += `\n| Имя аккаунта: ${user.eosname}`;
+    text += `\n| Билетов на сумму: ${totalBal}`;
+    // text += `\n| Номинал: `
+    // text += `\n| Поступило от партнеров: ${refStat}`;
+    // text += `\n| Акции: ${userPower.power} POWER (${sharesStake}%)`;
+    // text += `\n| Доступно: ${(parseFloat(totalBal) + parseFloat(balances.totalBalances)).toFixed(4) + " " + bot.getEnv().SYMBOL}`;
+    // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
+    // text += `\n|\t\t\t\t\tЗаблокиДобавить количество очков в подсчет голосов с учётом временировано: ${assetBlockedNow}`;
+    // text += `\n| Память: ${ram}`;
+    // text += `\n| Билет: ${currentTicket._id.toString().substring(0, 6) }`;
+    text += '\n---------------------------------';
+    text += `\n| До итогов: ${helix.currentPool.expired_time}`
+    
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else ctx.reply(text);
   }
+
+  // await printTickets(bot, user, ctx);
+
 }
 
 async function transferAction(bot, user, amount, ctx) {
-  const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+  const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
 
   if (parseFloat(amount) === 0) {
     await ctx.replyWithHTML('Сумма перевода должна быть больше нуля.');
@@ -432,6 +480,39 @@ async function transferAction(bot, user, amount, ctx) {
     });
   }
 }
+
+
+
+async function retireAction(bot, user, amount, address) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  return new Promise(async (resolve, reject) => {
+
+    eos.transact({
+      actions: [{
+        account: 'eosio.token',
+        name: "retire",
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          username: user.eosname,
+          quantity: amount,
+          memo: address,
+        },
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    }).then(async () => {
+     resolve()
+    }).catch(async (e) => {
+      reject(e)
+    });
+
+  })  
+}
+
 
 async function withdrawPartnerRefBalance(bot, username) {
   const partner = await getPartner(bot, username);
@@ -488,8 +569,80 @@ async function getHelixsList(bot) {
   return helixs;
 }
 
+
+async function depositAction(bot, ctx, user) {
+  const helix = await getHelixParams(bot, user.deposit_action.hostname);
+  try {
+    console.log("deposit: ", user.eosname)
+    const eos = await bot.uni.getEosPassInstance(user.wif);
+
+    const data = await eos.transact({
+      actions: [{
+        account: helix.host.root_token_contract,
+        name: 'transfer',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          from: user.eosname,
+          to: 'unicore',
+          quantity: user.deposit_action.quantity,
+          memo: `100-${user.deposit_action.hostname}-`,
+        },
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+    const cons = data.processed.action_traces[0].inline_traces[1].console;
+    const regex = /BALANCE_ID: (\w+);?/gi;
+    const group = regex.exec(cons);
+    const balanceId = group[1];
+    // eslint-disable-next-line max-len
+    const balance = await getOneUserHelixBalance(bot, user.deposit_action.hostname, user.eosname, balanceId);
+    await addUserHelixBalance(user.eosname, balance);
+    await ctx.replyWithHTML('Взнос успешно принят');
+    await printHelixWallet(bot, ctx, user, user.deposit_action.hostname);
+  } catch (e) {
+    await ctx.replyWithHTML(e.message);
+    console.error('ere: ', e);
+  }
+}
+
+async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  try {
+    await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'refreshbal',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          username: user.eosname,
+          balance_id: balanceId,
+          partrefresh: 50,
+        },
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+    // NOTIFY user
+    await printUserBalances(bot, ctx, user, hostname, currentIndex, true);
+  } catch (e) {
+    await ctx.replyWithHTML(e.message);
+    console.error(e);
+  }
+}
+
+
 async function internalRefreshAction(bot, balance, username) {
-  const eos = await bot.uni.getEosPassInstance(bot.getEnv().REFRESHER);
+  const eos = await bot.uni.getEosPassInstance(bot.getEnv().REFRESHER_WIF);
 
   try {
     await eos.transact({
@@ -511,6 +664,7 @@ async function internalRefreshAction(bot, balance, username) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
+    console.log("success update bal", balance.id)
   } catch (e) {
     console.log('ERROR ON REFRESH BALANCE: ', e.message);
     return e.message;
@@ -942,4 +1096,7 @@ module.exports = {
   getCurrentUserDeposit,
   getCondition,
   exitFromTail,
+  cantBuyTicket,
+  depositAction,
+  retireAction
 };

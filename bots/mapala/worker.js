@@ -15,10 +15,10 @@ const work = async (bot) => {
   //     console.error('Error in getOrdersAndCheckThem for', bot.instanceName);
   //     console.error(e);
   //   }),
-  //   refreshAllBalances(bot, null, null, true).catch((e) => {
-  //     console.error('Error in refreshAllBalances for', bot.instanceName);
-  //     console.error(e);
-  //   }),
+    // refreshAllBalances(bot, null, null, true).catch((e) => {
+    //   console.error('Error in refreshAllBalances for', bot.instanceName);
+    //   console.error(e);
+    // }),
   // ]);
   console.log('Success worker for', bot.instanceName);
 };

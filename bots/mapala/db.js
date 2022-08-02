@@ -355,6 +355,109 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
+
+async function insertTicket(suffix, user, ticket) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomTickets_${suffix}`);
+
+    await collection.insertOne(ticket);
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+async function insertStudent(suffix, user, student) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomStudents_${suffix}`);
+
+    await collection.insertOne(student);
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function insertGoal(suffix, user, goal) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+
+    await collection.insertOne(goal);
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+async function insertWithdraw(suffix, user, withdraw) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+
+    let res = await collection.insertOne(withdraw);
+    console.log("INSERT RES", res)
+    return res.insertedId
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+async function updateWithdraw(suffix, withdraw_id, status) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    await collection.updateOne(
+      { "_id": mongoose.Types.ObjectId(withdraw_id) },
+      { $set: {
+        status
+      } },
+      { upsert: false },
+    );
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+async function getWithdraw(suffix, withdraw_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    return await collection.findOne({ "_id":  mongoose.Types.ObjectId(withdraw_id)});
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function getTickets(suffix, user) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomTickets_${suffix}`);
+
+    let tickets = await collection.find({eosname: user.eosname}).toArray();
+
+    return tickets
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 module.exports = {
   loadDB,
   getUserHelixBalance,
@@ -377,5 +480,12 @@ module.exports = {
   getMessage,
   getChat,
   getUserByResumeChannelId,
-  insertRequest
+  insertRequest,
+  insertTicket,
+  getTickets,
+  insertStudent,
+  insertGoal,
+  insertWithdraw,
+  updateWithdraw,
+  getWithdraw
 };
