@@ -277,7 +277,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
     // buttons.push(Markup.button.callback('➕ пополнить цель', `fillgoal ${hostname} ${myGoal.id}`));
   // }
 
-  buttons.push(Markup.button.url('перейти в канал ➡️', 'https://intellect.run'));
+  buttons.push(Markup.button.url('перейти в канал ➡️', ${bot.getEnv().GOALS_CHANNEL} ));
 
   const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
   console.log("k", k)
