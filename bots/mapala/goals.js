@@ -208,6 +208,8 @@ async function createGoal(bot, ctx, user) {
     user.create_goal = {};
     await saveUser(bot.instanceName, user);
   } catch (e) {
+
+    console.log(goal)
     ctx.reply(e.message);
     console.error(e);
   }
@@ -271,17 +273,17 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const buttons = [];
   // buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
 
-  // if (!myGoal) {
+  if (!myGoal) {
     buttons.push(Markup.button.callback('➕ установить цель', `creategoal ${hostname}`));
-  // } else {
-    // buttons.push(Markup.button.callback('➕ пополнить цель', `fillgoal ${hostname} ${myGoal.id}`));
-  // }
+  } else {
+    buttons.push(Markup.button.callback('➕ пополнить цель', `fillgoal ${hostname} ${myGoal.id}`));
+  }
 
   buttons.push(Markup.button.url('перейти в канал ➡️', bot.getEnv().GOALS_CHANNEL));
 
   const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
-  console.log("k", k)
-  let totalPrevGoalsAmount = Math.floor(k * 1500 / 150 * 4)
+  
+  let totalPrevGoalsAmount = Math.floor(k * 300 / 150 * 4)
 
   // text += `\nСтоимость постановки цели: ${fillAmount}`;
   text += '\n---------------------------------';

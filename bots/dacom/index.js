@@ -953,6 +953,21 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
+  
+  bot.action('skip', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    console.log("on skip")
+    // user.is_demo = false;
+    // await saveUser(bot.instanceName, user);
+
+    // const menu = Markup
+    //   .keyboard(mainButtons, { columns: 2 }).resize();
+
+    // const t = 'Добро пожаловать в Двойную Спираль!.\n\nОКАЗАТЬ ПОМОЩЬ - произвести добровольное безвозмездное пожертвование партнёрам и получить FLOWER.\n\nПОЛУЧИТЬ ПОМОЩЬ - подарить FLOWER системе и получить добровольное безвозмездное пожертвование от партнёров.\n\nКОШЕЛЁК - хранит ваши FLOWER и подсчитывает вознаграждения от участия в кассах.\n\nКАССЫ - пространство честного обмена, где все зарабатывают.\n\nКАК ЭТО РАБОТАЕТ - раздел с описанием и обратной связью.\n\nКлубный чат: @helix_club';
+
+    // await sendMessageToUser(bot, user, { text: t }, menu);
+  });
+  
   bot.action('skipdemo', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
