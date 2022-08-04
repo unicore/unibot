@@ -832,7 +832,7 @@ module.exports.init = async (botModel, bot) => {
       
       if (result.data.status === 'ok'){
         await ctx.replyWithHTML(`Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:`)
-        await ctx.reply(`${result.data.address}`)d
+        await ctx.reply(`${result.data.address}`)
       }
       else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
 
