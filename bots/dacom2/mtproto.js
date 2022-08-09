@@ -12,8 +12,8 @@ const stringSession = new StringSession(process.env.STRING_SESSION)
 
 
 async function connect(){
-  // console.log("APIID:", apiId)
-  // console.log("apiHash:", apiHash)
+  console.log("APIID:", apiId)
+  console.log("apiHash:", apiHash)
 
 
   const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 })
