@@ -392,10 +392,11 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
         const clearMenu = Markup.removeKeyboard();
-        await ctx.reply(`Инструкции: https://unicore.notion.site/DACOMBOT-1472111f4a1341f2969b98bc91d30c91`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество. Запуск союзов приостановлен на время тестирования. Перезапустить робота командой /start чуть позже.`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
-        let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
+        // let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
+        // let t = '.\n';
 
         // Институт:  @intellect_run
 //         t += `
@@ -407,7 +408,7 @@ module.exports.init = async (botModel, bot) => {
 // Советы:     @dacom_soviets
 // Досуг:        @dacom_fun`
 
-        await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        // await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
 
         // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });
