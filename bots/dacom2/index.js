@@ -392,6 +392,7 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
         let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
+
         // Институт:  @intellect_run
 //         t += `
 // Инструкции:
@@ -402,7 +403,9 @@ module.exports.init = async (botModel, bot) => {
 // Советы:     @dacom_soviets
 // Досуг:        @dacom_fun`
 
-        ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+        // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
         // await ctx.reply('Добро пожаловать в Децентрализованное Автономное Сообщество Института Коллективного Разума!');
