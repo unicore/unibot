@@ -102,7 +102,99 @@ async function get_tasks(bot, username, hostname, reports) {
 
 
 
+async function createTask(bot, ctx, user, task) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  let res 
+  // if (!user.create_task)
+  //   user.create_task = {}
+  
+  try {
+    res = await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'settask',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: task
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+    const cons = res.processed.action_traces[0].console;
+    console.log("CONSOLE: ", cons)
+
+    const [, taskId] = cons.split('TASK_ID:');
+    console.log("TASKIS: ", taskId)
+    // operatorOrder.id = orderId;
+
+    const buttons = [];
+
+    // buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.create_goal.hostname} `));
+    // ctx.editMessageText('Ваша цель успешно создана и добавлена в общий список.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+    // eslint-disable-next-line no-param-reassign
+    // user.create_task = {};
+    console.log("TASK CREATED!", taskId)
+    
+    return taskId
+  } catch (e) {
+    ctx.reply(e.message);
+    console.error(e);
+  }
+}
+
+
+
+async function createReport(bot, ctx, user, report) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  let res 
+  // if (!user.create_task)
+  //   user.create_task = {}
+  
+  
+    res = await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'setreport',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: report
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+    const cons = res.processed.action_traces[0].console;
+    console.log("CONSOLE: ", cons)
+
+    const [, reportId] = cons.split('REPORT_ID:');
+    console.log("REPORT_ID: ", reportId)
+    // operatorOrder.id = orderId;
+
+    const buttons = [];
+
+    // buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.create_goal.hostname} `));
+    // ctx.editMessageText('Ваша цель успешно создана и добавлена в общий список.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+    // eslint-disable-next-line no-param-reassign
+    // user.create_task = {};
+    console.log("REPORT CREATED!", reportId)
+    
+    return reportId
+  
+}
+
+
 
 module.exports = {
-    generateTaskOutput
+    generateTaskOutput,
+    createTask,
+    createReport
 }

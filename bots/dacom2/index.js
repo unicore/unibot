@@ -8,7 +8,7 @@ const {
   mainButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
-const {createChat, makeAdmin, createGroupCall, setDiscussionGroup} = require('./mtproto')
+const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink} = require('./mtproto')
 
 const {
   getHelixParams,
@@ -63,8 +63,13 @@ const {
   printGoalsMenu,
   voteAction,
   createGoal,
-  burnNow,
+  burnNow
 } = require('./goals');
+
+const {
+  createTask,
+  createReport
+} = require('./tasks')
 
 const {
   sellSharesAction,
@@ -83,7 +88,15 @@ const {
   insertMessage,
   getMessage,
   getUserByResumeChannelId,
-  getUnion
+  getUnion,
+  getUnionByType,
+  insertGoal,
+  addMainChatMessageToGoal,
+  getGoalByChatMessage,
+  insertTask,
+  getTaskByChatMessage,
+  insertReport,
+  addMainChatMessageToReport
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -235,28 +248,32 @@ async function nextQuiz(bot, user, ctx) {
     let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем союз для вас. ")
     
     //TODO создать чат 
+    
     let chatResult = await createChat(bot, user, unionName, "union")
 
-    let goalChatResult = await createChat(bot, user, unionName, "goals")
+    // let goalChatResult = await createChat(bot, user, unionName, "goals")
     
     // let goalResult = await createChat(bot, user, unionName, "goals")
     // console.log("goalResult: ", goalResult)
 
     // await setDiscussionGroup(bot, parseInt(goalChatResult.chatId), parseInt(goalResult.chatId))    
     
+    console.log("AFTE RCREATE CHAT", chatResult)
 
     await ctx.deleteMessage(id.message_id);
 
     const buttons = [];
 
-    buttons.push(Markup.button.url('🏫 войти', chatResult.link));
-    buttons.push(Markup.button.url('🏫 цели', goalResult.link));
+    buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
+    // buttons.push(Markup.button.url('🏫 цели', goalResult.channelLink));
     
 
     const t = 'Союз создан. Пожалуйста, войдите в союз и завершите настройку.';
+    // console.log(t)
 
-    await sendMessageToUser(bot, user, { text: t }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
+    ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+    // await sendMessageToUser(bot, user, { text: t }, );
+    console.log("FINISH?")
     //send message to Channel
 
     
@@ -376,14 +393,14 @@ module.exports.init = async (botModel, bot) => {
 
         let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
         // Институт:  @intellect_run
-        t += `
-Инструкции:
-Новости:   @dacom_news
-Цели:         @dacom_goals
-Задания:   @dacom_tasks
-Союзы:      @dacom_unions
-Советы:     @dacom_soviets
-Досуг:        @dacom_fun`
+//         t += `
+// Инструкции:
+// Новости:   @dacom_news
+// Цели:         @dacom_goals
+// Задания:   @dacom_tasks
+// Союзы:      @dacom_unions
+// Советы:     @dacom_soviets
+// Досуг:        @dacom_fun`
 
         ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
@@ -400,7 +417,7 @@ module.exports.init = async (botModel, bot) => {
       let chatId = ctx.message.chat.id
       let userId = ctx.update.message.from.id
 
-      setDiscussionGroup(bot, 659911949, 1713017401, 9184800756685276000)
+      // setDiscussionGroup(bot, 659911949, 1713017401, 9184800756685276000)
 
       // createGroupCall(bot, chatId, userId)
       // ctx.reply("hello world")
@@ -432,7 +449,7 @@ module.exports.init = async (botModel, bot) => {
     
     console.log("chatId: ", chatId, "userId: ", userId)
     
-    let union = await getUnion(bot.instanceName, Math.abs(chatId))
+    let union = await getUnion(bot.instanceName, chatId)
     console.log("UNION: ", union, chatId)
     if (union)
       if (union.ownerId == userId) {
@@ -502,8 +519,8 @@ module.exports.init = async (botModel, bot) => {
     
     let tags = getHashtags(ctx.update.message)
     
-    console.log("message", ctx.update.message)
-
+    console.log("MESSAGE:", ctx.update.message)
+    console.log("TAGS:", tags)
     
     // entities: [ { offset: 12, length: 5, type: 'hashtag' } ]
     // console.log("message: ", ctx.update.message, ctx.update.message.chat.type)
@@ -512,43 +529,337 @@ module.exports.init = async (botModel, bot) => {
 
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         //PUBLIC CHAT
-        // console.log('tyL: ', ctx.update.message.reply_to_message);
+        // console.log('tyL: ', ctx.update.message);
 
 
-        if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
-          //получаем из бд сообщение на которое отвечаем
-          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id   || ctx.update.message.reply_to_message.message_id);
-          
-          if (msg && msg.message_id) {
-            //отвечаем пользователю в бота, если сообщение находится в БД
+        // if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
+        //   //получаем из бд сообщение на которое отвечаем
+        
+        //   const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id   || ctx.update.message.reply_to_message.message_id);
+        //   console.log("MESSAGE: ", msg)  
+        //   if (msg && msg.message_id) {
+        //     //отвечаем пользователю в бота, если сообщение находится в БД
 
-            // console.log('resend back to: ', msg);
+        //     // console.log('resend back to: ', msg);
             
-            const id = await sendMessageToUser(bot, { id: msg.id }, { text });
-            console.log("message_id: ", id)
-            await insertMessage(bot.instanceName, user, user.id, text, id, {chatId: ctx.update.message.chat.id});
-          }
+        //     const id = await sendMessageToUser(bot, { id: msg.id }, { text });
+        //     console.log("message_id: ", id)
+        //     await insertMessage(bot.instanceName, user, user.id, text, id, {chatId: ctx.update.message.chat.id});
+        //   }
         
 
-        } else {
-          if (tags.length > 0){
-            for (tag of tags) {
-              if (tag === 'goal') {
+        // } else 
+        if (true) {
+          if (text == '/new_cycle'){
+            ctx.reply("Введите дату начала цикла развития:")
+            user.state = "start_cycle"
+            user.new_cycle = {}
+            await saveUser(bot.instanceName, user);
+          } else if (user.state == 'start_cycle'){
+            ctx.reply(`Дата начала: ${text}`)
+            user.state = "create_cycle"
+            //TODO text -> DATE
+            user.new_cycle.start_date = text
 
-                console.log("GOAL DETECTED:", tag, user)
+            await saveUser(bot.instanceName, user);
+            ctx.reply("Введите название цикла развития:")
+          } 
+          // else if (user.state == 'finish_cycle'){
+          //   ctx.reply(`Дата завершения: ${text}`)
+          //   user.state = "create_cycle"
+          //   //TODO text -> DATE
+          //   user.new_cycle.finish_date = text
+          //   await saveUser(bot.instanceName, user);
+          //   ctx.reply("Введите название цикла развития:")
+
+          // }
+           else if (user.state == 'create_cycle'){
+            ctx.reply("Пожалуйста, подождите, мы создаём новый цикл.")
+
+            user.state = ""
+            user.new_cycle.title = text
+            await saveUser(bot.instanceName, user);
+            // ctx.reply(JSON.stringify(user.new_cycle))
+
+
+          }
+
+
+          else if (tags.length > 0){
+            for (tag of tags) {
+              if (tag === 'report'){
+                if (ctx.update.message.reply_to_message){
+                  // let checkl = await exportChatLink(ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+                  // console.log("CHECK!", checkl, ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+                  // console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.reply_to_message.forward_from_message_id)
+                  
+                  // (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
+
+                  try {
+                    console.log("RECIEVE REPORT!")
+                    // const msg = await getMessage(bot.instanceName, )
+                    console.log("ctx.update.message.reply_to_message.message_id: ",ctx.update.message.reply_to_message.message_id)
+                    let task = await getTaskByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.message_id)
+                    console.log("TASK:", task)
+
+                    if (!task){
+
+                      let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 
-                let goalId = await createGoal(bot, ctx, user, {
+                      exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  
+                      ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие. Канал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                  
+                    } else {
+
+                      try{
+
+                         let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                         
+                         console.log("CURRENT_CHAT: ", current_chat)
+                          
+                          if (current_chat){
+                            let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "reportsChannel")
+                            
+                            if (!exist) {
+                              // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+                              let reportsChatResult = await createChat(bot, user, current_chat.unionName, "reports")
+                               
+                              // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+                              exist = {id : "-100" + reportsChatResult.channelId}
+                            }
+
+
+                          const reportMessageId = await sendMessageToUser(bot, {id: exist.id}, { text });
+                          await insertMessage(bot.instanceName, user, user.id, text, reportMessageId, 'report', {chatId: exist.id});//goalId: goal.goalId, 
+
+
+
+                            //TODO send to channel
+                            
+
+                          await createReport(bot, ctx, user, {
+                            host: "core",
+                            username: user.eosname,
+                            task_id: task.task_id,
+                            data: text
+                          })
+
+                          insertReport(bot.instanceName, {
+                            host: "core",
+                            username: user.eosname,
+                            data: text,
+                            
+                            task_id: task.task_id,
+                            goal_id: task.goal_id,
+                            goal_chat_message_id: ctx.update.message.message_id,
+                            report_channel_message_id: reportMessageId
+                          })
+
+                          ctx.reply("Отчёт принят и ожидает утверждения", {reply_to_message_id: ctx.update.message.message_id})
+
+                        }
+
+                      } catch(e) {
+                        console.error(e)
+                        ctx.reply(`Ошибка при создании отчёта. Скорее всего, он уже создан. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
+                        
+                      }
+
+
+                    }
+
+
+                  } catch(e) {
+                    ctx.reply(e.message)
+                  }
+
+                 
+
+                } else {
+                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                
+                  exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  
+                  ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                }
+
+
+              } else if (tag === 'task'){
+
+                
+                const buttons = [];
+
+                buttons.push(Markup.button.callback('выполнить', 'vote'));
+                buttons.push(Markup.button.callback('отменить', 'vote'));
+                
+                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                
+                if (ctx.update.message.reply_to_message){
+                  // let checkl = await exportChatLink(ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+                  // console.log("CHECK!", checkl, ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+                  // console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.reply_to_message.forward_from_message_id)
+                
+                  try{
+                    await ctx.deleteMessage(ctx.update.message.message_id);      
+                  } catch(e){}
+                  
+                  
+                  
+                  // (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
+
+                  try {
+                    // const msg = await getMessage(bot.instanceName, )
+                    console.log("ctx.update.message.reply_to_message.message_id: ",ctx.update.message.reply_to_message.message_id)
+                    let goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.message_id)
+                    console.log("GOAL:", goal)
+                    let task_id = await createTask(bot, ctx, user, {
+                      host: "core",
+                      creator: user.eosname,
+                      permlink: "",
+                      goal_id: goal.goal_id, //TODO!
+                      priority: 0,
+                      title: text,
+                      data: "предоставьте отчёт",
+                      requested: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
+                      is_public: true,
+                      doer: "",
+                      for_each: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
+                      with_badge: false,
+                      duration: 0,
+                      badge_id: 0,
+                      is_batch: false,
+                      parent_batch_id: 0,
+                      is_regular: false,
+                      calendar: [],
+                      start_at: "2022-01-01T00:00:00",
+                      expired_at: "2022-01-01T00:00:00",
+                      meta: ""
+
+                    })
+
+                    text += '\nсоздатель: ' + user.eosname
+                    text += `\nдеятель: -`
+
+                    let chat_message_id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.reply_to_message.message_id, ...request})).message_id
+
+                    await insertTask(bot.instanceName, {
+                      host: 'core',
+                      task_id,
+                      goal_id: goal.goal_id,
+                      title: text,
+                      chat_id: ctx.update.message.chat.id,
+                      chat_message_id,
+                    })
+
+                    //TODO insert task
+                    await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', {chatId: ctx.update.message.chat.id, task_id: task_id, goal_id: goal.goal_id});//goalId: goal.goalId, 
+
+
+                  } catch(e) {
+                    ctx.reply(e.message)
+                  }
+
+                  // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                 // console.log("CURRENT_CHAT: ", current_chat)
+                  //Чат действий временно не создаём
+                  // if (current_chat){
+                  //   let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "tasksChannel")
+                    
+                  //   if (!exist) {
+                  //     // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+                  //     let tasksChatResult = await createChat(bot, user, current_chat.unionName, "tasks")
+                       
+                  //     // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+                  //     exist = {id : "-100" + tasksChatResult.channelId}
+                  //   }
+
+                  //   const taskMessageId = await sendMessageToUser(bot, {id: exist.id}, { text }, request);
+                  //   await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId, 
+
+
+                  //   //TODO send to channel
+                  // }
+
+                } else {
+                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                
+                  exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  
+                
+                  ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                }
+
+              } else if (tag === 'goal') {
+                console.log("looking_for: ", ctx.chat.id.toString())
+                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                console.log("current_chat: ", current_chat)
+
+                if (!current_chat) 
+                  return
+
+                
+                // await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
+                let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
+                console.log("AFTER!", exist)
+
+                if (exist.type != "unionChat"){
+                  ctx.reply("Ошибка! Постановка целей доступна только в главном чате союза. Используйте тег #task в сообщении.", {reply_to_message_id: ctx.message.message_id})
+                  return
+                }
+                console.log("goalChannel: ", exist)
+                
+                exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                
+                if (!exist){
+                  exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
+                  const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей союза" });
+                  let goalChatResult = await createChat(bot, user, exist.unionName, "goals")
+                  await ctx.deleteMessage(id);  
+                  const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал целей создан: ${goalChatResult.channelLink}` });
+                  exist = {id : "-100" + goalChatResult.channelId}
+                }
+                
+                let goalChannelId = exist.id
+    
+                console.log("GOAL DETECTED:", tag, user)
+                let goal = {
                   hostname: "core",
                   title: text,
                   description: "",
                   target: "0.0000 FLOWER",
                   parent_id: 0,
+                }
+
+                goal.goalId = await createGoal(bot, ctx, user, goal)
+                
+                
+                let text_goal = `создатель: ${user.eosname}`
+                text_goal += `\nпредложение:\n${text}`
+
+                const buttons = [];
+
+                buttons.push(Markup.button.callback('голосовать', 'vote'));
+                
+                const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+                // ctx.reply(text_goal, request)
+
+                console.log("goalChannelId: ", goalChannelId)
+                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: text_goal });
+                
+                await insertGoal(bot.instanceName, {
+                  host: "core",
+                  title: text,
+                  goal_id: goal.goalId,
+                  channel_message_id: goalMessageId 
                 })
+
                 
                 // console.log("goalId", goalId)
 
                 ctx.reply("Цель добавлена", {reply_to_message_id : ctx.update.message.message_id})
-                await insertMessage(bot.instanceName, user, user.id, text, ctx.update.message.message_id, 'goal', {goalId, chatId: ctx.update.message.chat.id});
+
+                await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
               } else if (tag === 'action') {
                 
@@ -601,15 +912,47 @@ module.exports.init = async (botModel, bot) => {
       }
     } else {
       if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
-          if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
-            if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-              user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+          let union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
+          
+          console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
+          
+          if (union){ //если словили пересылку из прикрепленного канала
+            if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
 
-              if (user && !user.resume_chat_id){
-                // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-                user.resume_chat_id = ctx.update.message.message_id
-                await saveUser(bot.instanceName, user);  
+              const buttons = [];
+              if (union.type == 'goalsChannel'){
+                buttons.push(Markup.button.callback('проголосовать', 'vote'));
+                buttons.push(Markup.button.callback('совершить взнос', 'vote'));
+                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
+                await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id)
+              
+              } else if (union.type == 'reportsChannel'){
+                buttons.push(Markup.button.callback('принять', 'vote'));
+                buttons.push(Markup.button.callback('отклонить', 'vote'));
+                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
+                await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, {"report_chat_message_id":ctx.message.message_id})
+              
               }
+              
+              console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.forward_from_message_id, ctx.message.message_id)
+
+              // console.log("here!!!!!")
+              
+              await insertMessage(bot.instanceName, {id: "bot"}, "bot", text, ctx.message.message_id, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
+
+              
+
+              // const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id   || ctx.update.message.reply_to_message.message_id);
+        
+              // user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+
+              // if (user && !user.resume_chat_id){
+              //   // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+              //   user.resume_chat_id = ctx.update.message.message_id
+              //   await saveUser(bot.instanceName, user);  
+              // }
               
             }
           }

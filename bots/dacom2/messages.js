@@ -27,7 +27,7 @@ async function sendMessageToUser(bot, user, message, extra) {
   return id.message_id;
   }
   catch(e){
-    
+    console.error(e)
   }
 }
 

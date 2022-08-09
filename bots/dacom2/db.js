@@ -359,6 +359,132 @@ async function insertUnion(suffix, union) {
 }
 
 
+
+// eslint-disable-next-line camelcase
+async function insertGoal(suffix, goal) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      ...goal,
+      created_at: new Date()
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+// eslint-disable-next-line camelcase
+async function insertTask(suffix, task) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomTasks_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      ...task,
+      created_at: new Date()
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+// eslint-disable-next-line camelcase
+async function insertReport(suffix, report) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomReports_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      ...report,
+      created_at: new Date()
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    
+    await collection.updateOne(
+      { channel_message_id },
+      { $set: {"chat_message_id": chat_message_id} },
+      { upsert: false },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function addMainChatMessageToReport(suffix, report_channel_message_id, updater) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomReports_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    
+    await collection.updateOne(
+      { report_channel_message_id },
+      { $set: updater },
+      { upsert: false },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+// eslint-disable-next-line camelcase
+async function getGoalByChatMessage(suffix, host, chat_message_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+
+    let res = await collection.findOne({
+      host,
+      chat_message_id
+    });
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+// eslint-disable-next-line camelcase
+async function getTaskByChatMessage(suffix, host, chat_message_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomTasks_${suffix}`);
+
+    let res = await collection.findOne({
+      host,
+      chat_message_id
+    });
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
+
+
 // eslint-disable-next-line camelcase
 async function getUnion(suffix, chatId) {
   try {
@@ -366,13 +492,32 @@ async function getUnion(suffix, chatId) {
     const collection = db.collection(`dacomUnions_${suffix}`);
 
     let res = await collection.findOne({
-      chatId
+      id: chatId
     });
     return res 
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
+
+
+
+// eslint-disable-next-line camelcase
+async function getUnionByType(suffix, ownerEosname, type) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    let res = await collection.findOne({
+      ownerEosname,
+      type
+    });
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 
 module.exports = {
   loadDB,
@@ -397,5 +542,13 @@ module.exports = {
   getChat,
   getUserByResumeChannelId,
   insertUnion,
-  getUnion
+  getUnion,
+  getUnionByType,
+  insertGoal,
+  addMainChatMessageToGoal,
+  getGoalByChatMessage,
+  insertTask,
+  getTaskByChatMessage,
+  insertReport,
+  addMainChatMessageToReport
 };
