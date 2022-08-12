@@ -392,10 +392,10 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
         const clearMenu = Markup.removeKeyboard();
-        await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество. Запуск союзов приостановлен на время тестирования. Перезапустить робота командой /start чуть позже.`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
-        // let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
+        let t = 'Доброе пожаловать в Децентрализованное Автономное Сообщество.\n';
         // let t = '.\n';
 
         // Институт:  @intellect_run
@@ -408,7 +408,7 @@ module.exports.init = async (botModel, bot) => {
 // Советы:     @dacom_soviets
 // Досуг:        @dacom_fun`
 
-        // await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
 
         // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });
@@ -533,10 +533,17 @@ module.exports.init = async (botModel, bot) => {
     
     // entities: [ { offset: 12, length: 5, type: 'hashtag' } ]
     // console.log("message: ", ctx.update.message, ctx.update.message.chat.type)
-    
+    if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
+        user = ctx.update.message.from;
+
+        user.eosname = await generateAccount(bot, ctx, false, user.ref);
+        await saveUser(bot.instanceName, user)
+    }
+
     if (user) {
 
-      if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
+      //CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
+      if (ctx.update.message.chat.type !== 'private') {
         //PUBLIC CHAT
         // console.log('tyL: ', ctx.update.message);
 
@@ -559,6 +566,28 @@ module.exports.init = async (botModel, bot) => {
 
         // } else 
         if (true) {
+          if (text == '/start_soviet'){
+            
+            ctx.reply("Введите дату начала и время Совета в формате 2022-08-09T20:00:00:")
+            user.state = "start_soviet"
+            user.new_soviet = {}
+            await saveUser(bot.instanceName, user);
+
+          } else if (user.state == "start_soviet") {
+            
+            let d = new Date(text)
+
+            user.new_soviet.start_at = d
+            let time = d.getTime() / 1000
+            console.log("TIME: ", d, time)
+
+            await createGroupCall(bot, ctx.update.message.chat.id, time)
+            // await saveUser(bot.instanceName, user);
+
+          }
+
+
+
           if (text == '/new_cycle'){
             ctx.reply("Введите дату начала цикла развития:")
             user.state = "start_cycle"
@@ -594,7 +623,7 @@ module.exports.init = async (botModel, bot) => {
           }
 
 
-          else if (tags.length > 0){
+          else if (tags.length > 0) {
             for (tag of tags) {
               if (tag === 'report'){
                 if (ctx.update.message.reply_to_message){
@@ -692,7 +721,6 @@ module.exports.init = async (botModel, bot) => {
                   
                   ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
                 }
-
 
               } else if (tag === 'task'){
 
@@ -879,6 +907,7 @@ module.exports.init = async (botModel, bot) => {
 
           }
         }
+      
       } else {//Если это диалог пользователя с ботом
         //проверяем не квиз ли
 
@@ -966,8 +995,11 @@ module.exports.init = async (botModel, bot) => {
             }
           }
         } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
-      }
-    }
+        
+     }
+   }
+  
+
   });
 
 

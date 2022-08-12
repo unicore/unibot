@@ -4,6 +4,9 @@ const { TelegramClient, Api } = require('telegram')
 const { StringSession } = require('telegram/sessions')
 const {insertUnion} = require('./db')
 
+const { createReadStream } = require("fs");
+const { TGCalls, Stream } = require("tgcalls-next");
+
 //KRASNOV
 const apiId = parseInt(process.env.API_ID)
 const apiHash = process.env.API_HASH
@@ -12,10 +15,6 @@ const stringSession = new StringSession(process.env.STRING_SESSION)
 
 
 async function connect(){
-  console.log("APIID:", apiId)
-  console.log("apiHash:", apiHash)
-
-
   const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 })
   await client.connect()
   return client
@@ -196,17 +195,33 @@ async function setDiscussionGroup(bot, chatId, channelId){
 
 }
 
-async function createGroupCall(bot, chatId, userId) {
-  const client = await connect()
+async function createGroupCall(bot, chatId, scheduleDate) {
+  // const client = await connect()
   
-  const result = await client.invoke(new Api.phone.CreateGroupCall({
-    peer: chatId,
-    randomId: Math.floor((Math.random() * 1000000000) + 1),
-    rtmpStream: false,
-    title: 'Совет',
-    scheduleDate: 1659083752
-  }));
+  // try{
+  //   const result = await client.invoke(new Api.phone.CreateGroupCall({
+  //     peer: chatId,
+  //     randomId: Math.floor((Math.random() * 1000000000) + 1),
+  //     rtmpStream: true,
+  //     title: 'Совет',
+  //     // scheduleDate: scheduleDate
+  //   }));
+  // } catch(e){
+  //   console.error(e)
+  // }
+  
+  // console.log("chatId: ", client, chatId)
 
+  // const tgcalls = new TGCalls(client, chatId)
+  
+  // tgcalls.joinVoiceCall = () => {
+    // console.log("HERE!", tgcalls, TGCalls)
+  // }
+  // const stream = new Stream({ audio: createReadStream("audio.raw"), video: createReadStream("video.raw") })
+  
+  // tgcalls.joinCall(client, chatId)
+  // console.log("tgcalls", tgcalls, stream)
+  // await tgcalls.stream(stream);
 }
 
 async function exportChatLink(channelId, messageId){
