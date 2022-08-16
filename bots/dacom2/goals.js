@@ -195,7 +195,8 @@ async function createGoal(bot, ctx, user, goal) {
     await saveUser(bot.instanceName, user);
     return goalId
   } catch (e) {
-    ctx.reply(e.message);
+    ctx.reply(e.message, {reply_to_message_id: ctx.update.message.message_id});
+
     console.error(e);
   }
 }

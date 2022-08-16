@@ -726,11 +726,11 @@ module.exports.init = async (botModel, bot) => {
 
                 
                 const buttons = [];
-
-                buttons.push(Markup.button.callback('выполнить', 'vote'));
-                buttons.push(Markup.button.callback('отменить', 'vote'));
+                buttons.push(Markup.button.callback('😁', 'vote'));
+                buttons.push(Markup.button.callback('👍', 'vote'));
+                buttons.push(Markup.button.callback('🔥', 'vote'));
                 
-                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                const request = Markup.inlineKeyboard(buttons, { columns: 3 }).resize()
                 
                 if (ctx.update.message.reply_to_message){
                   // let checkl = await exportChatLink(ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
@@ -738,7 +738,7 @@ module.exports.init = async (botModel, bot) => {
                   // console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.reply_to_message.forward_from_message_id)
                 
                   try{
-                    await ctx.deleteMessage(ctx.update.message.message_id);      
+                    // await ctx.deleteMessage(ctx.update.message.message_id);      
                   } catch(e){}
                   
                   
@@ -775,10 +775,10 @@ module.exports.init = async (botModel, bot) => {
 
                     })
 
-                    text += '\nсоздатель: ' + user.eosname
-                    text += `\nдеятель: -`
+                    // text += '\nсоздатель: ' + user.eosname
+                    // text += `\nдеятель: -`
 
-                    let chat_message_id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.reply_to_message.message_id, ...request})).message_id
+                    let chat_message_id = (await ctx.reply("Действие добавлено", {reply_to_message_id: ctx.update.message.message_id})).message_id //...request
 
                     await insertTask(bot.instanceName, {
                       host: 'core',
@@ -786,7 +786,7 @@ module.exports.init = async (botModel, bot) => {
                       goal_id: goal.goal_id,
                       title: text,
                       chat_id: ctx.update.message.chat.id,
-                      chat_message_id,
+                      chat_message_id: ctx.update.message.reply_to_message.message_id,
                     })
 
                     //TODO insert task
@@ -797,26 +797,39 @@ module.exports.init = async (botModel, bot) => {
                     ctx.reply(e.message)
                   }
 
-                  // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                 // console.log("CURRENT_CHAT: ", current_chat)
-                  //Чат действий временно не создаём
-                  // if (current_chat){
-                  //   let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "tasksChannel")
-                    
-                  //   if (!exist) {
-                  //     // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
-                  //     let tasksChatResult = await createChat(bot, user, current_chat.unionName, "tasks")
+                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                  console.log("CURRENT_CHAT: ", current_chat)
+ 
+                  if (current_chat){
+                    let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "tasksChannel")
+                     
+                    if (!exist){
+                      exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
+                      
+                      if (exist){
+                        const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+                        let tasksChatResult = await createChat(bot, user, exist.unionName, "tasks")
+                        await ctx.deleteMessage(id);  
+                        const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+                        exist = {id : "-100" + tasksChatResult.channelId}
+                      }
+
+                    }
+
+                    // if (!exist) {
+                    //   // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+                    //   let tasksChatResult = await createChat(bot, user, current_chat.unionName, "tasks")
                        
-                  //     // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
-                  //     exist = {id : "-100" + tasksChatResult.channelId}
-                  //   }
+                    //   // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+                    //   exist = {id : "-100" + tasksChatResult.channelId}
+                    // }
+                    if (exist){
+                      const taskMessageId = await sendMessageToUser(bot, {id: exist.id}, { text }, request);
+                      await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId, 
+                    }
 
-                  //   const taskMessageId = await sendMessageToUser(bot, {id: exist.id}, { text }, request);
-                  //   await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId, 
-
-
-                  //   //TODO send to channel
-                  // }
+                    //TODO send to channel
+                  }
 
                 } else {
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
@@ -870,9 +883,14 @@ module.exports.init = async (botModel, bot) => {
 
                 goal.goalId = await createGoal(bot, ctx, user, goal)
                 
-                
-                let text_goal = `создатель: ${user.eosname}`
-                text_goal += `\nпредложение:\n${text}`
+                if (!goal.goalId){
+                  ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
+                  return
+                }
+
+                // let text_goal = `создатель: ${user.eosname}`
+                // text_goal += `\nпредложение:\n${text}`
+                let text_goal = text
 
                 const buttons = [];
 
@@ -959,10 +977,12 @@ module.exports.init = async (botModel, bot) => {
 
               const buttons = [];
               if (union.type == 'goalsChannel'){
-                buttons.push(Markup.button.callback('проголосовать', 'vote'));
-                buttons.push(Markup.button.callback('совершить взнос', 'vote'));
-                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
-                ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
+                // buttons.push(Markup.button.callback('проголосовать', 'vote'));
+                // buttons.push(Markup.button.callback('совершить взнос', 'vote'));
+                // const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                // ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
+                ctx.reply("Инструкция: ", {reply_to_message_id : ctx.message.message_id})              
+                
                 await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id)
               
               } else if (union.type == 'reportsChannel'){
