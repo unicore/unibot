@@ -1,7 +1,7 @@
 const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
-const { saveUser } = require('./db');
+const { saveUser, getUserByEosName } = require('./db');
 
 async function getVotesCount(bot, hostname, username) {
   let votes = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'votes');
@@ -12,6 +12,21 @@ async function getVotesCount(bot, hostname, username) {
 async function fetchGoals(bot, hostname) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals');
   return goals.sort((a, b) => parseFloat(a.votes) - parseFloat(b.votes));
+}
+
+async function fetchHost(bot, hostname) {
+  const hosts = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'hosts');
+  return hosts[0]
+}
+async function fetchGoal(bot, hostname, goalId) {
+  const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals', goalId, goalId, 1);
+  return goals[0]
+}
+
+
+async function fetchReport(bot, hostname, reportId) {
+  const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'reports3', reportId, reportId, 1);
+  return goals[0]
 }
 
 async function fetchUPower(bot, hostname, username) {
@@ -40,42 +55,312 @@ async function fetchConditions(bot, hostname) {
   return conditions;
 }
 
-function getGoalMsg(index, goal) {
+function getGoalMsg(goal) {
   const votes = goal.positive_votes === 0 ? goal.filled_votes : goal.positive_votes;
   const flowerVotes = `${parseFloat(votes / 10000).toFixed(4)} FLOWER`;
 
-  return `Цель №${index}: ${goal.title}\n${goal.description}\n\nСобрано: ${goal.available} из ${goal.target}\nГолоса: ${flowerVotes}\n${goal.status === 'filled' ? 'Голосование завершено' : ''}`;
+  return `${goal.title}\n${goal.description}\n\nСобрано: ${goal.available} из ${goal.target}\nГолоса: ${flowerVotes}\n${goal.status === 'filled' ? 'Голосование завершено' : ''}`;
 }
 
-async function editGoalMsg(ctx, user, hostname, goalId) {
-  const goals = await fetchGoals(hostname);
-  let index = 1;
-  let goal;
+async function disableButtons(bot, ctx, up) {
+  let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
 
-  // eslint-disable-next-line array-callback-return
-  goals.map((g) => {
-    if (Number(g.id) === Number(goalId)) {
-      goal = g;
-      index = 1;
-    }
-  });
-
-  console.log('index', index);
-
-  const buttons = [];
-
-  if (goal.voters.find((el) => user.eosname === el)) {
-    buttons.push(Markup.button.callback('Снять голос', `voteup ${hostname} ${goal.id}`));
-  } else if (goal.status !== 'filled') {
-    buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
+  if (up)
+    keyboard[0][0].text = "ожидание"
+  else 
+    keyboard[0][1].text = "ожидание"
+  try{
+    await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
+  } catch(e){
+    console.log("error on disable buttons: ", e.message)
   }
-  // eslint-disable-next-line max-len
-  await ctx.editMessageText(getGoalMsg(index, goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 }
 
-async function voteAction(bot, ctx, user, hostname, goalId) {
-  const eos = await bot.uni.getEosPassInstance(user.wif);
 
+async function enableReportButtons(bot, ctx, up, hostname, reportId) {
+  let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
+  report = await fetchReport(bot, hostname, reportId);
+
+  if (up)
+    keyboard[0][0].text = `👍 (${report.voters.length})`
+  else 
+    keyboard[0][1].text = "ожидание"
+
+  try{
+    await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
+  } catch(e){
+    console.log("error on enable buttons: ", e.message)
+  }
+}
+
+
+async function constructGoalMessage(bot, hostname, goal, goalId){
+  if (!goal && goalId)
+    goal = await fetchGoal(bot, hostname, goalId);
+  console.log("GOAL MATCH2: ", goal.id)
+
+  let host = await fetchHost(bot, hostname)
+  let total_shares = host.total_shares
+  console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
+  let text = ""
+  text += `ЦЕЛЬ: ${goal.id}\n`
+  text += `${goal.title}\n\n`
+  text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
+  // text += `Постановщик: ${goal.creator}\n`
+  // text += `Координатор: ${goal.benefactor}\n`
+  text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
+  return text
+}
+
+
+async function constructTaskMessage(bot, hostname, task, taskId){
+  let text = ""
+
+  text += `ДЕЙСТВИЕ: \n`
+  text += `${task.title}`
+  return text
+}
+
+async function constructReportMessage(bot, hostname, report, reportId){
+  if (!report && reportId)
+    report = await fetchReport(bot, hostname, reportId);
+
+  if (report){
+    const goal = await fetchGoal(bot, hostname, report.goal_id);
+
+    console.log("total_shares: ", goal.second_circuit_votes, report.positive_votes, report.negative_votes)
+    let text = ""
+    let bonus
+    let votes
+
+    let user = await getUserByEosName(bot.instanceName, report.username)
+    let from = (user.username && user.username != "") ? '@' + user.username : report.username
+    text += `ОТЧЁТ от ${from}: \n`
+    text += `${report.data}\n\n`
+    text += `Одобрен: ${report.approved == '1' ? "🟢" : "🟡"}\n`
+    text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
+    
+    if (report.approved){
+      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
+      // text += `Голоса: ${}%\n`
+      bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes == 0 ? report.positive_votes : goal.second_circuit_votes  ) * goal.total_power_on_distribution} POWER\n`
+      bonus = parseFloat(bonus).toFixed(2) + " POWER"
+    } else {
+      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
+      
+      // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
+      if (report.positive_votes == 0){
+        bonus = parseFloat(0).toFixed(2) + " POWER"
+      } else {
+        bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) ) } POWER\n`
+      }
+      
+    }
+    
+    text += `Подарок: ${report.requested} + ${bonus}\n`
+    
+    // text += `Бонус: 
+
+    // text += `Постановщик: ${report.creator}\n`
+    // text += `Координатор: ${report.benefactor}\n`
+    return text  
+
+  } else return null
+  
+}
+
+async function editGoalMsg(bot, ctx, user, hostname, goalId) {
+
+  const goal = await fetchGoal(bot, hostname, goalId);
+  console.log("GOAL MATCH: ", goal.id, goalId)
+
+  let buttons = [];
+  buttons.push(Markup.button.callback(`👍 (${goal.positive_votes} POWER)`, `upvote ${hostname} ${goalId}`));
+  buttons.push(Markup.button.callback(`👎 (${goal.negative_votes} POWER)`, `downvote ${hostname} ${goalId}`));
+  buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalId} `));
+                
+  const keyboard = buttons;
+
+  const columnsCount = 2;
+
+  buttons = keyboard.reduce((curr, next, index) => {
+    if (index % columnsCount === 0) {
+      curr.push([]);
+    }
+
+    const [row] = curr.slice(-1);
+
+    row.push(next);
+
+    return curr;
+  }, []);
+
+  // let modified = false
+  // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
+  // await ctx.
+  await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
+
+  console.log(ctx.update.callback_query.message.reply_to_message)
+  let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id
+  let chat_id = ctx.update.callback_query.message.reply_to_message.forward_from_chat.id
+  
+  console.log("message: ", message_id, chat_id)
+  
+  let new_text = await constructGoalMessage(bot, hostname, goal)
+
+  //get message from chat
+
+
+  await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
+  // ctx.update.callback_query.message.reply_markup.inline_keyboard[0].map((el, index) => {
+  //   console.log("index", index, el)
+  //   if (buttons[0][index].text != el.text)
+  //     modified = true
+  // })
+
+  
+  // console.log("modified", modified)
+
+  
+  // console.log(buttons)
+  
+  
+
+}
+
+
+
+async function editReportMsg(bot, ctx, user, hostname, reportId) {
+  let report = await fetchReport(bot, hostname, reportId);
+  let new_text = await constructReportMessage(bot, "core", report)
+  
+
+
+  let buttons = [];
+  buttons.push(Markup.button.callback(`👍 (${report.voters.length})`, `rvote ${hostname} ${reportId}`));
+   
+  // await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
+  console.log(ctx.update)
+  let message_id = ctx.update.callback_query.message.message_id
+  let chat_id = ctx.update.callback_query.message.chat.id
+  
+  console.log('1: ', chat_id)
+  console.log('2: ', message_id)
+  try{
+    await bot.telegram.editMessageText(chat_id, message_id, null, new_text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+  } catch(e){
+    console.log("SAME MESSAG!")
+  }
+
+}
+
+
+
+
+
+async function setBenefactor(bot, user, hostname, goalId, curator) {
+  console.log("set Bene")
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  
+  
+    await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'setbenefac',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          host: hostname,
+          goal_id: goalId,
+          benefactor: curator,
+        },
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+   await editGoalMsg(bot, ctx, user, hostname, goalId);
+
+  
+}
+
+
+
+async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+    console.log("on VOTE ACTION")  
+  await disableButtons(bot, ctx, up)
+
+  let host = await fetchHost(bot, hostname)
+  let report = await fetchReport(bot, hostname, reportId);
+  let actions = []
+
+  if (user.eosname == host.architect && report.approved == 0){
+    console.log("SINSIDE")
+    actions.push({
+        account: 'unicore',
+        name: 'approver',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          host: hostname,
+          report_id: reportId,
+          comment: "",
+        },
+      })
+  }
+
+  actions.push({
+        account: 'unicore',
+        name: 'rvote',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          voter: user.eosname,
+          host: hostname,
+          report_id: reportId,
+          up: up,
+        },
+      })
+
+  try {
+    await eos.transact({
+      actions: actions,
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+    await editReportMsg(bot, ctx, user, hostname, reportId)
+    // await editGoalMsg(bot, ctx, user, hostname, reportId);
+
+  } catch (e) {
+    console.log("on error: ", )
+    if (e.message === 'assertion failure with message: You dont have shares for voting process') {
+      ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
+    } else {
+      ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
+    }
+
+    console.error(e);
+    await enableReportButtons(bot, ctx, up, hostname, reportId)
+
+  }
+}
+
+async function voteAction(bot, ctx, user, hostname, goalId, up) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  
+  await disableButtons(bot, ctx, up)
+
+  console.log("on VOTE ACTION")
   try {
     await eos.transact({
       actions: [{
@@ -89,7 +374,7 @@ async function voteAction(bot, ctx, user, hostname, goalId) {
           voter: user.eosname,
           host: hostname,
           goal_id: goalId,
-          up: true,
+          up: up,
         },
       }],
     }, {
@@ -97,7 +382,8 @@ async function voteAction(bot, ctx, user, hostname, goalId) {
       expireSeconds: 30,
     });
 
-    await editGoalMsg(ctx, user, hostname, goalId);
+    await editGoalMsg(bot, ctx, user, hostname, goalId);
+
   } catch (e) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
@@ -218,7 +504,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
       buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
     }
     // eslint-disable-next-line no-await-in-loop,max-len
-    await ctx.reply(getGoalMsg(index, goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+    await ctx.reply(getGoalMsg(goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     index += 1;
   }
 
@@ -257,6 +543,11 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 module.exports = {
   printGoalsMenu,
   voteAction,
+  rvoteAction,
   createGoal,
   burnNow,
+  setBenefactor,
+  constructGoalMessage,
+  constructReportMessage,
+  constructTaskMessage
 };

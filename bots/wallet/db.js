@@ -15,6 +15,21 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
+
+async function insertRequest(suffix, user, message_id, message) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomRequests_${suffix}`);
+
+    await collection.insertOne({
+      // eslint-disable-next-line camelcase
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+    });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 async function saveUser(suffix, user) {
   try {
     const db = await loadDB();
@@ -133,19 +148,6 @@ async function getUserByEosName(suffix, eosname) {
     const collection = db.collection(`dacomUsers_${suffix}`);
 
     return await collection.findOne({ eosname });
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-  return null;
-}
-
-
-async function getUserByUsername(suffix, username) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomUsers_${suffix}`);
-
-    return await collection.findOne({ username });
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -308,7 +310,7 @@ async function getSubscribers(bot, hostname) {
 }
 
 // eslint-disable-next-line camelcase
-async function insertMessage(suffix, user, from, message, message_id, type, meta) {
+async function insertMessage(suffix, user, from, message, message_id, type) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomChats_${suffix}`);
@@ -316,7 +318,6 @@ async function insertMessage(suffix, user, from, message, message_id, type, meta
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       type, message_id, id: user.id, eosname: user.eosname, from, message, time: new Date(),
-      ...meta
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -355,17 +356,13 @@ async function getChat(suffix, eosname) {
 }
 
 
-// eslint-disable-next-line camelcase
-async function insertUnion(suffix, union) {
+async function insertTicket(suffix, user, ticket) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`dacomUnions_${suffix}`);
+    const collection = db.collection(`dacomTickets_${suffix}`);
 
-    await collection.insertOne({
-      // eslint-disable-next-line camelcase
-      ...union,
-      created_at: new Date()
-    });
+    await collection.insertOne(ticket);
+
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -373,17 +370,25 @@ async function insertUnion(suffix, union) {
 
 
 
-// eslint-disable-next-line camelcase
-async function insertGoal(suffix, goal) {
+async function insertStudent(suffix, user, student) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomStudents_${suffix}`);
+
+    await collection.insertOne(student);
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function insertGoal(suffix, user, goal) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomGoals_${suffix}`);
 
-    await collection.insertOne({
-      // eslint-disable-next-line camelcase
-      ...goal,
-      created_at: new Date()
-    });
+    await collection.insertOne(goal);
+
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -391,17 +396,14 @@ async function insertGoal(suffix, goal) {
 
 
 
-// eslint-disable-next-line camelcase
-async function insertTask(suffix, task) {
+async function insertWithdraw(suffix, user, withdraw) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`dacomTasks_${suffix}`);
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
 
-    await collection.insertOne({
-      // eslint-disable-next-line camelcase
-      ...task,
-      created_at: new Date()
-    });
+    let res = await collection.insertOne(withdraw);
+    console.log("INSERT RES", res)
+    return res.insertedId
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -409,145 +411,52 @@ async function insertTask(suffix, task) {
 
 
 
-// eslint-disable-next-line camelcase
-async function insertReport(suffix, report) {
+async function updateWithdraw(suffix, withdraw_id, status) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`dacomReports_${suffix}`);
-
-    await collection.insertOne({
-      // eslint-disable-next-line camelcase
-      ...report,
-      created_at: new Date()
-    });
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
-
-
-
-async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomGoals_${suffix}`);
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    
     await collection.updateOne(
-      { channel_message_id },
-      { $set: {"chat_message_id": chat_message_id} },
+      { "_id": mongoose.Types.ObjectId(withdraw_id) },
+      { $set: {
+        status
+      } },
       { upsert: false },
     );
+
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
 
 
-async function addMainChatMessageToReport(suffix, report_channel_message_id, updater) {
+
+async function getWithdraw(suffix, withdraw_id) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`dacomReports_${suffix}`);
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    
-    await collection.updateOne(
-      { report_channel_message_id },
-      { $set: updater },
-      { upsert: false },
-    );
+    return await collection.findOne({ "_id":  mongoose.Types.ObjectId(withdraw_id)});
+
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
 
 
-// eslint-disable-next-line camelcase
-async function getGoalByChatMessage(suffix, host, channel_message_id) {
+async function getTickets(suffix, user) {
   try {
     const db = await loadDB();
-    const collection = db.collection(`dacomGoals_${suffix}`);
+    const collection = db.collection(`dacomTickets_${suffix}`);
 
-    let res = await collection.findOne({
-      host,
-      channel_message_id
-    });
-    return res 
+    let tickets = await collection.find({eosname: user.eosname}).toArray();
+
+    return tickets
+
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
-
-// eslint-disable-next-line camelcase
-async function getTaskByChatMessage(suffix, host, chat_message_id) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomTasks_${suffix}`);
-
-    let res = await collection.findOne({
-      host,
-      chat_message_id
-    });
-    return res 
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
-
-
-// eslint-disable-next-line camelcase
-async function getTaskById(suffix, host, task_id) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomTasks_${suffix}`);
-
-    let res = await collection.findOne({
-      host,
-      task_id
-    });
-    return res 
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
-
-
-
-
-
-// eslint-disable-next-line camelcase
-async function getUnion(suffix, chatId) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomUnions_${suffix}`);
-
-    let res = await collection.findOne({
-      id: chatId
-    });
-    return res 
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
-
-
-
-// eslint-disable-next-line camelcase
-async function getUnionByType(suffix, ownerEosname, type) {
-  try {
-    const db = await loadDB();
-    const collection = db.collection(`dacomUnions_${suffix}`);
-
-    let res = await collection.findOne({
-      ownerEosname,
-      type
-    });
-    return res 
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
-
 
 module.exports = {
   loadDB,
@@ -571,16 +480,12 @@ module.exports = {
   getMessage,
   getChat,
   getUserByResumeChannelId,
-  insertUnion,
-  getUnion,
-  getUnionByType,
+  insertRequest,
+  insertTicket,
+  getTickets,
+  insertStudent,
   insertGoal,
-  addMainChatMessageToGoal,
-  getGoalByChatMessage,
-  insertTask,
-  getTaskByChatMessage,
-  insertReport,
-  addMainChatMessageToReport,
-  getTaskById,
-  getUserByUsername
+  insertWithdraw,
+  updateWithdraw,
+  getWithdraw
 };
