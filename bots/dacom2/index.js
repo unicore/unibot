@@ -409,27 +409,13 @@ module.exports.init = async (botModel, bot) => {
 
 
         let t = 'Доброе пожаловать.\n';
-        // let t = '.\n';
-
-        // Институт:  @intellect_run
-//         t += `
-// Инструкции:
-// Новости:   @dacom_news
-// Цели:         @dacom_goals
-// Задания:   @dacom_tasks
-// Союзы:      @dacom_unions
-// Советы:     @dacom_soviets
-// Досуг:        @dacom_fun`
-
         await ctx.reply(t, menu);
 
 
-        // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });
-
-
-        await ctx.reply('Инструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        //TODO UNCOMMENT IT
+        // await ctx.reply('Инструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   
-        // await startQuiz(bot, ctx, user);
+        
 
       }
     } else {
