@@ -337,7 +337,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-
+    
     await editReportMsg(bot, ctx, user, hostname, reportId)
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
 
@@ -346,7 +346,8 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
     } else {
-      ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
+      let msg_id = (await ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id})).message_id;
+      setTimeout(() => ctx.deleteMessage(msg_id), 5000)
     }
 
     console.error(e);
