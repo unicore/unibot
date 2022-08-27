@@ -499,7 +499,7 @@ module.exports.init = async (botModel, bot) => {
 
     const buttons = [];
 
-    buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
+    // buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
 
     ctx.reply('Союз - это ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   });
