@@ -211,7 +211,11 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId) {
   //get message from chat
 
 
-  await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
+  try{
+    await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
+  } catch(e){
+    console.log("same message!")
+  }
   // ctx.update.callback_query.message.reply_markup.inline_keyboard[0].map((el, index) => {
   //   console.log("index", index, el)
   //   if (buttons[0][index].text != el.text)
@@ -389,7 +393,8 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
     } else {
-      ctx.reply(e.message);
+      let msg_id = (await ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id})).message_id;
+      setTimeout(() => ctx.deleteMessage(msg_id), 5000)
     }
 
     console.error(e);
@@ -423,8 +428,11 @@ async function burnNow(bot, ctx, user) {
     const buttons = [];
 
     buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.burn.hostname} `));
-    ctx.editMessageText('Сила голоса успешно пополнена.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
+    try{
+      ctx.editMessageText('Сила голоса успешно пополнена.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+    } catch(e){
+      console.log("same message!")
+    }
     // eslint-disable-next-line no-param-reassign
     user.burn = {};
     await saveUser(bot.instanceName, user);
