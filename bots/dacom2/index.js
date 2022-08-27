@@ -586,7 +586,7 @@ module.exports.init = async (botModel, bot) => {
       if (current_chat && goal && curator_object) {
         console.log("ON HERE")
         try {
-          await setBenefactor(bot, user, "core", goal.goal_id, curator_object.eosname)
+          await setBenefactor(bot, ctx, user, "core", goal.goal_id, curator_object.eosname)
           await ctx.deleteMessage(ctx.update.message.message_id)
           await ctx.reply(`У цели появился новый координатор: @${curator}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
         } catch(e){
@@ -766,7 +766,7 @@ module.exports.init = async (botModel, bot) => {
                          console.log("CURRENT_CHAT: ", current_chat)
                           
                           // let duration = 1 //час
-                          let asset_per_hour = "10.0000 FLOWER"
+                          let asset_per_hour = "0.0000 FLOWER"
 
                           let reportId = await createReport(bot, ctx, user, {
                             host: "core",
@@ -876,7 +876,7 @@ module.exports.init = async (botModel, bot) => {
                       creator: user.eosname,
                       permlink: "",
                       goal_id: goal.goal_id, //TODO!
-                      priority: 0,
+                      priority: 1,
                       title: text,
                       data: "предоставьте отчёт",
                       requested: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
@@ -896,14 +896,14 @@ module.exports.init = async (botModel, bot) => {
 
                     }
                     task_id = await createTask(bot, ctx, user, task)
-
+                    task.id = task_id
                     // text += '\nсоздатель: ' + user.eosname
                     // text += `\nдеятель: -`
                     // const buttons = [];
 
                      const buttons = [];
                 
-                    buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${task_id} НАПИШИТЕ_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, НАПИШИТЕ_ТЕКСТ_ОТЧЁТА`));
+                    buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${task_id} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
                     const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
                     // console.log("before C")
                     let task_text = await constructTaskMessage(bot, "core", task)
@@ -1050,8 +1050,8 @@ module.exports.init = async (botModel, bot) => {
                 })
 
                 // console.log("goalId", goalId)
-
-                ctx.reply("Цель добавлена", {reply_to_message_id : ctx.update.message.message_id})
+                let tempChannelId = goalChannelId.replace('-100', '')
+                ctx.reply(`Цель добавлена. \nОбсудить: https://t.me/c/${tempChannelId}/${goalMessageId}`, {reply_to_message_id : ctx.update.message.message_id})
 
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
@@ -1122,7 +1122,7 @@ module.exports.init = async (botModel, bot) => {
 
                 buttons.push(Markup.button.callback('👍', `upvote core ${goalid}`));
                 buttons.push(Markup.button.callback('👎', `downvote core ${goalid}`));
-                buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} `));
+                buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} ЗАМЕНИТЕ_НА_ТЕКСТ_ДЕЙСТВИЯ`));
                     
                 const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
                 // ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              

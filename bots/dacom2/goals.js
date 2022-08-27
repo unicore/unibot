@@ -102,12 +102,24 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   let host = await fetchHost(bot, hostname)
   let total_shares = host.total_shares
   console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
+  let user = await getUserByEosName(bot.instanceName, goal.creator)
+  let from = (user.username && user.username != "") ? '@' + user.username : goal.creator
+    
   let text = ""
-  text += `ЦЕЛЬ: ${goal.id}\n`
+  text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
   text += `${goal.title}\n\n`
   text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
   // text += `Постановщик: ${goal.creator}\n`
-  // text += `Координатор: ${goal.benefactor}\n`
+  
+  let coordinator = ""
+
+  if (goal.benefactor != ""){
+
+    let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
+    coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
+  }
+  
+  text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
   text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
   return text
 }
@@ -115,9 +127,16 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
 async function constructTaskMessage(bot, hostname, task, taskId){
   let text = ""
+  let level = task.priority == (0 || 1) ? "10 $/час" : (task.priority == 2 ? "20 $/час" : "40 $/час")
+  
+  let user = await getUserByEosName(bot.instanceName, task.creator)
+  let from = (user.username && user.username != "") ? '@' + user.username : task.creator
+  
 
-  text += `ДЕЙСТВИЕ: \n`
-  text += `${task.title}`
+  text += `#ДЕЙСТВИЕ_${task.id} от ${from}: \n`
+  text += `${task.title}\n\n`
+  text += `Ставка: ${level}\n`
+  
   return text
 }
 
@@ -135,7 +154,7 @@ async function constructReportMessage(bot, hostname, report, reportId){
 
     let user = await getUserByEosName(bot.instanceName, report.username)
     let from = (user.username && user.username != "") ? '@' + user.username : report.username
-    text += `ОТЧЁТ от ${from}: \n`
+    text += `#ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
     text += `Одобрен: ${report.approved == '1' ? "🟢" : "🟡"}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
@@ -152,7 +171,7 @@ async function constructReportMessage(bot, hostname, report, reportId){
       if (report.positive_votes == 0){
         bonus = parseFloat(0).toFixed(2) + " POWER"
       } else {
-        bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) ) } POWER\n`
+        bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
       }
       
     }
@@ -198,6 +217,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId) {
   // let modified = false
   // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
   // await ctx.
+  // 
   await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
 
   console.log(ctx.update.callback_query.message.reply_to_message)
@@ -262,7 +282,7 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 
 
 
-async function setBenefactor(bot, user, hostname, goalId, curator) {
+async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
   console.log("set Bene")
   const eos = await bot.uni.getEosPassInstance(user.wif);
   
@@ -286,9 +306,17 @@ async function setBenefactor(bot, user, hostname, goalId, curator) {
       expireSeconds: 30,
     });
 
-   await editGoalMsg(bot, ctx, user, hostname, goalId);
-
-  
+   // await editGoalMsg(bot, ctx, user, hostname, goalId);
+   let text = await constructGoalMessage(bot, hostname, null, goalId)
+   console.log("TEXT:", text)
+   let message_id = ctx.update.message.reply_to_message.forward_from_message_id
+   let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id
+   
+   try{
+    await bot.telegram.editMessageText(chat_id, message_id, null, text);
+  } catch(e){
+    console.log("same message!", e)
+  }
 }
 
 
