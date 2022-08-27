@@ -167,7 +167,7 @@ async function isAdmin(bot, id) {
 
 
 async function checkForExistBCAccount(bot, ctx) {
-  const user = ctx.update.message.from.id;
+  const user = ctx.update.message.from.id || ctx.update.callback_query.from.id;
   const exist = await getUser(bot.instanceName, user);
 
   if (!exist || !exist.eosname) {
@@ -408,7 +408,7 @@ module.exports.init = async (botModel, bot) => {
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
-        let t = 'Доброе пожаловать.\n';
+        let t = 'Добро пожаловать.\n';
         await ctx.reply(t, menu);
 
 
@@ -497,7 +497,11 @@ module.exports.init = async (botModel, bot) => {
     await getUser(bot.instanceName, ctx.update.message.from.id);
     await checkForExistBCAccount(bot, ctx);
 
-    ctx.reply('Главный Вход: https://intellect.run');
+    const buttons = [];
+
+    buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
+
+    ctx.reply('Союз - это ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   });
 
 
@@ -599,23 +603,30 @@ module.exports.init = async (botModel, bot) => {
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log('catch user', user);
+
+    // await checkForExistBCAccount(bot, ctx);
+
     let { text } = ctx.update.message;
     let entities = ctx.update.message.entities
     
     let tags = getHashtags(ctx.update.message)
-    text = cutTags(bot, text, tags)
+
+    if (tags.length > 0)
+      text = cutTags(bot, text, tags)
 
     console.log("MESSAGE:", ctx.update.message)
     console.log("TAGS:", tags)
     
     // entities: [ { offset: 12, length: 5, type: 'hashtag' } ]
     // console.log("message: ", ctx.update.message, ctx.update.message.chat.type)
-    if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
-        user = ctx.update.message.from;
-
-        user.eosname = await generateAccount(bot, ctx, false, user.ref);
-        await saveUser(bot.instanceName, user)
-    }
+    
+    // if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
+    //     user = ctx.update.message.from;
+    //     if (user.id != 777000){
+    //       user.eosname = await generateAccount(bot, ctx, false, user.ref);
+    //       await saveUser(bot.instanceName, user)
+    //     }
+    // }
 
     if (user) {
 
@@ -990,6 +1001,8 @@ module.exports.init = async (botModel, bot) => {
                   await ctx.deleteMessage(id);  
                   const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал целей создан: ${goalChatResult.channelLink}` });
                   exist = {id : "-100" + goalChatResult.channelId}
+                  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                  await sleep(3000)
                 }
                 
                 let goalChannelId = exist.id
@@ -1095,7 +1108,7 @@ module.exports.init = async (botModel, bot) => {
     } else {
       if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
           let union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
-          
+          console.log("___________________________")
           console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
           
           if (union){ //если словили пересылку из прикрепленного канала
