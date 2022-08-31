@@ -29,6 +29,12 @@ async function fetchReport(bot, hostname, reportId) {
   return goals[0]
 }
 
+
+async function fetchTask(bot, hostname, taskId) {
+  const tasks = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'tasks', taskId, taskId, 1);
+  return tasks[0]
+}
+
 async function fetchUPower(bot, hostname, username) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'power3', username, username, 1);
   if (goals[0]) return goals[0].power;
@@ -121,17 +127,25 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   
   text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
   text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
+  if (parseFloat(goal.available) > 0)
+    text += `\nСобрано: ${goal.available}`
+  if (parseFloat(goal.withdrawed) > 0)
+    text += `\nПолучено: ${goal.withdrawed}`
+
   return text
 }
 
 
 async function constructTaskMessage(bot, hostname, task, taskId){
+  if (!task && taskId)
+    task = await fetchTask(bot, hostname, taskId);
+
   let text = ""
   let level = task.priority == (0 || 1) ? "10 $/час" : (task.priority == 2 ? "20 $/час" : "40 $/час")
   
   let user = await getUserByEosName(bot.instanceName, task.creator)
   let from = (user.username && user.username != "") ? '@' + user.username : task.creator
-  
+
 
   text += `#ДЕЙСТВИЕ_${task.id} от ${from}: \n`
   text += `${task.title}\n\n`
@@ -188,7 +202,7 @@ async function constructReportMessage(bot, hostname, report, reportId){
   
 }
 
-async function editGoalMsg(bot, ctx, user, hostname, goalId) {
+async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 
   const goal = await fetchGoal(bot, hostname, goalId);
   console.log("GOAL MATCH: ", goal.id, goalId)
@@ -197,6 +211,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId) {
   buttons.push(Markup.button.callback(`👍 (${goal.positive_votes} POWER)`, `upvote ${hostname} ${goalId}`));
   buttons.push(Markup.button.callback(`👎 (${goal.negative_votes} POWER)`, `downvote ${hostname} ${goalId}`));
   buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalId} `));
+  // buttons.push(Markup.button.switchToCurrentChat('создать донат', `/donate`));
                 
   const keyboard = buttons;
 
@@ -218,7 +233,8 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId) {
   // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
   // await ctx.
   // 
-  await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
+  if (!skip)
+    await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
 
   console.log(ctx.update.callback_query.message.reply_to_message)
   let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id
@@ -280,6 +296,54 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 
 
 
+
+
+async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
+  
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  
+    let data = {
+          host: hostname,
+          task_id: taskId,
+          priority: priority,
+        }
+    console.log(data)
+
+    await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'setpriority',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: data,
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+   // await editGoalMsg(bot, ctx, user, hostname, goalId);
+   let text = await constructTaskMessage(bot, hostname, null, taskId)
+   console.log("TEXT:", text)
+
+   let message_id = ctx.update.message.reply_to_message.message_id
+   let chat_id = ctx.update.message.reply_to_message.chat.id
+   
+
+  const buttons = [];
+                
+  buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${taskId} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
+  const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+  
+
+   try{
+    await bot.telegram.editMessageText(chat_id, message_id, null, text, request);
+  } catch(e){
+    console.log("same message!", e)
+  }
+}
 
 
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
@@ -586,5 +650,7 @@ module.exports = {
   setBenefactor,
   constructGoalMessage,
   constructReportMessage,
-  constructTaskMessage
+  constructTaskMessage,
+  setTaskPriority,
+  editGoalMsg
 };

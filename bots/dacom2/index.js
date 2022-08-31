@@ -18,6 +18,8 @@ const {
   getLiquidBalance,
   getOneUserHelixBalance,
   printWallet,
+  printHelixStat,
+  printPublicWallet,
   printUserBalances,
   withdrawAction,
   printHelixs,
@@ -27,6 +29,9 @@ const {
   getCurrentUserDeposit,
   getCondition,
   exitFromTail,
+  goalWithdraw,
+  retireAction,
+  getGoalInstructions
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -65,10 +70,12 @@ const {
   createGoal,
   burnNow,
   setBenefactor,
+  setTaskPriority,
   constructGoalMessage,
   constructTaskMessage,
   constructReportMessage,
-  rvoteAction
+  rvoteAction,
+  editGoalMsg
 } = require('./goals');
 
 const {
@@ -103,7 +110,12 @@ const {
   getTaskById,
   insertReport,
   addMainChatMessageToReport,
-  getUserByUsername
+  getUserByUsername,
+  insertWithdraw,
+  updateWithdraw,
+  getWithdraw,
+  getUserByEosName,
+  getChat
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -408,7 +420,7 @@ module.exports.init = async (botModel, bot) => {
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
-        let t = 'Добро пожаловать.\n';
+        let t = 'Добро пожаловать.\n\nЭтот робот обеспечивает регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.\n\n';
         await ctx.reply(t, menu);
 
 
@@ -499,9 +511,9 @@ module.exports.init = async (botModel, bot) => {
 
     const buttons = [];
 
-    // buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
+    buttons.push(Markup.button.callback('🆕 добавить союз', `createunion`));
 
-    ctx.reply('Союз - это ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+    ctx.reply('Союз - это цифровое объединение людей в чате с копилкой. Копилки пополняются из разных направлений и распределяется по фондам союзов и их партнёров. Партнёр - это участник, принявший кодекс и принятый в систему на равных правах со всеми партнёрами системы. Каждый участник союза - это партнёр всех союзов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   });
 
 
@@ -558,7 +570,416 @@ module.exports.init = async (botModel, bot) => {
     return text
   }
 
-  bot.command("set_curator", async(ctx) => {
+async function finishEducation(ctx) {
+    
+    const icomeMenu = Markup
+    .keyboard(mainButtons, { columns: 2 }).resize();
+   
+    let t = 'Добро пожаловать в игру.\n';
+    t += "\nОтобразить капитализацию союза: /capital,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
+
+    await ctx.replyWithHTML(t, icomeMenu);
+  
+}
+
+async function pushEducation(ctx, currentSlideIndex) {
+  const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
+  console.log("SLIDE : ", slide)
+  if (!slide) {
+    try {
+      // await ctx.editMessageText('Ознакомление завершено');
+      await ctx.deleteMessage()
+    } catch (e) {
+      console.error(e);
+    }
+
+    await finishEducation(ctx);
+  } else {
+    if (currentSlideIndex === 0) {
+      const incomeMenu = Markup
+        .removeKeyboard();
+
+      // await ctx.reply('Ознакомление запущено', incomeMenu, { reply_markup: { remove_keyboard: true } });
+    }
+
+    const buttons = [];
+
+    
+    if (currentSlideIndex + 1 === education.length){
+      buttons.push(Markup.button.callback('Начать игру', `finisheducation`));
+    } else {
+      buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
+      buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`)); 
+      buttons.push(Markup.button.callback('Пропустить ознакомление', `pusheducation ${education.length}`));
+    }
+
+
+
+    let text = '';
+    text += `\n\n${slide.text}`;
+    
+    if (currentSlideIndex === 0 && slide.img != "") {
+      // eslint-disable-next-line max-len
+      
+      if (slide.img.length > 0) {
+        // eslint-disable-next-line max-len
+        // { source: slide.img }
+        // 
+        await ctx.replyWithPhoto(slide.img, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+      } else {
+        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      }    
+    } else {
+      await ctx.deleteMessage();
+
+      if (slide.img.length > 0) {
+        // eslint-disable-next-line max-len
+        await ctx.replyWithPhoto(slide.img, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+      } else {
+        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      }
+    }
+  }
+}
+
+  bot.action(/pusheducation (\w+)/gi, async (ctx) => {
+    const currentSlideIndex = Number(ctx.match[1]);
+    await pushEducation(ctx, currentSlideIndex);
+  });
+
+  bot.command('/welcome', async (ctx) => {
+
+    await pushEducation(ctx, 0);
+  });
+
+  bot.action('finisheducation', async (ctx) => {
+    await finishEducation(ctx);
+  });
+
+  bot.command("capital", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    if (user)
+      await printHelixStat(bot, user, "core", ctx);
+    else ctx.repy("Пользователь не зарегистрирован")
+  })
+
+
+  bot.command("about", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    try{
+
+
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+    let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+    let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
+    let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+
+    // console.log('chats: ', unionChat, goalsChat,goalsChannel )
+
+    let text = ""
+    text += `Название союза: ${current_chat.unionName}\n`
+    text += `Чат союза: ${unionChat.link}\n`
+    text += `Канал целей союза: ${goalsChannel.link}\n`
+    text += `_______________________________________\n`
+    text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
+    text += `\n\nсообщение будет удалено через 30 секунд.`
+    let reply_to
+    
+    if (ctx.update.message.reply_to_message)
+      reply_to = ctx.update.message.reply_to_message.forward_from_message_id
+
+    console.log(reply_to)
+    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id
+    
+    setTimeout(
+      () => {
+        ctx.deleteMessage(ctx.update.message.message_id)
+        ctx.deleteMessage(id)
+      },
+      30 * 1000,
+    );
+  } catch(e){
+    console.log("error on local bot: ", e.message)
+  }
+  })
+
+
+  bot.command("about", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+    let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+    let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
+    let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+
+    // console.log('chats: ', unionChat, goalsChat,goalsChannel )
+
+    let text = ""
+    text += `Название союза: ${current_chat.unionName}\n`
+    text += `Чат союза: ${unionChat.link}\n`
+    text += `Канал целей союза: ${goalsChannel.link}\n`
+    text += `_______________________________________\n`
+    text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
+    await ctx.reply(text)
+  })
+
+  bot.command("iam", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    if (user)
+      await printPublicWallet(bot, user, "core", ctx);
+    else ctx.reply("Пользователь не зарегистрирован")
+  })
+
+
+  bot.command("wallet", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    if (user)
+      await printWallet(bot, user, ctx, true);
+    else ctx.repy("Пользователь не зарегистрирован")
+  })
+
+
+  bot.command("helix", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    if (user)
+      await printHelixWallet(bot, ctx, user, "core");
+    else ctx.reply("Пользователь не зарегистрирован")
+  })
+
+
+
+  bot.command("withdraw", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    if (ctx.update.message.reply_to_message){
+      goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.forward_from_message_id)
+      if (!goal){
+        
+        ctx.reply("Цель не найдена", {reply_to_message_id: ctx.update.message.message_id})
+
+      } else {
+        console.log("GOAL:", goal, user.eosname)
+        // if (goal.benefactor != user.eosname) {
+
+        //   await ctx.reply("Только координатор может получить донат из цели.", {reply_to_message_id: ctx.update.message.message_id})
+        
+        // } else {
+
+          try{
+
+            await goalWithdraw(bot, ctx, user, goal)
+            await editGoalMsg(bot, ctx, user, goal.host, goal.goal_id, true)
+
+            await ctx.reply(`Вывод баланса в кошелёк координатора произведён успешно.`, {reply_to_message_id: ctx.update.message.message_id})    
+
+          } catch(e){
+
+            await ctx.reply(`Ошибка: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})    
+          
+          // }
+          
+        }
+
+      }
+    } 
+  })
+
+ bot.command("donate", async(ctx) => {
+    let msg_id = (await ctx.reply("Пожалуйста, подождите", {reply_to_message_id: ctx.update.message.message_id})).message_id
+
+    await checkForExistBCAccount(bot, ctx);
+    
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    let goal
+    
+    if (ctx.update.message.reply_to_message){
+      goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.forward_from_message_id)
+      
+    } 
+
+    if (!ctx.update.message.reply_to_message || !goal) {
+      // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+
+      await ctx.reply("Совершить взнос можно только в обсуждениях цели. ", {reply_to_message_id: ctx.update.message.message_id})
+      await ctx.deleteMessage(msg_id)
+      return
+    }
+    
+    // console.log("donate", ctx.update.message.reply_to_message)
+    // console.log(goal)
+
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+    if (current_chat){
+
+      let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+      if (exist){
+        let address 
+        if (user)
+          address = await getAddress(bot, user, ctx, exist.id, "USDT.TRC20", "donate", {goal_id: goal.goal_id});
+        else ctx.reply("Пользователь не зарегистрирован", {reply_to_message_id: ctx.update.message.message_id})
+
+        if (address) {
+          ctx.reply(`Персональный адрес для взноса в USDT (TRC20):\n${address}`, {reply_to_message_id: ctx.update.message.message_id})
+        }
+
+        await ctx.deleteMessage(msg_id)
+      }   
+      
+        
+    }
+    
+    
+  })
+
+
+  async function getMaxWithdrawAmount(bot, user, ctx) {
+    const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
+    const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
+    
+    const min = `${(2 / parseFloat(1)).toFixed(0)} ${bot.getEnv().SYMBOL}`;
+    const max = `${(((parseFloat(balances.totalBalances) + parseFloat(liquidBal)) * parseFloat(1)) / parseFloat(1)).toFixed(4)} ${bot.getEnv().SYMBOL}`;
+    
+    return {min, max}
+
+  }
+
+
+  bot.action("withdraw", async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
+    user.state = 'set_withdraw_amount';
+    await saveUser(bot.instanceName, user);
+    // showBuySellMenu(bot, user, ctx);
+    // console.log("helixBalances: ", balances)
+    let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+    
+    if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+    else {
+      ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, на вашем балансе: ${max}. `); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+    }
+
+    // if (parseFloat(liquidBal) == 0){
+    //   ctx.reply('Ошибка! У вас нет USDT для вывода. ')
+    // } else {
+
+      // ctx.reply(`Введите ваш адрес USDT в сети TRC20:`)  
+    // }
+     
+     
+
+    // await printTickets(bot, user, ctx, nextId);
+  });
+
+
+  async function getAddress(bot, user, ctx, unionchat, currency, type, meta) {
+    try{
+      
+      let params = {
+        username: user.eosname,
+        currency: currency,
+        hostname: "core",
+        chat: {
+          union_chat_id: unionchat,
+          reply_to_message_id: ctx.update.message.reply_to_message.message_id,
+          reply_to_message_chat_id: ctx.update.message.reply_to_message.chat.id,
+          goal_message_id: ctx.update.message.reply_to_message.forward_from_message_id,
+          goal_channel_id: ctx.update.message.reply_to_message.forward_from_chat.id
+        },
+        type: type,
+        meta: meta
+      }
+
+      let path = `${bot.getEnv().PAY_GATEWAY}/generate`
+      
+      const result = await axios.post(
+        path,
+        params
+      );
+      
+      if (result.data.status === 'ok')
+        return result.data.address
+      else {
+        ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ", {reply_to_message_id: ctx.update.message.message_id})
+      }
+
+    } catch(e){
+      console.log(e)
+      ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ", {reply_to_message_id: ctx.update.message.message_id})
+    }
+    
+  }
+
+  bot.command("set_priority", async(ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+  
+    //TODO only architect can set CURATOR!
+
+    console.log("on set_priority", ctx.update.message)
+    let text = ctx.update.message.text
+    let entities = ctx.update.message.entities
+    let priority = 0
+
+    entities.map(entity => {
+      if (entity.type == 'bot_command')
+        priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', '')))
+    })
+
+    console.log('priority: ', priority)
+
+    //TODO get task from message
+    //if not task - return
+    let task = await getTaskByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.message_id)
+    console.log("TASK: ", task)
+    if (!task){
+        ctx.reply("Действие не найдено. Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.", {reply_to_message_id: ctx.update.message.message_id})
+    
+    } else {
+     if (!priority){
+        ctx.reply("Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.", {reply_to_message_id: ctx.update.message.message_id})
+      } else {
+        
+        let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+        // let goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.message.reply_to_message.forward_from_message_id)
+        // console.log("goal", goal)
+        // let curator_object = await getUserByUsername(bot.instanceName, curator)
+
+        if (current_chat && task) {
+          console.log("ON HERE")
+          try {
+            // await setBenefactor(bot, ctx, user, "core", goal.goal_id, curator_object.eosname)
+            await setTaskPriority(bot, ctx, user, "core", task.task_id, priority)
+            await ctx.deleteMessage(ctx.update.message.message_id)
+            let tprior = (priority == 0 || priority == 1) ? "10 $/час" : ((priority == 2) ? "20 $/час" :"40 $/час")
+            await ctx.reply(`Координатор установил ставку действия: ${tprior}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
+         
+          } catch(e){
+            console.log(e)
+            await ctx.reply(`Ошибка: ${e.message}`,{reply_to_message_id: ctx.update.message.reply_to_message.message_id})
+          }
+          
+        } else {
+
+        }
+      }
+    }
+   
+  })
+
+
+
+  bot.command("set_coordinator", async(ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
   
     //TODO only architect can set CURATOR!
@@ -575,7 +996,7 @@ module.exports.init = async (botModel, bot) => {
 
 
     if (curator == ""){
-      ctx.reply("Для установки куратора отметьте пользователя командой /set_curator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
+      ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     } else {
       
       let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
@@ -600,12 +1021,17 @@ module.exports.init = async (botModel, bot) => {
     }
   })
 
+  bot.on('edited_message', async (ctx) => {
+    console.log(ctx)
+  });
+
+  
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log('catch user', user);
 
     // await checkForExistBCAccount(bot, ctx);
-
+    console.log(ctx.update)
     let { text } = ctx.update.message;
     let entities = ctx.update.message.entities
     
@@ -710,6 +1136,8 @@ module.exports.init = async (botModel, bot) => {
 
           }
 
+
+            
 
           else if (tags.length > 0) {
             for (tag of tags) {
@@ -1051,7 +1479,7 @@ module.exports.init = async (botModel, bot) => {
 
                 // console.log("goalId", goalId)
                 let tempChannelId = goalChannelId.replace('-100', '')
-                ctx.reply(`Цель добавлена. \nОбсудить: https://t.me/c/${tempChannelId}/${goalMessageId}`, {reply_to_message_id : ctx.update.message.message_id})
+                ctx.reply(`Цель добавлена.\nОбсудить: https://t.me/c/${tempChannelId}/${goalMessageId}`, {reply_to_message_id : ctx.update.message.message_id})
 
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
@@ -1100,6 +1528,53 @@ module.exports.init = async (botModel, bot) => {
             }
             // 
           } 
+          else if (user.state === 'set_withdraw_amount') {
+              const helix = await getHelixParams(bot, "core");
+
+              let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+              const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
+              
+
+              if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+              
+              else if (parseFloat(min) > parseFloat(amount)){
+                
+                ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+              
+              } else {
+
+                user.state = "set_withdraw_address"
+                user.on_withdraw = {
+                  amount
+                }
+                await saveUser(bot.instanceName, user);
+
+                ctx.reply("Введите адрес для получения USDT.TRC20: ")
+
+              }
+
+
+            } 
+
+            else if (user.state === 'set_withdraw_address') {
+              user.on_withdraw.address = text
+              await saveUser(bot.instanceName, user);
+
+              const buttons = [];
+
+              buttons.push(Markup.button.callback('Да', 'withdrawaction'));
+              buttons.push(Markup.button.callback('Отмена', `backto wallet `));
+
+              let text2 = "Подтверждение! Вы уверены, что хотите поставить средства на вывод?"
+              text2 += `\n\nСумма: ${user.on_withdraw.amount}`
+              text2 += `\nАдрес: ${user.on_withdraw.address}`
+
+              ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
+
+
+            } 
+
+
         } else {
           console.log("message2")
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -1123,10 +1598,13 @@ module.exports.init = async (botModel, bot) => {
                 buttons.push(Markup.button.callback('👍', `upvote core ${goalid}`));
                 buttons.push(Markup.button.callback('👎', `downvote core ${goalid}`));
                 buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} ЗАМЕНИТЕ_НА_ТЕКСТ_ДЕЙСТВИЯ`));
+                // buttons.push(Markup.button.switchToCurrentChat('создать донат', `/donate`));
+  
                     
                 const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
                 // ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
-                ctx.reply("Инструкция: ", {reply_to_message_id : ctx.message.message_id, ...request})              
+                let instructions = await getGoalInstructions();
+                await ctx.reply(instructions, {reply_to_message_id : ctx.message.message_id, ...request})              
                 
                 await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id)
               
@@ -1165,6 +1643,76 @@ module.exports.init = async (botModel, bot) => {
    }
   
 
+  });
+
+
+  bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
+    const withdraw_id = ctx.match[1];
+    // console.log("withdraw_id: ", withdraw_id)
+    let wobj = await getWithdraw(bot.instanceName, withdraw_id)
+    // console.log('wobj', wobj)
+    const user = await getUser(bot.instanceName, wobj.userId);
+
+    await updateWithdraw(bot.instanceName, withdraw_id, "confirmed")
+
+    await ctx.editMessageText('вывод обработан');
+
+    //TO CLIENT
+    await sendMessageToUser(bot, user, { text: `Заявка на вывод ${wobj.amount} успешно обработана` });
+
+    //TODO make db insert
+    //TODO send request to admin
+    //
+  });
+
+
+  bot.action('withdrawaction', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    user.state = ""
+    let withdraw_id = await insertWithdraw(bot.instanceName, user, {
+      userId: user.id,
+      eosname: user.eosname,
+      amount: user.on_withdraw.amount,
+      address: user.on_withdraw.address,
+      created_at: new Date(),
+      status: 'created'
+    })
+
+    const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
+    
+
+    //MASSWITHDRAWACTION
+    massWithdrawAction(bot, user, bot.getEnv().CORE_HOST, balances.all).then(res => {
+
+      //TODO make a burn from user with address in memo
+      retireAction(bot, user, user.on_withdraw.amount, user.on_withdraw.address).then(async () => {
+        ctx.deleteMessage(); //delete buttons
+
+        const buttons = [];
+        buttons.push(Markup.button.callback('подтвердить оплату', `confirmwithdraw ${withdraw_id}`));
+        
+        //TO CLIENT
+        await sendMessageToUser(bot, user, { text: `Заявка на вывод создана на сумму ${user.on_withdraw.amount}. Перевод будет выполнен на адрес:\n${user.on_withdraw.address}` });
+
+        //TO ADMIN
+        
+        let admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME)
+        await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
+        await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+        
+        await updateWithdraw(bot.instanceName, withdraw_id, "waiting")
+        
+      }).catch(e => {
+        console.error(e)
+        ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`)      
+      }) 
+    }).catch(e => {
+      console.error(e)
+        ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`)      
+    })
+
+    //
   });
 
   
