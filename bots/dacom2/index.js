@@ -578,7 +578,7 @@ async function finishEducation(ctx) {
     let t = 'Добро пожаловать в игру.\n';
     t += "\nПоказать ознакомление: /welcome,\nОтобразить капитализацию союза: /capital,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
 
-    await ctx.replyWithHTML(t, icomeMenu);
+    await ctx.replyWithHTML(t);
   
 }
 
