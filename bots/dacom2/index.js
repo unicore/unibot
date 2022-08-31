@@ -576,7 +576,7 @@ async function finishEducation(ctx) {
     .keyboard(mainButtons, { columns: 2 }).resize();
    
     let t = 'Добро пожаловать в игру.\n';
-    t += "\nОтобразить капитализацию союза: /capital,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
+    t += "\nПоказать ознакомление: /welcome,\nОтобразить капитализацию союза: /capital,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
 
     await ctx.replyWithHTML(t, icomeMenu);
   
