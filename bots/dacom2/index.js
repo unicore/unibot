@@ -68,6 +68,7 @@ const {
   printGoalsMenu,
   voteAction,
   createGoal,
+  editGoal,
   burnNow,
   setBenefactor,
   setTaskPriority,
@@ -75,7 +76,8 @@ const {
   constructTaskMessage,
   constructReportMessage,
   rvoteAction,
-  editGoalMsg
+  editGoalMsg,
+  fetchGoal
 } = require('./goals');
 
 const {
@@ -521,9 +523,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    if (ctx.update.message.chat.type === 'private') {
+    // if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
-    } 
+    // } 
 
   });
 
@@ -1022,9 +1024,65 @@ async function pushEducation(ctx, currentSlideIndex) {
   })
 
   bot.on('edited_message', async (ctx) => {
-    console.log(ctx)
+    // console.log('edited_message', ctx.update.edited_message)
+    // console.log("edited_chat_id: ", ctx.update.edited_message.forward_from_chat.id)
+
+    // let user = await getUser(bot.instanceName, ctx.update.edited_message.forward_from_chat.id);
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
+    // console.log("current_chat: ", current_chat)
+    if (current_chat){
+      // console.log(true)
+      let goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.edited_message.forward_from_message_id)
+      // console.log(goal)
+      if (goal) {
+        // console.log("true", true)
+        let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
+        // console.log("trueGoal:", trueGoal)
+        if (trueGoal){
+          // console.log(true)
+          let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
+          // console.log()
+          if (editor){
+            try {
+
+              await editGoal(bot, ctx, editor, {
+                editor: trueGoal.creator,
+                id: trueGoal.id,
+                hostname: goal.host, 
+                title: ctx.update.edited_message.text,
+                description: "",
+                meta: {},
+              })
+              // console.log("scucss edit")
+              
+            } catch(e){
+              console.log(e)
+              
+            }
+            
+          } else {
+            console.log("no")
+          }
+          
+        }
+      } else {
+
+        console.log("not find the goal")
+      }
+    } else {
+      console.log("not find the chat")
+    }
+    
+    
   });
 
+// bot.on('edited_channel_post', async (ctx) => {
+//     console.log('edited_channel_post')
+//     console.log(ctx)
+    
+//   });
+
+  
   
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);

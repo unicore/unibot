@@ -534,6 +534,36 @@ async function burnNow(bot, ctx, user) {
   }
 }
 
+async function editGoal(bot, ctx, user, goal) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+  
+  let res 
+  let data = {
+        editor: user.eosname,
+        goal_id: goal.id,
+        host: goal.hostname,
+        title: goal.title,
+        description: goal.description,
+        meta: JSON.stringify(goal.meta || {}),
+      }
+
+  return await eos.transact({
+    actions: [{
+      account: 'unicore',
+      name: 'editgoal',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
+      }],
+      data: data,
+    }],
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
+  
+ }
+
 async function createGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   let res 
@@ -652,5 +682,7 @@ module.exports = {
   constructReportMessage,
   constructTaskMessage,
   setTaskPriority,
-  editGoalMsg
+  editGoalMsg,
+  editGoal,
+  fetchGoal
 };
