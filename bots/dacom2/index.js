@@ -1033,7 +1033,7 @@ async function pushEducation(ctx, currentSlideIndex) {
               try {
                 let text = ctx.update.edited_message.text
                 console.log("text on edit1: ", text)
-                let index1 = text.indexOf("\n\n");
+                let index1 = text.indexOf("\n");
 
                 text = text.substr(index1, text.length)
                 console.log("text on edit1: ",  index1, text)
@@ -1041,6 +1041,10 @@ async function pushEducation(ctx, currentSlideIndex) {
 
                 text = text.substr(0, index2)
                 console.log("text on edit1: ",  index2, text)
+
+                index1 = text.indexOf("\n");
+
+                text = text.substr(index1, text.length)
 
                 await editGoal(bot, ctx, editor, {
                   editor: trueGoal.creator,
