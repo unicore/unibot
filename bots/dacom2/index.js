@@ -585,6 +585,9 @@ async function finishEducation(ctx) {
 }
 
 async function pushEducation(ctx, currentSlideIndex) {
+  try{
+
+
   const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
   console.log("SLIDE : ", slide)
   if (!slide) {
@@ -641,6 +644,9 @@ async function pushEducation(ctx, currentSlideIndex) {
         await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       }
     }
+  }
+} catch(e){
+    ctx.reply(`error: ${e.message}`)
   }
 }
 
