@@ -1037,7 +1037,7 @@ async function pushEducation(ctx, currentSlideIndex) {
 
                 text = text.substr(index1 + 1, text.length)
                 console.log("text on edit1: ",  index1, text)
-                let index2 = text.indexOf("\nОдобрена: ");
+                let index2 = text.indexOf("\n\nОдобрена: ");
 
                 text = text.substr(0, index2)
                 console.log("text on edit1: ",  index2, text)
