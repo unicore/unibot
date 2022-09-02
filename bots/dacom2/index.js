@@ -1102,13 +1102,13 @@ async function pushEducation(ctx, currentSlideIndex) {
     // entities: [ { offset: 12, length: 5, type: 'hashtag' } ]
     // console.log("message: ", ctx.update.message, ctx.update.message.chat.type)
     
-    // if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
-    //     user = ctx.update.message.from;
-    //     if (user.id != 777000){
-    //       user.eosname = await generateAccount(bot, ctx, false, user.ref);
-    //       await saveUser(bot.instanceName, user)
-    //     }
-    // }
+    if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
+        user = ctx.update.message.from;
+        
+        user.eosname = await generateAccount(bot, ctx, false, user.ref);
+        await saveUser(bot.instanceName, user)
+      
+    }
 
     if (user) {
 
