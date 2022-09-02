@@ -1033,7 +1033,7 @@ async function pushEducation(ctx, currentSlideIndex) {
               try {
                 let text = ctx.update.edited_message.text
                 console.log("text on edit1: ", text)
-                let index1 = text.indexOf("\n");
+                let index1 = text.indexOf("\n\n");
 
                 text = text.substr(index1, text.length)
                 console.log("text on edit1: ",  index1, text)
