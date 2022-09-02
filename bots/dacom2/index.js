@@ -1049,7 +1049,7 @@ async function pushEducation(ctx, currentSlideIndex) {
                   description: "",
                   meta: {},
                 })
-                console.log("scucss edit")
+                console.log("scucss edit: ", text)
                 
               } catch(e){
                 console.log(e)
