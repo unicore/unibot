@@ -1032,14 +1032,15 @@ async function pushEducation(ctx, currentSlideIndex) {
             if (editor){
               try {
                 let text = ctx.update.edited_message.text
-                
+                console.log("text on edit1: ", text)
                 let index1 = text.indexOf("\n");
 
                 text = text.substr(index1, text.length)
+                console.log("text on edit1: ",  index1, text)
                 let index2 = text.indexOf("\nОдобрена: ");
 
                 text = text.substr(0, index2)
-                                
+                console.log("text on edit1: ",  index2, text)
 
                 await editGoal(bot, ctx, editor, {
                   editor: trueGoal.creator,
