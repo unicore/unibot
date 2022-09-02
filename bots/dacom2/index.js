@@ -1042,10 +1042,7 @@ async function pushEducation(ctx, currentSlideIndex) {
                 text = text.substr(0, index2)
                 console.log("text on edit1: ",  index2, text)
 
-                index1 = text.indexOf("\n");
-
-                text = text.substr(index1, text.length)
-
+                
                 await editGoal(bot, ctx, editor, {
                   editor: trueGoal.creator,
                   id: trueGoal.id,
