@@ -578,7 +578,7 @@ async function finishEducation(ctx) {
     .keyboard(mainButtons, { columns: 2 }).resize();
    
     let t = 'Добро пожаловать в игру.\n';
-    t += "\nПоказать ознакомление: /welcome,\nОтобразить капитализацию союза: /capital,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
+    t += "\nПоказать ознакомление: /welcome,\nОтобразить капитализацию союза: /stat,\nПоказать оборот союза: /helix,\nВаша интеллектуальная собственность: /iam,\nВаш кошелёк: /wallet,\nСовершить взнос: /donate,\nСоздать цель: напишите сообщение с тегом #goal"
 
     await ctx.replyWithHTML(t);
   
@@ -658,7 +658,7 @@ async function pushEducation(ctx, currentSlideIndex) {
     await finishEducation(ctx);
   });
 
-  bot.command("capital", async(ctx) => {
+  bot.command("stat", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
@@ -675,60 +675,40 @@ async function pushEducation(ctx, currentSlideIndex) {
     try{
 
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
-    let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
-    let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+      let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+      let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
+      let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
 
-    // console.log('chats: ', unionChat, goalsChat,goalsChannel )
+      // console.log('chats: ', unionChat, goalsChat,goalsChannel )
 
-    let text = ""
-    text += `Название союза: ${current_chat.unionName}\n`
-    text += `Чат союза: ${unionChat.link}\n`
-    text += `Канал целей союза: ${goalsChannel.link}\n`
-    text += `_______________________________________\n`
-    text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
-    text += `\n\nсообщение будет удалено через 30 секунд.`
-    let reply_to
-    
-    if (ctx.update.message.reply_to_message)
-      reply_to = ctx.update.message.reply_to_message.forward_from_message_id
+      let text = ""
+      text += `Название союза: ${current_chat.unionName}\n`
+      text += `Чат союза: ${unionChat.link}\n`
+      text += `Канал целей союза: ${goalsChannel.link}\n`
+      text += `_______________________________________\n`
+      text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
+      text += `\n\nсообщение будет удалено через 30 секунд.`
+      let reply_to
+      
+      if (ctx.update.message.reply_to_message)
+        reply_to = ctx.update.message.reply_to_message.forward_from_message_id
 
-    console.log(reply_to)
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id
-    
-    setTimeout(
-      () => {
-        ctx.deleteMessage(ctx.update.message.message_id)
-        ctx.deleteMessage(id)
-      },
-      30 * 1000,
-    );
+      console.log(reply_to)
+      let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id
+      
+      setTimeout(
+        () => {
+          ctx.deleteMessage(ctx.update.message.message_id)
+          ctx.deleteMessage(id)
+        },
+        30 * 1000,
+      );
   } catch(e){
     console.log("error on local bot: ", e.message)
   }
   })
 
-
-  bot.command("about", async(ctx) => {
-    await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
-    let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
-    let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-
-    // console.log('chats: ', unionChat, goalsChat,goalsChannel )
-
-    let text = ""
-    text += `Название союза: ${current_chat.unionName}\n`
-    text += `Чат союза: ${unionChat.link}\n`
-    text += `Канал целей союза: ${goalsChannel.link}\n`
-    text += `_______________________________________\n`
-    text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
-    await ctx.reply(text)
-  })
 
   bot.command("iam", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
@@ -1034,7 +1014,7 @@ async function pushEducation(ctx, currentSlideIndex) {
       if (current_chat){
         // console.log(true)
         let goal = await getGoalByChatMessage(bot.instanceName, "core", ctx.update.edited_message.forward_from_message_id)
-        // console.log(goal)
+        console.log(goal)
         if (goal) {
           // console.log("true", true)
           let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
@@ -1045,16 +1025,25 @@ async function pushEducation(ctx, currentSlideIndex) {
             // console.log()
             if (editor){
               try {
+                let text = ctx.update.edited_message.text
+                
+                let index1 = text.indexOf("\n");
+
+                text = text.substr(index1, text.length)
+                let index2 = text.indexOf("\nОдобрена: ");
+
+                text = text.substr(0, index2)
+                                
 
                 await editGoal(bot, ctx, editor, {
                   editor: trueGoal.creator,
                   id: trueGoal.id,
                   hostname: goal.host, 
-                  title: ctx.update.edited_message.text,
+                  title: text,
                   description: "",
                   meta: {},
                 })
-                // console.log("scucss edit")
+                console.log("scucss edit")
                 
               } catch(e){
                 console.log(e)
@@ -1062,7 +1051,7 @@ async function pushEducation(ctx, currentSlideIndex) {
               }
               
             } else {
-              console.log("no")
+              // console.log("no")
             }
             
           }
