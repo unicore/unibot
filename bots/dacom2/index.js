@@ -422,12 +422,12 @@ module.exports.init = async (botModel, bot) => {
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
 
-        let t = 'Добро пожаловать.\n\nЭтот робот обеспечивает регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.\n\n';
+        let t = 'Добро пожаловать.\n\n';
         await ctx.reply(t, menu);
 
 
         //TODO UNCOMMENT IT
-        // await ctx.reply('Инструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        await ctx.reply('\n\nЭтот робот обеспечивает регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   
         
 
@@ -439,16 +439,33 @@ module.exports.init = async (botModel, bot) => {
       let chatId = ctx.message.chat.id
       let userId = ctx.update.message.from.id
 
+      let res = await ctx.getChatAdministrators()
+      console.log(res)
+
+      let res2 = await ctx.getChat()
+      console.log(res2)
+      //добавьте бота админом в этот чат
+      //проверить админ ли бот
+      //проверить админ ли юзер
+      //пожалуйста, создайте канал для целей
+        //только админ
+      //пожалуйста, создайте чат для обсуждений
+        //только админ
+
       // setDiscussionGroup(bot, 659911949, 1713017401, 9184800756685276000)
 
       // createGroupCall(bot, chatId, userId)
-      // ctx.reply("hello world")
+      // const buttons = [];
+      // buttons.push(Markup.button.callback('🆕 ', `createunion`));
+    
+      // let welcome = `Меня зовут Дакомбот. Для создания DAO в этом чате, добавьте меня админом.`
+    
+      // ctx.reply(welcome, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
       // let res = await makeAdmin(bot, chatId, userId)
     
       //dont have any reactions on public chats
     }
   });
-
 
   bot.on('contact', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
