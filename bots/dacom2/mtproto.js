@@ -320,5 +320,6 @@ module.exports = {
   makeAdmin,
   createGroupCall, 
   setDiscussionGroup,
-  exportChatLink
+  exportChatLink,
+  insertUnion
 };

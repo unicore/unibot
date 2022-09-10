@@ -8,7 +8,7 @@ const {
   mainButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
-const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink} = require('./mtproto')
+const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink, insertUnion} = require('./mtproto')
 
 const {
   getHelixParams,
@@ -31,7 +31,7 @@ const {
   exitFromTail,
   goalWithdraw,
   retireAction,
-  getGoalInstructions
+  getGoalInstructions,
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -124,8 +124,8 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 
-async function generateAccount(bot, ctx, isAdminUser, ref) {
-  const user = ctx.update.message.from;
+async function generateAccount(bot, ctx, isAdminUser, ref, userext) {
+  const user = userext || ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
 
@@ -139,7 +139,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   if (!user.ref) user.ref = '';
 
   const params = {
-    tg_id: ctx.update.message.from.id,
+    tg_id: user.id,
     username: user.eosname,
     active_pub: user.pub,
     owner_pub: user.pub,
@@ -439,11 +439,13 @@ module.exports.init = async (botModel, bot) => {
       let chatId = ctx.message.chat.id
       let userId = ctx.update.message.from.id
 
-      let res = await ctx.getChatAdministrators()
-      console.log(res)
+      //TODO запуск WELCOME
+      // let res = await ctx.getChatAdministrators()
+      // console.log(res)
 
       let res2 = await ctx.getChat()
-      console.log(res2)
+      
+      await welcome(bot, ctx)
       //добавьте бота админом в этот чат
       //проверить админ ли бот
       //проверить админ ли юзер
@@ -482,27 +484,9 @@ module.exports.init = async (botModel, bot) => {
   });
 
   async function welcome(bot, ctx){
-
-    let chatId = ctx.message.chat.id
-    let userId = ctx.message.new_chat_member.id
     
-    console.log("chatId: ", chatId, "userId: ", userId)
-    
-    let union = await getUnion(bot.instanceName, chatId)
-    console.log("UNION: ", union, chatId)
-    if (union)
-      if (union.ownerId == userId) {
-        let res = await makeAdmin(bot, chatId, userId)
+    await pushEducation(ctx, 0);
 
-        const id = await sendMessageToUser(bot, { id: chatId }, { text: "Привет админу!" });
-        console.log("make admin: ", res)
-
-      } else {
-        const id = await sendMessageToUser(bot, { id: chatId }, { text: "Привет участнику" });
-      
-      }
-      
-  
   };
 
   bot.on('new_chat_members', async (ctx) => {
@@ -632,7 +616,7 @@ async function pushEducation(ctx, currentSlideIndex) {
     } else {
       buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
       buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`)); 
-      buttons.push(Markup.button.callback('Пропустить ознакомление', `pusheducation ${education.length}`));
+      buttons.push(Markup.button.callback('Создать союз', `startunion`));
     }
 
 
@@ -641,21 +625,17 @@ async function pushEducation(ctx, currentSlideIndex) {
     text += `\n\n${slide.text}`;
     
     if (currentSlideIndex === 0 && slide.img != "") {
-      // eslint-disable-next-line max-len
-      
       if (slide.img.length > 0) {
-        // eslint-disable-next-line max-len
-        // { source: slide.img }
-        // 
         await ctx.replyWithPhoto(slide.img, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
       } else {
         await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       }    
     } else {
-      await ctx.deleteMessage();
-
+      try{
+        await ctx.deleteMessage();  
+      } catch(e){}
+      
       if (slide.img.length > 0) {
-        // eslint-disable-next-line max-len
         await ctx.replyWithPhoto(slide.img, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
       } else {
         await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
@@ -672,10 +652,253 @@ async function pushEducation(ctx, currentSlideIndex) {
     await pushEducation(ctx, currentSlideIndex);
   });
 
+  bot.command('/start_union', async(ctx) => {
+    console.log("on start union", ctx)
+    // await startUnion(bot, ctx)
+  })
+
   bot.command('/welcome', async (ctx) => {
 
     await pushEducation(ctx, 0);
   });
+
+
+
+async function upgradeHost(eos, target_host, host) {
+
+        console.log("TARGET HOST: ", target_host, host)
+
+        return eos.transact({ 
+          actions: [
+          {
+            account: "unicore",
+            name: 'upgrade',
+            authorization: [{
+              actor: target_host,
+              permission: 'active',
+            }],
+            data: host
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        })
+
+}
+
+
+async function setParamsToHost(eos, target_host, host) {
+      console.log("set params", host)
+      return  eos.transact({ 
+          actions: [
+          {
+            account: "unicore",
+            name: 'setparams',
+            authorization: [{
+              actor: target_host,
+              permission: 'active',
+            }],
+            data: host
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        })
+
+}
+
+
+
+async function startHost(eos, target_host, host) {
+      console.log("start host")
+      
+        return eos.transact({ 
+          actions: [
+          {
+            account: "unicore",
+            name: 'start',
+            authorization: [{
+              actor: target_host,
+              permission: 'active',
+            }],
+            data: {
+              host: target_host,
+              chost: target_host
+            }
+          }]
+        }, {
+          blocksBehind: 3,
+          expireSeconds: 30,
+        })
+
+}
+
+
+async function setupHost(bot, ctx, user, chat) {
+    
+    try{
+      console.log("before start")
+      const eos = await bot.uni.getEosPassInstance(user.wif);
+
+      let helix = {
+          host: user.eosname,
+          chost: user.eosname,
+          size_of_pool: 10000,
+          quants_precision: 1000000,
+          overlap: 20000,
+          profit_growth: 10000, 
+          base_rate: 100,
+          loss_percent: 1000000,
+          compensator_percent: 0,
+          pool_limit: 20,
+          pool_timeout: 259200,
+          priority_seconds: 0,
+          
+        }
+
+      let host = {
+          username: user.eosname,
+          platform: user.eosname,
+          title: chat.title,
+          purpose: "",
+          total_shares: 0,
+          quote_amount: "0.0000 FLOWER",
+          root_token: "0.0000 FLOWER",
+          root_token_contract: "eosio.token",
+          consensus_percent: 0,
+          gtop: 0,
+          emission_percent: 0,
+          referral_percent: 250000,
+          dacs_percent: 250000,
+          cfund_percent: 250000,
+          hfund_percent: 250000,
+          quote_token_contract: "eosio.token",
+          voting_only_up: false,
+          levels: [1000000],
+          meta: JSON.stringify({})
+        }
+
+      let upgrade_res = await upgradeHost(eos, user.eosname, host)
+      let setparams_res = await setParamsToHost(eos, user.eosname, helix)
+      let start_res = await startHost(eos, user.eosname, user.eosname)
+    } catch(e){
+      ctx.reply(`ошибка при запуске союза, обратитесь в поддержку с сообщением: ${e.message}`)
+      console.log(e.message)
+    }
+
+}
+
+  async function startUnion(bot, ctx){
+    // console.log("on start Union", ctx)
+    let res = await ctx.getChatAdministrators()
+    // console.log(res)
+    let bot_is_admin = false
+
+    res.map(user => {
+      console.log("user.user.username", user.user.username)
+      console.log("botname: ", bot.getEnv().BOTNAME)
+
+      if (user.user.username == bot.getEnv().BOTNAME){
+
+        bot_is_admin = true
+      }
+    })
+
+    if (!bot_is_admin) {
+      ctx.reply(`Для создания DAO в чате робот @${bot.getEnv().BOTNAME} должен быть назначен администратором.`)
+    } else {
+
+      //CHECK union for exist in current chat
+
+      let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+      console.log("current_union: ", current_chat, ctx.chat.id)
+      if (current_chat){
+        await ctx.reply(`DAO уже активно в этом чате. Инструкция: `)
+      } else {
+        let user = await checkAccountForExist(bot, ctx, ctx.from)
+        console.log("IT IS USER: ", user)
+        //TODO make a host
+        if (user) {
+          let type = "union"
+          let chat = await ctx.getChat()
+          console.log("chat", chat)
+          
+          await insertUnion(bot.instanceName, {
+            ownerId: user.id,
+            ownerEosname: user.eosname, 
+            host: user.eosname,
+            id: chat.id.toString(),
+            type: type + 'Chat', 
+            unionName: chat.title,
+            link: chat.invite_link,
+          })
+
+          await ctx.reply(`Создаём DAO`)
+
+          await ctx.reply(`Сейчас в бч зарегаемся и всё`)
+          try{
+            await setupHost(bot, ctx, user, chat)
+            await ctx.reply(`DAO успешно создано. Инструкция: `)
+    
+          } catch(e){
+            ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку с сообщением: ${e.message}`)
+          }
+
+        } else {
+          ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку.`)
+        }
+        
+      
+      }
+
+      
+      
+      // ctx.reply(`@${bot.getEnv().BOTNAME} готов к запуску DAO. `)
+      
+      // console.log('ctx.from', ctx.from)
+      
+      // let user = await getUser(bot.instanceName, from.id);
+      // console.log('user: ', user)
+      /* Регистрация DAO в бч и бд
+       * Одно DAO = 1 аккаунт
+       * Проверка запускающего пользователя на наличие аккаунта в бч, если нет - создать
+       * 
+      */
+    }
+  }
+
+  async function checkAccountForExist(bot, ctx, from){
+    let user = await getUser(bot.instanceName, from.id);
+    
+    try {
+
+      if (!user) {
+        // await ctx.reply(`Регистрируем аккаунт в блокчейне для администратора`)
+
+        user = from;
+        user.eosname = await generateAccount(bot, ctx, false, "", user);
+
+        await saveUser(bot.instanceName, user)
+        await ctx.deleteMessage()
+        // await ctx.reply(`Регистрация завершена`)
+        return user
+      } else {
+
+        return user
+      }
+
+    } catch(e){
+      ctx.reply(`error: ${e.message}`)
+      console.log(e)
+      return
+    }
+    
+  }
+
+  bot.action('startunion', async(ctx) => {
+    // console.log("on start union", ctx)
+    await startUnion(bot, ctx)
+  })
 
   bot.action('finisheducation', async (ctx) => {
     await finishEducation(ctx);
@@ -690,46 +913,12 @@ async function pushEducation(ctx, currentSlideIndex) {
     else ctx.repy("Пользователь не зарегистрирован")
   })
 
+  async function printAbout(bot, ctx){
+    await ctx.reply(`DAO создано`)
+  }
 
   bot.command("about", async(ctx) => {
-    await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
-    try{
-
-
-      let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-      let unionChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
-      let goalsChat = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChat")
-      let goalsChannel = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-
-      // console.log('chats: ', unionChat, goalsChat,goalsChannel )
-
-      let text = ""
-      text += `Название союза: ${current_chat.unionName}\n`
-      text += `Чат союза: ${unionChat.link}\n`
-      text += `Канал целей союза: ${goalsChannel.link}\n`
-      text += `_______________________________________\n`
-      text += `@dacombot - робот, обеспечивающий регистрацию интеллектуальной собственности при производстве цифровых продуктов в союзах людей.`
-      text += `\n\nсообщение будет удалено через 30 секунд.`
-      let reply_to
-      
-      if (ctx.update.message.reply_to_message)
-        reply_to = ctx.update.message.reply_to_message.forward_from_message_id
-
-      console.log(reply_to)
-      let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id
-      
-      setTimeout(
-        () => {
-          ctx.deleteMessage(ctx.update.message.message_id)
-          ctx.deleteMessage(id)
-        },
-        30 * 1000,
-      );
-  } catch(e){
-    console.log("error on local bot: ", e.message)
-  }
+    printAbout()
   })
 
 
