@@ -183,7 +183,7 @@ async function constructReportMessage(bot, hostname, report, reportId){
 
           text += `#PullRequest ${prData.data.title}\n`;
           text += `+${prData.data.additions} -${prData.data.deletions}\n`;
-          text += `📁${prData.data.changed_files} файлов затронуто\n`;
+          text += `📁 ${prData.data.changed_files} файлов затронуто\n`;
         }
         text += '\n';
       } catch (e) {
