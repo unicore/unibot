@@ -73,7 +73,7 @@ async function disableButtons(bot, ctx, up) {
 
   if (up)
     keyboard[0][0].text = "ожидание"
-  else 
+  else
     keyboard[0][1].text = "ожидание"
   try{
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
@@ -89,7 +89,7 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 
   if (up)
     keyboard[0][0].text = `👍 (${report.voters.length})`
-  else 
+  else
     keyboard[0][1].text = "ожидание"
 
   try{
@@ -110,13 +110,13 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
   let user = await getUserByEosName(bot.instanceName, goal.creator)
   let from = (user.username && user.username != "") ? '@' + user.username : goal.creator
-    
+
   let text = ""
   text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
   text += `${goal.title}\n\n`
   text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
   // text += `Постановщик: ${goal.creator}\n`
-  
+
   let coordinator = ""
 
   if (goal.benefactor != ""){
@@ -124,7 +124,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
     let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
     coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
   }
-  
+
   text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
   text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
   if (parseFloat(goal.available) > 0)
@@ -142,7 +142,7 @@ async function constructTaskMessage(bot, hostname, task, taskId){
 
   let text = ""
   let level = task.priority == (0 || 1) ? "10 $/час" : (task.priority == 2 ? "20 $/час" : "40 $/час")
-  
+
   let user = await getUserByEosName(bot.instanceName, task.creator)
   let from = (user.username && user.username != "") ? '@' + user.username : task.creator
 
@@ -150,7 +150,7 @@ async function constructTaskMessage(bot, hostname, task, taskId){
   text += `#ДЕЙСТВИЕ_${task.id} от ${from}: \n`
   text += `${task.title}\n\n`
   text += `Ставка: ${level}\n`
-  
+
   return text
 }
 
@@ -170,9 +170,30 @@ async function constructReportMessage(bot, hostname, report, reportId){
     let from = (user.username && user.username != "") ? '@' + user.username : report.username
     text += `#ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
+
+    if (bot.octokit) {
+      try {
+        const githubUrl = report.data.match(/https:\/\/github.com\/.*\/pull\/\d+/)
+        if (githubUrl) {
+          const prData = await bot.octokit.pulls.get({
+            owner: githubUrl[0].split('/')[3],
+            repo: githubUrl[0].split('/')[4],
+            pull_number: githubUrl[0].split('/')[6],
+          });
+
+          text += `#PullRequest ${prData.data.title}\n`;
+          text += `+${prData.data.additions} -${prData.data.deletions}\n`;
+          text += `📁${prData.data.changed_files} файлов затронуто\n`;
+        }
+        text += '\n';
+      } catch (e) {
+        console.log('github error', e);
+      }
+    }
+
     text += `Одобрен: ${report.approved == '1' ? "🟢" : "🟡"}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
-    
+
     if (report.approved){
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
@@ -180,26 +201,26 @@ async function constructReportMessage(bot, hostname, report, reportId){
       bonus = parseFloat(bonus).toFixed(2) + " POWER"
     } else {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
-      
+
       // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
       if (report.positive_votes == 0){
         bonus = parseFloat(0).toFixed(2) + " POWER"
       } else {
         bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
       }
-      
+
     }
-    
+
     text += `Подарок: ${report.requested} + ${bonus}\n`
-    
-    // text += `Бонус: 
+
+    // text += `Бонус:
 
     // text += `Постановщик: ${report.creator}\n`
     // text += `Координатор: ${report.benefactor}\n`
-    return text  
+    return text
 
   } else return null
-  
+
 }
 
 async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
@@ -212,7 +233,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   buttons.push(Markup.button.callback(`👎 (${goal.negative_votes} POWER)`, `downvote ${hostname} ${goalId}`));
   buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalId} `));
   // buttons.push(Markup.button.switchToCurrentChat('создать донат', `/donate`));
-                
+
   const keyboard = buttons;
 
   const columnsCount = 2;
@@ -232,16 +253,16 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   // let modified = false
   // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
   // await ctx.
-  // 
+  //
   if (!skip)
     await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
 
   console.log(ctx.update.callback_query.message.reply_to_message)
   let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id
   let chat_id = ctx.update.callback_query.message.reply_to_message.forward_from_chat.id
-  
+
   console.log("message: ", message_id, chat_id)
-  
+
   let new_text = await constructGoalMessage(bot, hostname, goal)
 
   //get message from chat
@@ -258,13 +279,13 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   //     modified = true
   // })
 
-  
+
   // console.log("modified", modified)
 
-  
+
   // console.log(buttons)
-  
-  
+
+
 
 }
 
@@ -273,17 +294,17 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 async function editReportMsg(bot, ctx, user, hostname, reportId) {
   let report = await fetchReport(bot, hostname, reportId);
   let new_text = await constructReportMessage(bot, "core", report)
-  
+
 
 
   let buttons = [];
   buttons.push(Markup.button.callback(`👍 (${report.voters.length})`, `rvote ${hostname} ${reportId}`));
-   
+
   // await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
   console.log(ctx.update)
   let message_id = ctx.update.callback_query.message.message_id
   let chat_id = ctx.update.callback_query.message.chat.id
-  
+
   console.log('1: ', chat_id)
   console.log('2: ', message_id)
   try{
@@ -299,9 +320,9 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 
 
 async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
-  
+
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  
+
     let data = {
           host: hostname,
           task_id: taskId,
@@ -330,13 +351,13 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 
    let message_id = ctx.update.message.reply_to_message.message_id
    let chat_id = ctx.update.message.reply_to_message.chat.id
-   
+
 
   const buttons = [];
-                
+
   buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${taskId} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
   const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-  
+
 
    try{
     await bot.telegram.editMessageText(chat_id, message_id, null, text, request);
@@ -349,8 +370,8 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
   console.log("set Bene")
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  
-  
+
+
     await eos.transact({
       actions: [{
         account: 'unicore',
@@ -375,7 +396,7 @@ async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
    console.log("TEXT:", text)
    let message_id = ctx.update.message.reply_to_message.forward_from_message_id
    let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id
-   
+
    try{
     await bot.telegram.editMessageText(chat_id, message_id, null, text);
   } catch(e){
@@ -387,7 +408,7 @@ async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
 
 async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-    console.log("on VOTE ACTION")  
+    console.log("on VOTE ACTION")
   await disableButtons(bot, ctx, up)
 
   let host = await fetchHost(bot, hostname)
@@ -433,7 +454,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-    
+
     await editReportMsg(bot, ctx, user, hostname, reportId)
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
 
@@ -454,7 +475,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
 
 async function voteAction(bot, ctx, user, hostname, goalId, up) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  
+
   await disableButtons(bot, ctx, up)
 
   console.log("on VOTE ACTION")
@@ -536,8 +557,8 @@ async function burnNow(bot, ctx, user) {
 
 async function editGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  
-  let res 
+
+  let res
   let data = {
         editor: user.eosname,
         goal_id: goal.id,
@@ -561,15 +582,15 @@ async function editGoal(bot, ctx, user, goal) {
     blocksBehind: 3,
     expireSeconds: 30,
   });
-  
+
  }
 
 async function createGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  let res 
+  let res
   if (!user.create_goal)
     user.create_goal = {}
-  
+
   try {
     res = await eos.transact({
       actions: [{
