@@ -662,7 +662,6 @@ async function pushEducation(ctx, currentSlideIndex) {
   });
 
 
-
 async function upgradeHost(eos, target_host, host) {
 
         console.log("TARGET HOST: ", target_host, host)
@@ -1421,7 +1420,31 @@ async function setupHost(bot, ctx, user, chat) {
 
           } else if (tags.length > 0) {
             for (const tag of tags) {
-              if (tag.tag === 'report'){
+              if (tag.tag === 'project'){
+
+                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                if (!current_chat){
+                  ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+                  return
+                }
+
+                if (text.length >= 100){
+                  await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
+                  return
+                } 
+
+                
+                const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей союза" });
+                let goalChatResult = await createChat(bot, user, current_chat.unionName, "goals")
+                await ctx.deleteMessage(id);  
+                
+                const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                await sleep(3000)
+
+                await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
+
+
+              } else if (tag.tag === 'report'){
 
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 if (!current_chat){
