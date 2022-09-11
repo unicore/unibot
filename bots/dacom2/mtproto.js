@@ -317,11 +317,91 @@ async function makeAdmin(bot, chatId, userId, ctx){
 
 }
 
+
+
+async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
+  const client = await connect()
+  
+  // console.log("chatId: ", chatId)
+  // chatId = chatId.substr(4, chatId.length)
+  // (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
+  // console.log("newChatId: ", chatId)
+  // console.log("userId:", userId)
+  // let chat = await ctx.getChatMember({userId: Number(userId)})
+  // console.log(chat)
+  // let chat = await client.invoke(new Api.channels.GetFullChannel({
+  //   channel: chatId,
+  // }));
+  
+  
+  // let newAdmin = chat.users.find(el => parseInt(el.id.value) == userId)
+  // console.log('newAdmin: ', newAdmin)
+  // let result
+  
+  // try{
+  //   if (newAdmin){
+
+  //     // await client.invoke(new Api.messages.EditChatAdmin({
+  //     //     chatId: Math.abs(chatId),
+  //     //     userId: parseInt(newAdmin.id.value),
+  //     //     accessHash: parseInt(newAdmin.accessHash.value),
+  //     //     isAdmin: true
+  //     // }));
+      
+  //     // await client.invoke(new Api.messages.InviteToChannel({
+  //     //     channel: channelId,
+  //     //     users: [parseInt(newAdmin.id.value)],
+  //     //     accessHash: parseInt(newAdmin.accessHash.value),
+  //     //     isAdmin: true
+  //     // }));
+      
+      
+
+
+  //     // await client.invoke(new Api.channels.EditAdmin({
+  //     //   channel: "1619899041",
+  //     //   userId: parseInt(newAdmin.id.value),
+  //     //   accessHash: parseInt(newAdmin.accessHash.value),
+  //     //   adminRights: new Api.ChatAdminRights({
+  //     //       changeInfo: true,
+  //     //       postMessages: true,
+  //     //       editMessages: true,
+  //     //       deleteMessages: true,
+  //     //       banUsers: true,
+  //     //       inviteUsers: true,
+  //     //       pinMessages: true,
+  //     //       addAdmins: true,
+  //     //       anonymous: true,
+  //     //       manageCall: true,
+  //     //       other: true
+  //     //   }),
+  //     //   rank: ''
+  //     // }));
+
+  //     // await client.invoke(new Api.messages.EditChatAdmin({
+  //     //   chatId: Math.abs(1619899041),
+  //     //   userId: parseInt(newAdmin.id.value),
+  //     //   accessHash: parseInt(newAdmin.accessHash.value),
+  //     //   isAdmin: true
+  //     // }));
+
+  //   }
+  // } catch(e){
+  //   result = e
+  //   console.log("error: ", e)
+    
+  // }
+  
+  // return result
+
+}
+
 module.exports = {
   createChat,
   makeAdmin,
   createGroupCall, 
   setDiscussionGroup,
   exportChatLink,
-  insertUnion
+  insertUnion,
+  makeChannelAdmin
 };
