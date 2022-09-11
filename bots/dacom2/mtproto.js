@@ -134,6 +134,7 @@ async function createChat(bot, user, unionName, type) {
     await insertUnion(bot.instanceName, {
       ownerId: user.id,
       ownerEosname: user.eosname, 
+      host: user.eosname,
       id: '-100' + chatId,
       type: type + 'Chat', 
       unionName,
@@ -143,6 +144,7 @@ async function createChat(bot, user, unionName, type) {
     await insertUnion(bot.instanceName, {
       ownerId: user.id,
       ownerEosname: user.eosname, 
+      host: user.eosname,
       id: '-100' + channelId,
       type: type + "Channel", 
       unionName,
