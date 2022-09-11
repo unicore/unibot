@@ -557,13 +557,13 @@ module.exports.init = async (botModel, bot) => {
 
   function cutTags(botInstance, text, tags) {
     let newText = text;
-    // for (const tag of tags) {
-    //   let tmp = `#${tag.tag}`;
-    //   if (tag.id) {
-    //     tmp = `${tmp}_${tag.id}`;
-    //   }
-    //   newText = newText.replace(new RegExp(tmp, 'g'), '');
-    // }
+    for (const tag of tags) {
+      let tmp = `#${tag.tag}`;
+      if (tag.id) {
+        tmp = `${tmp}_${tag.id}`;
+      }
+      newText = newText.replace(new RegExp(tmp, 'g'), '');
+    }
 
     newText = text.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
     return newText.trim();
