@@ -520,7 +520,7 @@ async function getUnion(suffix, chatId) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
-
+    console.log("GET UNION: ", chatId)
     let res = await collection.findOne({
       id: chatId
     });
