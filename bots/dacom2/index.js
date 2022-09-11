@@ -1460,7 +1460,7 @@ async function setupHost(bot, ctx, user, chat) {
 
                     console.log("TEXT: ", text)
                     let [duration, ...data] = text.split(',');
-                    data = data.join(',');
+                    data = data.join(',').trim();
                     duration = duration.replace(/[^0-9]/g, '');
                     duration = Number(duration);
 
