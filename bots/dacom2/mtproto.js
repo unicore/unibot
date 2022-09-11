@@ -2,7 +2,7 @@ const path = require('path');
 
 const { TelegramClient, Api } = require('telegram')
 const { StringSession } = require('telegram/sessions')
-const {insertUnion} = require('./db')
+const {insertUnion, getProjectsCount} = require('./db')
 
 const { createReadStream } = require("fs");
 const { TGCalls, Stream } = require("tgcalls-next");
@@ -31,6 +31,7 @@ async function createChat(bot, user, unionName, type) {
   let channelLink
   let channelTitle
   let chatTitle
+  let projectCount 
 
   if (type == 'union'){
     channelTitle = `Канал союза ${unionName}` 
@@ -44,6 +45,11 @@ async function createChat(bot, user, unionName, type) {
   } else if (type == 'reports'){
     channelTitle = `Канал отчётов союза ${unionName}` 
     chatTitle = `Обсуждение отчётов союза ${unionName}` 
+  } else if (type == 'project'){
+    projectCount = await getProjectsCount(bot.instanceName, user.id)
+    //todo get projects
+    channelTitle = `Проект #${projectCount + 1} ${unionName}` 
+    chatTitle = `Обсуждение проекта #${projectCount + 1} ${unionName}` 
   }
 
 
@@ -139,6 +145,7 @@ async function createChat(bot, user, unionName, type) {
       type: type + 'Chat', 
       unionName,
       link: chatLink,
+      projectCount: projectCount + 1
     })
 
     await insertUnion(bot.instanceName, {
@@ -149,6 +156,7 @@ async function createChat(bot, user, unionName, type) {
       type: type + "Channel", 
       unionName,
       link: channelLink,
+      projectCount: projectCount + 1
     })
     console.log('GOALS CHANNEL: ', result)
 
