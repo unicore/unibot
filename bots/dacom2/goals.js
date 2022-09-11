@@ -126,7 +126,9 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   }
 
   text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
-  text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
+  text += `Голоса: ${goal.positive_votes} POWER`
+
+  // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
   if (parseFloat(goal.available) > 0)
     text += `\nСобрано: ${goal.available}`
   if (parseFloat(goal.withdrawed) > 0)
@@ -293,7 +295,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 
 async function editReportMsg(bot, ctx, user, hostname, reportId) {
   let report = await fetchReport(bot, hostname, reportId);
-  let new_text = await constructReportMessage(bot, "core", report)
+  let new_text = await constructReportMessage(bot, hostname, report)
 
 
 
@@ -602,10 +604,10 @@ async function createGoal(bot, ctx, user, goal) {
         }],
         data: {
           creator: user.eosname,
-          host: goal.hostname || user.create_goal.hostname,
+          host: goal.hostname,
           parent_id: goal.parent_id || 0,
-          title: goal.title || user.create_goal.title,
-          description: goal.description || user.create_goal.description,
+          title: goal.title,
+          description: goal.description,
           target: goal.target || user.create_goal.target || parseFloat(0).toFixed(4) + " FLOWER",
           meta: JSON.stringify(goal.meta || {}),
         },
