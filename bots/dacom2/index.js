@@ -562,10 +562,10 @@ module.exports.init = async (botModel, bot) => {
       if (tag.id) {
         tmp = `${tmp}_${tag.id}`;
       }
-      newText = newText.replace(new RegExp(tmp, 'g'), '');
+      newText = newText.replace(new RegExp(tmp, 'g'), '').replace(/\s\s+/g, ' ');
     }
 
-    newText = text.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
+    newText = newText.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
     return newText.trim();
   }
 
