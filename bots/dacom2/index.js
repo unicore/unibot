@@ -1402,21 +1402,19 @@ async function setupHost(bot, ctx, user, chat) {
                     let task
                     let reply_to
 
-                    console.log("TEXT: ", text) 
-                    var match = text.match(/(.+),(.*)/);
-                    console.log("MATCH: ", match)
+                    console.log("TEXT: ", text)
+                    let [duration, ...data] = text.split(',');
+                    data = data.join(',');
+                    duration = duration.replace(/[^0-9]/g, '');
+                    duration = Number(duration);
 
-                    if (!match || !match[1] || !match[2])
+                    if ((!duration && duration !== 0) || !data)
                     {
                       await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
                       return
                     }
 
-                    let duration = parseInt(match[1])
-                    let data = match[2]
-
                     if (tag.id){
-                    
                       task = await getTaskById(bot.instanceName, "core", tag.id)
                       
                     } else {
