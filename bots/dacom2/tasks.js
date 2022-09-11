@@ -125,8 +125,7 @@ async function createTask(bot, ctx, user, task) {
     });
 
     const cons = res.processed.action_traces[0].console;
-    console.log("CONSOLE: ", cons)
-
+    
     const [, taskId] = cons.split('TASK_ID:');
     console.log("TASKIS: ", taskId)
     // operatorOrder.id = orderId;
