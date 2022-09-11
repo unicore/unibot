@@ -562,10 +562,10 @@ module.exports.init = async (botModel, bot) => {
       if (tag.id) {
         tmp = `${tmp}_${tag.id}`;
       }
-      newText = newText.replace(new RegExp(tmp, 'g'), '');
+      newText = newText.replace(new RegExp(tmp, 'g'), '').replace(/\s\s+/g, ' ');
     }
 
-    newText = text.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
+    newText = newText.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
     return newText.trim();
   }
 
@@ -651,9 +651,9 @@ async function pushEducation(ctx, currentSlideIndex) {
   bot.command('/make_me_admin', async(ctx) => {
     console.log("on start union", ctx)
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-    
+
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, "-1001598098546")
-    
+
   })
 
   bot.command('/welcome', async (ctx) => {
@@ -1038,7 +1038,7 @@ async function setupHost(bot, ctx, user, chat) {
 
     let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
     if (exist){
-      let address 
+      let address
       if (user)
         address = await getAddress(bot, user, ctx, exist.host, exist.id, "USDT.TRC20", "donate", {goal_id: goal.goal_id});
       else ctx.reply("Пользователь не зарегистрирован", {reply_to_message_id: ctx.update.message.message_id})
@@ -1048,7 +1048,7 @@ async function setupHost(bot, ctx, user, chat) {
       }
 
       await ctx.deleteMessage(msg_id)
-    }   
+    }
     
     
   })
@@ -1431,13 +1431,13 @@ async function setupHost(bot, ctx, user, chat) {
                 if (text.length >= 100){
                   await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
                   return
-                } 
+                }
 
-                
+
                 const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей союза" });
                 let goalChatResult = await createChat(bot, user, current_chat.unionName, "goals")
-                await ctx.deleteMessage(id);  
-                
+                await ctx.deleteMessage(id);
+
                 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
                 await sleep(3000)
 
@@ -1458,21 +1458,19 @@ async function setupHost(bot, ctx, user, chat) {
                     let task
                     let reply_to
 
-                    console.log("TEXT: ", text) 
-                    var match = text.match(/(.+),(.*)/);
-                    console.log("MATCH: ", match)
+                    console.log("TEXT: ", text)
+                    let [duration, ...data] = text.split(',');
+                    data = data.join(',');
+                    duration = duration.replace(/[^0-9]/g, '');
+                    duration = Number(duration);
 
-                    if (!match || !match[1] || !match[2])
+                    if ((!duration && duration !== 0) || !data)
                     {
                       await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
                       return
                     }
 
-                    let duration = parseInt(match[1])
-                    let data = match[2]
-
                     if (tag.id){
-                    
                       task = await getTaskById(bot.instanceName, current_chat.host, tag.id)
                       
                     } else {
@@ -1735,10 +1733,10 @@ async function setupHost(bot, ctx, user, chat) {
                   exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
                   if (!exist){
                     exist = await getUnionByType(bot.instanceName, user.eosname, "unionChat")
-                  
+
                     const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей союза" });
                     let goalChatResult = await createChat(bot, user, exist.unionName, "goals")
-                    await ctx.deleteMessage(id);  
+                    await ctx.deleteMessage(id);
                     const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал целей создан: ${goalChatResult.channelLink}` });
                     exist = {id : "-100" + goalChatResult.channelId}
                     const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -1846,7 +1844,7 @@ async function setupHost(bot, ctx, user, chat) {
           } 
           else if (user.state === 'set_withdraw_amount') {
               let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                         
+
               if (!current_chat){
                 await ctx.reply(`Союз не найден`)
                 return
@@ -1927,10 +1925,10 @@ async function setupHost(bot, ctx, user, chat) {
                 const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
                 // ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
                 let instructions = await getGoalInstructions();
-                let iid = (await ctx.reply(instructions, {reply_to_message_id : ctx.message.message_id, ...request})).message_id 
+                let iid = (await ctx.reply(instructions, {reply_to_message_id : ctx.message.message_id, ...request})).message_id
 
                 await insertMessage(bot.instanceName, {id: "bot"}, "goalInstruction", text, iid, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
-  
+
                 await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id)
               
               } else if (union.type == 'reportsChannel'){
