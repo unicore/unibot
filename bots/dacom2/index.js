@@ -538,46 +538,35 @@ module.exports.init = async (botModel, bot) => {
   });
 
 
-  function getHashtags(message){
-    let tags = []
-    let { text } = message;
-    let entities = message.entities
-    
-    if (entities)
-      entities.map(el => {
-        if (el.type == 'hashtag') {
-          tags.push(text.substr(el.offset + 1, el.length).replace(' ', ''))
+  function getHashtags(message) {
+    const { text, entities } = message;
+    const result = [];
+
+    if (entities) {
+      entities.forEach((entity) => {
+        if (entity.type === 'hashtag') {
+          const tag = text.substring(entity.offset + 1, entity.offset + entity.length).replace(/\s/g, '');
+          const [tagHead, id] = tag.split('_');
+          result.push({ tag: tagHead, id });
         }
-      })
+      });
+    }
 
-    let new_tags = []
-    
-    tags.map(tag => {
-      [tag, id] = tag.split('_');
-      new_tags.push({tag, id})
-    })
-    // tags.map(tag => {
-    //   console.log("TAG: ", tag)
-    //   tag = tag
-    //   console.log("TAG_AFTER: ", tag)
-    // })
-
-    return new_tags
-
+    return result;
   }
 
-  function cutTags(bot, text, tags){
-    tags.map(tag => {
-      let tmp
-      if (tag.id)
-        tmp = '#' + tag.tag + '_' + tag.id
-      else tmp = '#' + tag.tag
+  function cutTags(botInstance, text, tags) {
+    let newText = text;
+    for (const tag of tags) {
+      let tmp = `#${tag.tag}`;
+      if (tag.id) {
+        tmp = `${tmp}_${tag.id}`;
+      }
+      newText = newText.replace(new RegExp(tmp, 'g'), '');
+    }
 
-      text = text.replace(tmp, "")
-    })
-
-    text = text.replace('@' + bot.getEnv().BOTNAME, "")
-    return text
+    newText = text.replace(new RegExp(`@${botInstance.getEnv().BOTNAME}`, 'g'), '');
+    return newText.trim();
   }
 
 async function finishEducation(ctx) {
@@ -1302,12 +1291,12 @@ async function setupHost(bot, ctx, user, chat) {
     // await checkForExistBCAccount(bot, ctx);
     console.log(ctx.update)
     let { text } = ctx.update.message;
-    let entities = ctx.update.message.entities
-    
-    let tags = getHashtags(ctx.update.message)
 
-    if (tags.length > 0)
-      text = cutTags(bot, text, tags)
+    const tags = getHashtags(ctx.update.message);
+
+    if (tags.length > 0) {
+      text = cutTags(bot, text, tags);
+    }
 
     console.log("MESSAGE:", ctx.update.message)
     console.log("TAGS:", tags)
@@ -1403,15 +1392,9 @@ async function setupHost(bot, ctx, user, chat) {
             // ctx.reply(JSON.stringify(user.new_cycle))
 
 
-          }
-
-
-            
-
-          else if (tags.length > 0) {
-            for (tag of tags) {
+          } else if (tags.length > 0) {
+            for (const tag of tags) {
               if (tag.tag === 'report'){
-
                 console.log("on report!")
                 if (ctx.update.message.reply_to_message || tag.id){
                   
@@ -1423,7 +1406,7 @@ async function setupHost(bot, ctx, user, chat) {
                     var match = text.match(/(.+),(.*)/);
                     console.log("MATCH: ", match)
 
-                    if (!match || !match[1], !match[2])
+                    if (!match || !match[1] || !match[2])
                     {
                       await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
                       return
@@ -1538,9 +1521,7 @@ async function setupHost(bot, ctx, user, chat) {
                   ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
                 }
 
-              } else if (tag.tag === 'task'){
-
-                
+              } else if (tag.tag === 'task') {
                 // buttons.push(Markup.button.callback('голосовать', ' vote'));
                 
                 // buttons.push(Markup.button.callback('😁', 'vote'));
