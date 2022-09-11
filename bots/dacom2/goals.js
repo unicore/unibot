@@ -173,17 +173,37 @@ async function constructReportMessage(bot, hostname, report, reportId){
 
     if (bot.octokit) {
       try {
-        const githubUrl = report.data.match(/https:\/\/github.com\/.*\/pull\/\d+/)
-        if (githubUrl) {
+        const githubPullRequestUrl = report.data.match(/https:\/\/github.com\/.*\/pull\/\d+/);
+        if (githubPullRequestUrl) {
           const prData = await bot.octokit.pulls.get({
-            owner: githubUrl[0].split('/')[3],
-            repo: githubUrl[0].split('/')[4],
-            pull_number: githubUrl[0].split('/')[6],
+            owner: githubPullRequestUrl[0].split('/')[3],
+            repo: githubPullRequestUrl[0].split('/')[4],
+            pull_number: githubPullRequestUrl[0].split('/')[6],
           });
 
           text += `#PullRequest ${prData.data.title}\n`;
+          text + `В проекте: ${prData.data.base.repo.full_name}\n`;
           text += `+${prData.data.additions} -${prData.data.deletions}\n`;
           text += `📁 ${prData.data.changed_files} файлов затронуто\n`;
+        } else {
+          const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
+          if (githubCommitUrl) {
+            const commitData = await bot.octokit.repos.getCommit({
+              owner: githubCommitUrl[0].split('/')[3],
+              repo: githubCommitUrl[0].split('/')[4],
+              commit_sha: githubCommitUrl[0].split('/')[6],
+            });
+
+            const repoData = await bot.octokit.repos.get({
+              owner: githubCommitUrl[0].split('/')[3],
+              repo: githubCommitUrl[0].split('/')[4],
+            });
+
+            text += `#Commit ${commitData.data.commit.message}\n`;
+            text += `В проекте: ${repoData.data.full_name}\n`;
+            text += `+${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
+            text += `📁 ${commitData.data.files.length} файлов затронуто\n`;
+          }
         }
         text += '\n';
       } catch (e) {
