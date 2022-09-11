@@ -9,7 +9,7 @@ const {
   mainButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
-const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink, insertUnion} = require('./mtproto')
+const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink, makeChannelAdmin, insertUnion} = require('./mtproto')
 
 const {
   getHelixParams,
@@ -659,9 +659,12 @@ async function pushEducation(ctx, currentSlideIndex) {
     await pushEducation(ctx, currentSlideIndex);
   });
 
-  bot.command('/start_union', async(ctx) => {
+  bot.command('/make_me_admin', async(ctx) => {
     console.log("on start union", ctx)
-    // await startUnion(bot, ctx)
+    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    
+    await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, "-1001598098546")
+    
   })
 
   bot.command('/welcome', async (ctx) => {
