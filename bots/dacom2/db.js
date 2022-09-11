@@ -549,6 +549,20 @@ async function getUnionByType(suffix, ownerEosname, type) {
 }
 
 
+async function getProjectsCount(suffix, ownerId) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    let tickets = await collection.find({ownerId, type: 'projectChannel'}).toArray();
+
+    return tickets.length
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 
 async function insertWithdraw(suffix, user, withdraw) {
   try {
@@ -649,5 +663,6 @@ module.exports = {
   getUserByUsername,
   insertWithdraw,
   updateWithdraw,
-  getWithdraw
+  getWithdraw,
+  getProjectsCount
 };
