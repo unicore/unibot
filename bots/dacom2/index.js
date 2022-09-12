@@ -118,7 +118,8 @@ const {
   updateWithdraw,
   getWithdraw,
   getUserByEosName,
-  getChat
+  getChat,
+  getProject
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -1421,12 +1422,10 @@ async function setupHost(bot, ctx, user, chat) {
           } else if (tags.length > 0) {
             for (const tag of tags) {
               if (tag.tag === 'project'){
-                console.log("on project!")
-                if (tags.indexOf('goal') == -1){
-
-                
+                if (tags.indexOf('goal') != -1){
 
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                 
                   if (!current_chat){
                     ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
                     return
@@ -1445,12 +1444,45 @@ async function setupHost(bot, ctx, user, chat) {
 
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
                   let goalChatResult = await createChat(bot, user, current_chat.unionName, "project")
+                  
+                  // host: exist.host,
+                  // title: text,
+                  // goal_id: goal.goalId,
+                  // channel_message_id: goalMessageId,
+                  // channel_id: goalChannelId
+
+
+                  let goal = {
+                    hostname: exist.host,
+                    title: text,
+                    description: "",
+                    target: "0.0000 FLOWER",
+                    parent_id: 0,
+                  }
+
+                  goal.goalId = await createGoal(bot, ctx, user, goal)
+
+                  await insertGoal(bot.instanceName, {
+                    host: exist.host,
+                    title: text,
+                    goal_id: goal.goalId,
+                    channel_message_id: goalMessageId,
+                    channel_id: goalChannelId
+                  })
+
+
+                  await insertProject(bot.instanceName, {
+                    host: current_chat.host,
+                    channelLink: goalChatResult.channelLink,
+                  })
+
                   await ctx.deleteMessage(id);  
                   
                   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
                   await sleep(3000)
 
                   await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
+
 
                 }
 
@@ -1719,9 +1751,9 @@ async function setupHost(bot, ctx, user, chat) {
                 }
 
               } else if (tag.tag === 'goal') {
-                console.log("looking_for: ", ctx.chat.id.toString())
+                // console.log("looking_for: ", ctx.chat.id.toString())
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                console.log("current_chat: ", current_chat)
+                // console.log("current_chat: ", current_chat)
 
                 if (!current_chat) 
                   return
@@ -1729,13 +1761,13 @@ async function setupHost(bot, ctx, user, chat) {
                 
                 // await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
                 let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
-                console.log("AFTER!", exist)
+                // console.log("AFTER!", exist)
 
                 if (exist.type != "unionChat"){
                   ctx.reply("Ошибка! Постановка целей доступна только в главном чате союза. Используйте тег #task в сообщении.", {reply_to_message_id: ctx.message.message_id})
                   return
                 }
-                console.log("goalChannel: ", exist)
+                // console.log("goalChannel: ", exist)
                 
                 exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
                 
@@ -1757,8 +1789,11 @@ async function setupHost(bot, ctx, user, chat) {
                 }
                 
                 let goalChannelId = exist.id
-    
-                console.log("GOAL DETECTED:")
+      
+                let project = tags.find(el => el.tag == 'project')
+                
+
+                // console.log("GOAL DETECTED:")
                 let goal = {
                   hostname: exist.host,
                   title: text,
@@ -1768,7 +1803,7 @@ async function setupHost(bot, ctx, user, chat) {
                 }
 
                 goal.goalId = await createGoal(bot, ctx, user, goal)
-                console.log("goal.goalId: ", goal)
+                // console.log("goal.goalId: ", goal)
 
                 if (!goal.goalId){
                   ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
@@ -1786,13 +1821,13 @@ async function setupHost(bot, ctx, user, chat) {
                 const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
                 // ctx.reply(text_goal, request)
 
-                console.log("goalChannelId: ", goalChannelId)
+                // console.log("goalChannelId: ", goalChannelId)
                 
                 let msg = await constructGoalMessage(bot, exist.host, null, goal.goalId)
                 
                 //TODo редактирование образа цели
                 const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: msg });
-                console.log("goalMessageId: ", goalMessageId)
+                // console.log("goalMessageId: ", goalMessageId)
 
                 await insertGoal(bot.instanceName, {
                   host: exist.host,
@@ -1802,28 +1837,48 @@ async function setupHost(bot, ctx, user, chat) {
                   channel_id: goalChannelId
                 })
 
-                let project = tags.find(el => el.tag == 'project')
-                if (project && project.id) {
+                let t = msg
+
+                let tempChannelId = goalChannelId.replace('-100', '')
+                let projectChannelId
+
+                if (project) {
+                  if (project.id) {
                   
-                  await ctx.reply(`Добавляем цель в проект`)
-                
+                    let pr = await getProject(bot.instanceName, project.id)
+                    if (pr) {
+                    
+                      projectChannelId = pr.id
+                      t += `\n${project.id ? `\nКанал проекта: ${pr.link}` : ''}`
+                      // t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
+                      await ctx.reply(`Добавляем цель в проект`)
+                    
+                    } else {
+                      ctx.reply(`Проект не найден`)
+                    }
+                    
+                    
+                  } else {
+                    ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
+                  }
+
                 } else {
-                  ctx.reply(`ID проекта не найден`)
+                  t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
                 }
 
                 // console.log("goalId", goalId)
-                let tempChannelId = goalChannelId.replace('-100', '')
-                await ctx.deleteMessage(ctx.update.message.message_id)
+                
+                // await ctx.deleteMessage(ctx.update.message.message_id)
 
-                await ctx.reply(`${msg}\n${project.id ? `\nКанал проекта: ${tag.id}` : ''}\nОбсуждение цели: https://t.me/c/${tempChannelId}/${goalMessageId}`) //, {reply_to_message_id : ctx.update.message.message_id}
+                await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
+
+                if (project && project.id) {
+                  const id = await sendMessageToUser(bot, { id:  projectChannelId}, { text: msg });
+                }
 
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
-              } else if (tag === 'action') {
-                
-                console.log("ACTION DETECTED:", tag)
-
-              }
+              } 
             }
 
           }
@@ -1933,7 +1988,7 @@ async function setupHost(bot, ctx, user, chat) {
             if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
 
               const buttons = [];
-              if (union.type == 'goalsChannel'){
+              if (union.type == 'goalsChannel' || 'projectChannel'){
                 let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id)
                 // console.log("ИНСТРУКЦИЯ:Ж ", goal, ctx.update.message)
                 let goalid = goal ? goal.goal_id : null
