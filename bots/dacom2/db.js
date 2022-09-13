@@ -30,6 +30,23 @@ async function saveUser(suffix, user) {
     console.log('error: ', e.message);
   }
 }
+async function saveHost(suffix, host) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomHosts_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+
+    host.created_at = new Date().getTime();
+
+    await collection.updateOne(
+      { eosname: host.eosname },
+      { $set: host },
+      { upsert: true },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
 
 async function getQuiz(suffix, id) {
   try {
@@ -59,25 +76,6 @@ async function getAllQuizzes(suffix) {
   return null;
 }
 
-async function saveHost(suffix, user, env) {
-  try {
-    const db = await loadDB();
-    const hosts = db.collection(`dacomHosts_${suffix}`);
-
-    await hosts.updateOne(
-      { id: user.id },
-      {
-        $set: {
-          eosname: user.eosname,
-          env,
-        },
-      },
-      { upsert: true },
-    );
-  } catch (e) {
-    console.log('error: ', e.message);
-  }
-}
 
 async function saveQuiz(suffix, user, quiz) {
   try {
@@ -694,5 +692,5 @@ module.exports = {
   getWithdraw,
   getProjectsCount,
   getProject,
-  insertProject
+  insertProject,
 };
