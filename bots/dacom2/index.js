@@ -332,7 +332,7 @@ async function nextQuiz(bot, user, ctx) {
     
     //TODO создать чат 
     
-    let chatResult = await createChat(bot, user, unionName, "union")
+    let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
 
     // let goalChatResult = await createChat(bot, user, unionName, "goals")
     
@@ -1578,7 +1578,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
 
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
-                  let goalChatResult = await createChat(bot, user, current_chat.unionName, "project")
+                  let goalChatResult = await createChat(bot, user, current_chat.host, current_chat.unionName, "project")
                   
                   // host: exist.host,
                   // title: text,
@@ -1912,7 +1912,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                     exist = await getUnionByType(bot.instanceName, user.eosname, "unionChat")
 
                     const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей вашего DAO" });
-                    let goalChatResult = await createChat(bot, user, exist.unionName, "goals")
+                    let goalChatResult = await createChat(bot, user, current_chat.host, exist.unionName, "goals")
                     await ctx.deleteMessage(id);
                     const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал целей создан: ${goalChatResult.channelLink}` });
                     exist = {id : "-100" + goalChatResult.channelId, host: exist.host, link: exist.link}
@@ -2058,7 +2058,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
           else if (user.state === 'set_withdraw_amount') {
               let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-              if (!current_chat){
+              if (!current_chat) {
                 await ctx.reply(`Союз не найден`)
                 return
               }
