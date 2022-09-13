@@ -20,7 +20,7 @@ async function connect(){
   return client
 }
 
-async function createChat(bot, user, unionName, type) {
+async function createChat(bot, user, hostname, unionName, type) {
   const client = await connect()
   // await client.sendMessage('me', { message: 'Hello!' });
   // const request = new Api.messages.SendMessage({peer: "me", message: "hello"})
@@ -140,7 +140,7 @@ async function createChat(bot, user, unionName, type) {
     await insertUnion(bot.instanceName, {
       ownerId: user.id,
       ownerEosname: user.eosname, 
-      host: user.eosname,
+      host: hostname,
       id: '-100' + chatId,
       type: type + 'Chat', 
       unionName,
@@ -151,7 +151,7 @@ async function createChat(bot, user, unionName, type) {
     await insertUnion(bot.instanceName, {
       ownerId: user.id,
       ownerEosname: user.eosname, 
-      host: user.eosname,
+      host: hostname,
       id: '-100' + channelId,
       type: type + "Channel", 
       unionName,
