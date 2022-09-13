@@ -447,7 +447,8 @@ async function printHelixStat(bot, user, hostname, ctx) {
 
     text += '\n---------------------------------';
     text += `\nсообщение будет удалено через 30 секунд`;
-    // text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
+    text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
+    text += `\nПоказать помощь: /help`
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
     
@@ -466,7 +467,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
   }
 }
 
-async function printWallet(bot, user, ctx, reply) {
+async function printWallet(bot, user, ctx, hostname) {
   const buttons = [];
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
@@ -494,6 +495,25 @@ async function printWallet(bot, user, ctx, reply) {
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
     const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    let userPower
+    let io
+    let convert_rate
+    let params
+    let totalShares
+    let estimateSysIncome
+
+    if (hostname){
+      params = await getHelixParams(bot, hostname);
+      convert_rate = params.host.sale_shift / 10000
+      totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
+      userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
+      io = await getUserIntelOwn(bot, hostname, user.eosname)
+      estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
+    
+      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
+      
+    }
+
 
     
     // text += '\n---------------------------------';
@@ -506,6 +526,15 @@ async function printWallet(bot, user, ctx, reply) {
     text += `\n| Курс: ${parseFloat(outUsdRate).toFixed(8)} USD / FLOWER`;
     text += `\n| Стоимость: ${(parseFloat(totalBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
     
+    if (hostname) {
+      text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
+      // text += `\n| Взносы: ${0} FLOWER`;
+      text += `\n| Роялти: ${royalty}% от оборота`;
+      text += `\n| Фракции: ${userPower.power} POWER`;
+      text += `\n|\t\t\t\t\tКурс: ${(convert_rate * outUsdRate).toFixed(4)} USD / POWER`;
+      text += `\n|\t\t\t\t\tСтоимость: ${(convert_rate * userPower.power * outUsdRate).toFixed(4)} USD`;
+    }
+
     text += '\n---------------------------------';
     text += `\nСсылка для приглашений: ${link}\n`; //
     // eslint-disable-next-line max-len
@@ -1227,11 +1256,11 @@ async function getWelcome(){
 
 async function getGoalInstructions(){
   let text = ""
-  text += `Совершая действия, участники регистрируют интеллектуальную собственность и получают роялти от оборота союза.`
-  text += `\n/donate - создать взнос и получить фракцию по наилучшему курсу`
-  text += `\n/about - о союзе`
-  text += `\n/set_coordinator @username - установить координатора цели (доступно только архитектору)`
-  text += `\n/withdraw - вывод донатов из цели (доступно только координатору)`
+  text += `Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.`
+  text += `\n\n/donate - создать взнос в цель и получить возможность голосовать за цели (минимальный взнос 10 USDT)`
+  // text += `\n/about - о союзе`
+  // text += `\n/set_coordinator @username - установить координатора цели (доступно только архитектору)`
+  // text += `\n/withdraw - вывод донатов из цели (доступно только координатору)`
   // text += `\nсообщение с тегом #task или кнопка "создать действие" - создаёт действие в рамках цели`
   // text += `\nсообщение с тегом #report как ответ на созданное действие, или кнопка "создать отчёт" - создаёт отчёт для опубликованного ранее действия.`
 
