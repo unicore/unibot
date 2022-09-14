@@ -478,12 +478,13 @@ async function nextQuiz(bot, user, ctx) {
 
     user.state = "chat"
     user.resume_channel_id = id3
-    console.log("TEXT: ", text)
+    console.log("TEXT: ", text)   
+    await saveUser(bot.instanceName, user)  
+    
 
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
-   
-    await saveUser(bot.instanceName, user)  
+
     
     
   }
