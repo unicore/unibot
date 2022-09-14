@@ -260,7 +260,7 @@ async function checkForExistBCAccount(bot, ctx) {
 const quizDefinition = [
   { message: 'Contacts' },
   { message: 'Как вас зовут?' },
-  { message: 'В чём хотели бы развиваться?' },
+  // { message: 'В чём хотели бы развиваться?' },
   { message: 'Расскажите о себе и/или пришлите профиль в любой соцсети' },
 ];
 
@@ -437,12 +437,12 @@ async function nextQuiz(bot, user, ctx) {
   } else {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
-
+    user.state = ""
     let unionName = quiz.answers[1].answer
     let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
     
     let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
-
+    chatResult = {chatLink: "https://google.com", chatId: "-1001618007293"}
     const icomeMenu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
    
@@ -459,22 +459,28 @@ async function nextQuiz(bot, user, ctx) {
 
     const buttons = [];
 
-    // buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
+    buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
     const t = 'Войдите в ваше DAO и получите инструкции:';
     ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
 
     k = 0
-    let text = `${quiz.answers[1].answer}, `
-    text += `${quiz.answers[2].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username}\n`
+    let text = ``
+    //`${quiz.answers[1].answer}, `
+    // text += `${quiz.answers[2].answer}, `
+    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
     
     for (const answer of quiz.answers) {
-      if (k > 2) {
+      if (k > 0) {
         text += `\n${answer.message}`
         text += `\n${answer.answer}\n`
       }
       k++
     }
+
+    let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+
+    await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
+
 
     user.state = "chat"
     user.resume_channel_id = id3
@@ -482,8 +488,6 @@ async function nextQuiz(bot, user, ctx) {
     await saveUser(bot.instanceName, user)  
     
 
-    let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
-    await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
 
     
     
