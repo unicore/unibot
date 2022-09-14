@@ -441,7 +441,7 @@ async function nextQuiz(bot, user, ctx) {
     let unionName = quiz.answers[1].answer
     let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
     
-    // let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
+    let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
 
     const icomeMenu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
@@ -455,7 +455,7 @@ async function nextQuiz(bot, user, ctx) {
     t1 += `\nКапитализация DAO: /stat,`
     t1 += "\nВаш кошелёк: /wallet,"
     
-    // const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
+    const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
 
     const buttons = [];
 
