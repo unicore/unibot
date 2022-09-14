@@ -1074,7 +1074,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
 
     if (user)
-      await printWallet(bot, user, ctx, current_chat.host);
+      await printWallet(bot, user, ctx, current_chat.host || 'core');
     else ctx.repy("Пользователь не зарегистрирован")
   })
 
