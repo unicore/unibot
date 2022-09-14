@@ -1073,9 +1073,13 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
     
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
 
+    if (!current_chat){
+      return ctx.reply(`Союз не найден`)
+    }
+
     if (user)
       await printWallet(bot, user, ctx, current_chat.host || 'core');
-    else ctx.repy("Пользователь не зарегистрирован")
+    else ctx.reply("Пользователь не зарегистрирован")
   })
 
 
