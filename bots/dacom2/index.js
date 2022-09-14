@@ -438,28 +438,11 @@ async function nextQuiz(bot, user, ctx) {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
 
-    // const menu = Markup // , "цели", "действия"
-    //   .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
-
-    // let current_chat = await getUnion(bot.instanceName, (user.eosname).toString())
-
     let unionName = quiz.answers[1].answer
     let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
     
-    //TODO создать чат 
-    
-    let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
+    // let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
 
-    // let goalChatResult = await createChat(bot, user, unionName, "goals")
-    
-    // let goalResult = await createChat(bot, user, unionName, "goals")
-    // console.log("goalResult: ", goalResult)
-
-    // await setDiscussionGroup(bot, parseInt(goalChatResult.chatId), parseInt(goalResult.chatId))    
-    
-    
-    // await sendMessageToUser(bot, {id: chatResult.chatId}, { text: "" }, );
-    
     const icomeMenu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
    
@@ -472,56 +455,34 @@ async function nextQuiz(bot, user, ctx) {
     t1 += `\nКапитализация DAO: /stat,`
     t1 += "\nВаш кошелёк: /wallet,"
     
-    const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
-
-    //Ваша интеллектуальная собственность: /iam,\n
-    
-
-
-    console.log("AFTE RCREATE CHAT", chatResult)
-
-    // await ctx.deleteMessage(id.message_id);
+    // const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
 
     const buttons = [];
 
-    buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
-    // buttons.push(Markup.button.url('🏫 цели', goalResult.channelLink));
-    
-    //
-    // welcome(bot, ctx)
+    // buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
     const t = 'Войдите в ваше DAO и получите инструкции:';
-    // console.log(t)
-
-
     ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
-    // await sendMessageToUser(bot, user, { text: t }, );
-    console.log("FINISH?")
-    //send message to Channel
+
+    k = 0
+    let text = `${quiz.answers[1].answer}, `
+    text += `${quiz.answers[2].answer}, `
+    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username}\n`
+    
+    for (const answer of quiz.answers) {
+      if (k > 2) {
+        text += `\n${answer.message}`
+        text += `\n${answer.answer}\n`
+      }
+      k++
+    }
+
+    user.state = "chat"
+    user.resume_channel_id = id3
+    console.log("TEXT: ", text)
 
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
-    
-    
-    // console.log("HERE3")
-    // const buttons = [];
-    // buttons.push(Markup.button.callback('создать союз', `createunion`));
-    // buttons.push(Markup.button.callback('список союзов', `listunion`));
-    // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
-    // Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-        
-
-
-    // let text = ''
-    // text += `Имя организатора: ${quiz.answers[1].answer}, @${user.username}\n`
-    // text += `Название: ${quiz.answers[2].answer}\n`
-    // text += `Назначение: ${quiz.answers[3].answer}\n`
-    // text += `Токен: ${quiz.answers[4].answer}`
-    // let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
-    // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');    
-    // user.state = "chat"
-    // user.resume_channel_id = id
-
-    
+   
     await saveUser(bot.instanceName, user)  
     
     

@@ -404,7 +404,7 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
-          t
+          
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
@@ -440,7 +440,7 @@ module.exports.init = async (botModel, bot) => {
           // console.log("\n\non here2")
           if (user.state === 'chat') {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text || "empty" }, {reply_to_message_id : user.resume_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text || "" }, {reply_to_message_id : user.resume_chat_id});
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
