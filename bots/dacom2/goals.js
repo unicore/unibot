@@ -103,38 +103,42 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 async function constructGoalMessage(bot, hostname, goal, goalId){
   if (!goal && goalId)
     goal = await fetchGoal(bot, hostname, goalId);
-  console.log("GOAL MATCH2: ", goal.id)
+  
+  if (goal){
+    console.log("GOAL MATCH2: ", goal.id)
 
-  let host = await fetchHost(bot, hostname)
-  let total_shares = host.total_shares
-  console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
-  let user = await getUserByEosName(bot.instanceName, goal.creator)
-  let from = (user.username && user.username != "") ? '@' + user.username : goal.creator
+    let host = await fetchHost(bot, hostname)
+    let total_shares = host.total_shares
+    console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
+    let user = await getUserByEosName(bot.instanceName, goal.creator)
+    let from = (user.username && user.username != "") ? '@' + user.username : goal.creator
 
-  let text = ""
-  text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
-  text += `${goal.title}\n\n`
-  text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
-  // text += `Постановщик: ${goal.creator}\n`
+    let text = ""
+    text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
+    text += `${goal.title}\n\n`
+    text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
+    // text += `Постановщик: ${goal.creator}\n`
 
-  let coordinator = ""
+    let coordinator = ""
 
-  if (goal.benefactor != ""){
+    if (goal.benefactor != ""){
 
-    let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
-    coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
-  }
+      let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
+      coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
+    }
 
-  text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
-  text += `Голоса: ${goal.positive_votes} POWER`
+    text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
+    text += `Голоса: ${goal.positive_votes} POWER`
 
-  // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
-  if (parseFloat(goal.available) > 0)
-    text += `\nСобрано: ${goal.available}`
-  if (parseFloat(goal.withdrawed) > 0)
-    text += `\nПолучено: ${goal.withdrawed}`
+    // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
+    if (parseFloat(goal.available) > 0)
+      text += `\nСобрано: ${goal.available}`
+    if (parseFloat(goal.withdrawed) > 0)
+      text += `\nПолучено: ${goal.withdrawed}`
 
-  return text
+    return text
+  } else return ""
+  
 }
 
 

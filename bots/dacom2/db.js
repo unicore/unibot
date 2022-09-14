@@ -551,7 +551,7 @@ async function insertProject(suffix, project){
     const db = await loadDB();
     const collection = db.collection(`dacomProjects_${suffix}`);
 
-    let res = await collection.insertOne(withdraw);
+    let res = await collection.insertOne(project);
 
 
   } catch (e) {

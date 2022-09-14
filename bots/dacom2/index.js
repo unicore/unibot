@@ -121,12 +121,12 @@ const {
   getWithdraw,
   getUserByEosName,
   getChat,
-  getProject
+  getProject,
+  insertProject
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
-
 
 
 async function generateHost(bot, ctx, host) {
@@ -185,6 +185,8 @@ async function generateHost(bot, ctx, host) {
   })
 
 }
+
+
 
 async function generateAccount(bot, ctx, isAdminUser, ref, userext) {
   const user = userext || ctx.update.message.from;
@@ -256,12 +258,119 @@ async function checkForExistBCAccount(bot, ctx) {
 
 
 const quizDefinition = [
-  { message: 'start' },
-  // { message: 'Как к вам обращаться?' },
-  { message: 'Введите название союза:' },  
-  // { message: 'Введите цель вашего союза:' },  
-  // { message: 'Введите токен бота вашего союза:' },  
+  { message: 'Contacts' },
+  { message: 'Как вас зовут?' },
+  { message: 'В чём хотели бы развиваться?' },
+  { message: 'Расскажите о себе и/или пришлите профиль в любой соцсети' },
 ];
+
+
+async function welcome(bot, ctx){
+    
+    await pushEducation(bot, ctx, 0);
+
+};
+
+
+async function pushEducation(bot, ctx, currentSlideIndex) {
+  try{
+
+    console.log("ctx: ", ctx)
+
+  const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
+  console.log("SLIDE : ", slide)
+  if (!slide) {
+    try {
+      // await ctx.editMessageText('Ознакомление завершено');
+      await ctx.deleteMessage()
+    } catch (e) {
+      console.error(e);
+    }
+
+    await finishEducation(ctx);
+  } else {
+    if (currentSlideIndex === 0) {
+      const incomeMenu = Markup
+        .removeKeyboard();
+
+      // await ctx.reply('Ознакомление запущено', incomeMenu, { reply_markup: { remove_keyboard: true } });
+    }
+
+    const buttons = [];
+    let id 
+    try {
+      id = ctx.update.callback_query.message.chat.id
+    } catch(e){
+      id = ctx.update.message.chat.id 
+    }
+    
+    let current_chat = await getUnion(bot.instanceName, (id).toString())
+    
+    
+    if (currentSlideIndex + 1 === education.length){
+      // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
+      // buttons.push(Markup.button.callback('C начала', `pusheducation 0`)); 
+      // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
+      // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
+      // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
+      
+
+      if (!current_chat)  
+        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
+      
+      
+    } else {
+      // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
+      // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
+      // buttons.push(Markup.button.url('Условия', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
+      // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
+      // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`)); 
+      
+      if (!current_chat)  
+        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
+    }
+
+
+
+    let text = '';
+    text += `Создать DAO.`// [${currentSlideIndex + 1} / ${education.length}]`
+    
+
+    text += `\n\n${slide.text}`;
+    
+    if (currentSlideIndex === 0 && slide.img != "") {
+      if (slide.img.length > 0) {
+        
+        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+      
+      } else {
+
+        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+
+      }    
+    } else {
+
+      try{
+
+        await ctx.deleteMessage();  
+
+      } catch(e){}
+      
+      if (slide.img.length > 0) {
+        console.log("HERE3!")
+        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+      } else {
+        console.log("HERE4!")
+        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+      }
+    }
+  }
+} catch(e){
+    console.log(e)
+    ctx.reply(`error 2: ${e.message}`)
+  }
+}
+
 
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
@@ -283,6 +392,11 @@ async function startQuiz(bot, ctx, user) {
   
   // await ctx.reply('Как можно к вам обращаться?');
 
+  await insertMessage(bot.instanceName, user, user.id, 'Получил вопросы');
+
+  const buttons = [Markup.button.contactRequest('Поделиться контактом')];
+  const request = Markup.keyboard(buttons, { columns: 1 }).resize();
+  return ctx.reply('Я ваш проводник в DAO Коллективного Разума.\n\nПожалуйста, поделитесь номером телефона для продолжения знакомства.', request);
 
   // startQuiz()
   // return ctx.reply('', request);
@@ -311,11 +425,12 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
+
       await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
     } else {
-      // const clearMenu = Markup.removeKeyboard();
+      const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message);//, clearMenu, { reply_markup: { remove_keyboard: true } }
+      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });//, clearMenu, 
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -326,9 +441,10 @@ async function nextQuiz(bot, user, ctx) {
     // const menu = Markup // , "цели", "действия"
     //   .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
 
-    
+    // let current_chat = await getUnion(bot.instanceName, (user.eosname).toString())
+
     let unionName = quiz.answers[1].answer
-    let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем союз для вас. ")
+    let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
     
     //TODO создать чат 
     
@@ -341,24 +457,50 @@ async function nextQuiz(bot, user, ctx) {
 
     // await setDiscussionGroup(bot, parseInt(goalChatResult.chatId), parseInt(goalResult.chatId))    
     
+    
+    // await sendMessageToUser(bot, {id: chatResult.chatId}, { text: "" }, );
+    
+    const icomeMenu = Markup
+      .keyboard(mainButtons, { columns: 2 }).resize();
+   
+    let t1 = '';
+    t1 += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
+    
+    t1 += `\nПоказать это сообщение: /help,`
+    // t += `\nСоздать проект: напишите сообщение с тегом #project`
+    // t += `\nСовершить взнос: /donate,`
+    t1 += `\nКапитализация DAO: /stat,`
+    t1 += "\nВаш кошелёк: /wallet,"
+    
+    const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
+
+    //Ваша интеллектуальная собственность: /iam,\n
+    
+
+
     console.log("AFTE RCREATE CHAT", chatResult)
 
-    await ctx.deleteMessage(id.message_id);
+    // await ctx.deleteMessage(id.message_id);
 
     const buttons = [];
 
     buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
     // buttons.push(Markup.button.url('🏫 цели', goalResult.channelLink));
     
-
-    const t = 'Союз создан. Пожалуйста, войдите в союз и завершите настройку.';
+    //
+    // welcome(bot, ctx)
+    const t = 'Войдите в ваше DAO и получите инструкции:';
     // console.log(t)
+
 
     ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
     // await sendMessageToUser(bot, user, { text: t }, );
     console.log("FINISH?")
     //send message to Channel
 
+    let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+    await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
+    
     
     // console.log("HERE3")
     // const buttons = [];
@@ -481,7 +623,7 @@ module.exports.init = async (botModel, bot) => {
           .keyboard(mainButtons, { columns: 2 }).resize();
 
       
-        buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
+        // buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
         const clearMenu = Markup.removeKeyboard();
         
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
@@ -491,11 +633,12 @@ module.exports.init = async (botModel, bot) => {
 
 
         let t = 'Добро пожаловать.\n\n';
-        await ctx.reply(t, menu);
+        await ctx.reply(t, clearMenu);
 
+        await startQuiz(bot, ctx, user);
 
         //TODO UNCOMMENT IT
-        await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   
         
 
@@ -514,25 +657,7 @@ module.exports.init = async (botModel, bot) => {
       // let res2 = await ctx.getChat()
       
       await welcome(bot, ctx)
-      //добавьте бота админом в этот чат
-      //проверить админ ли бот
-      //проверить админ ли юзер
-      //пожалуйста, создайте канал для целей
-        //только админ
-      //пожалуйста, создайте чат для обсуждений
-        //только админ
-
-      // setDiscussionGroup(bot, 659911949, 1713017401, 9184800756685276000)
-
-      // createGroupCall(bot, chatId, userId)
-      // const buttons = [];
-      // buttons.push(Markup.button.callback('🆕 ', `createunion`));
-    
-      // let welcome = `Меня зовут Дакомбот. Для создания DAO в этом чате, добавьте меня админом.`
-    
-      // ctx.reply(welcome, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
-      // let res = await makeAdmin(bot, chatId, userId)
-    
+     
       //dont have any reactions on public chats
     }
   });
@@ -550,12 +675,6 @@ module.exports.init = async (botModel, bot) => {
     await saveQuiz(bot.instanceName, user, quiz);
     await nextQuiz(bot, user, ctx);
   });
-
-  async function welcome(bot, ctx){
-    
-    await pushEducation(ctx, 0);
-
-  };
 
   bot.on('new_chat_members', async (ctx) => {
     console.log("welcome")
@@ -630,7 +749,7 @@ module.exports.init = async (botModel, bot) => {
     return newText.trim();
   }
 
-async function finishEducation(ctx) {
+async function finishEducation(ctx, id) {
     
     const icomeMenu = Markup
     .keyboard(mainButtons, { columns: 2 }).resize();
@@ -644,114 +763,21 @@ async function finishEducation(ctx) {
     t += `\nКапитализация DAO: /stat,`
     t += "\nВаш кошелёк: /wallet,"
     
-    
+    if (id){
+      
+      const id = await sendMessageToUser(bot, { id }, { text:t });
+
+    } else {
+      await ctx.replyWithHTML(t);  
+    }
     //Ваша интеллектуальная собственность: /iam,\n
-    await ctx.replyWithHTML(t);
+    
   
-}
-
-async function pushEducation(ctx, currentSlideIndex) {
-  try{
-
-    console.log("ctx: ", ctx)
-
-  const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
-  console.log("SLIDE : ", slide)
-  if (!slide) {
-    try {
-      // await ctx.editMessageText('Ознакомление завершено');
-      await ctx.deleteMessage()
-    } catch (e) {
-      console.error(e);
-    }
-
-    await finishEducation(ctx);
-  } else {
-    if (currentSlideIndex === 0) {
-      const incomeMenu = Markup
-        .removeKeyboard();
-
-      // await ctx.reply('Ознакомление запущено', incomeMenu, { reply_markup: { remove_keyboard: true } });
-    }
-
-    const buttons = [];
-    let id 
-    try {
-      id = ctx.update.callback_query.message.chat.id
-    } catch(e){
-      id = ctx.update.message.chat.id 
-    }
-    
-    let current_chat = await getUnion(bot.instanceName, (id).toString())
-    
-    
-    if (currentSlideIndex + 1 === education.length){
-      // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      // buttons.push(Markup.button.callback('C начала', `pusheducation 0`)); 
-      // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
-      // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
-      // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
-      
-
-      if (!current_chat)  
-        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
-      
-      
-    } else {
-      // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
-      // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
-      // buttons.push(Markup.button.url('Условия', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
-      // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`)); 
-      
-      if (!current_chat)  
-        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
-    }
-
-
-
-    let text = '';
-    text += `Создать DAO.`// [${currentSlideIndex + 1} / ${education.length}]`
-    
-
-    text += `\n\n${slide.text}`;
-    
-    if (currentSlideIndex === 0 && slide.img != "") {
-      if (slide.img.length > 0) {
-        
-        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
-      
-      } else {
-
-        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
-      }    
-    } else {
-
-      try{
-
-        await ctx.deleteMessage();  
-
-      } catch(e){}
-      
-      if (slide.img.length > 0) {
-        console.log("HERE3!")
-        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
-      } else {
-        console.log("HERE4!")
-        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-      }
-    }
-  }
-} catch(e){
-    console.log(e)
-    ctx.reply(`error 2: ${e.message}`)
-  }
 }
 
   bot.action(/pusheducation (\w+)/gi, async (ctx) => {
     const currentSlideIndex = Number(ctx.match[1]);
-    await pushEducation(ctx, currentSlideIndex);
+    await pushEducation(bot, ctx, currentSlideIndex);
   });
 
   bot.command('/make_me_admin', async(ctx) => {
@@ -764,18 +790,19 @@ async function pushEducation(ctx, currentSlideIndex) {
 
   bot.command('/welcome', async (ctx) => {
     finishEducation(ctx)
-    // await pushEducation(ctx, 0);
+    // await pushEducation(bot, ctx, 0);
   });
 
   bot.command('/help', async (ctx) => {
     finishEducation(ctx)
-    // await pushEducation(ctx, 0);
+    // await pushEducation(bot, ctx, 0);
   });
 
 
   bot.command(`/create_union`, async (ctx) => {
 
     await startUnion(bot, ctx)
+
   })
 
 
@@ -904,7 +931,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 }
 
   async function startUnion(bot, ctx){
-    // console.log("on start Union", ctx)
+    console.log("on start Union", ctx)
+
     let res = await ctx.getChatAdministrators()
     // console.log(res)
     let bot_is_admin = false
@@ -1557,7 +1585,10 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
           } else if (tags.length > 0) {
             for (const tag of tags) {
               if (tag.tag === 'project'){
-                if (tags.indexOf('goal') != -1){
+                
+                let gexist = tags.find(el => el.tag == 'goal')
+                
+                if (!gexist) {
 
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                  
@@ -1576,19 +1607,12 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                     return
                   } 
 
-
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
                   let goalChatResult = await createChat(bot, user, current_chat.host, current_chat.unionName, "project")
                   
-                  // host: exist.host,
-                  // title: text,
-                  // goal_id: goal.goalId,
-                  // channel_message_id: goalMessageId,
-                  // channel_id: goalChannelId
-
 
                   let goal = {
-                    hostname: exist.host,
+                    hostname: current_chat.host,
                     title: text,
                     description: "",
                     target: "0.0000 FLOWER",
@@ -1598,11 +1622,12 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   goal.goalId = await createGoal(bot, ctx, user, goal)
 
                   await insertGoal(bot.instanceName, {
-                    host: exist.host,
+                    host: current_chat.host,
                     title: text,
                     goal_id: goal.goalId,
-                    channel_message_id: goalMessageId,
-                    channel_id: goalChannelId
+                    type: 'project',
+                    // channel_message_id: goalMessageId,
+                    channel_id: goalChatResult.channelId
                   })
 
 
@@ -1619,6 +1644,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
 
 
+                } else {
+                  console.log("NOT INSIDE!", tags.indexOf('goal') == -1)
                 }
 
               } else if (tag.tag === 'report'){
@@ -1924,20 +1951,28 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 }
                 
                 let goalChannelId = exist.id
-      
                 let project = tags.find(el => el.tag == 'project')
-                
+                let pr 
+                let projectChannelId
+
+                let msg
+
+                let hostname = pr ? pr.host : exist.host
 
                 // console.log("GOAL DETECTED:")
                 let goal = {
-                  hostname: exist.host,
+                  hostname: hostname,
                   title: text,
                   description: "",
                   target: "0.0000 FLOWER",
                   parent_id: 0,
                 }
+
                 console.log("goal.goalId: ", goal)
                 goal.goalId = await createGoal(bot, ctx, user, goal)
+                
+                
+
                 
 
                 if (!goal.goalId){
@@ -1958,49 +1993,56 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 // console.log("goalChannelId: ", goalChannelId)
                 
-                let msg = await constructGoalMessage(bot, exist.host, null, goal.goalId)
+                let t = msg
+
+                if (project) {
+                  if (project.id) {
+                  
+                    pr = await getProject(bot.instanceName, project.id)
+                    if (pr) {
+                    
+                      projectChannelId = pr.id
+                      t = await constructGoalMessage(bot, pr.host, null, goal.goalId)
+                      t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
+                      // t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
+                      await ctx.reply(`Добавляем цель в проект`)
+                      
+                      
+                    } else {
+                      await ctx.reply(`Проект не найден`)
+                    }
+                    
+                    
+                  } else {
+                    await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
+                  }
+
+                } else {
+                  t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
+                      
+                  gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
+                }
+
                 
                 //TODo редактирование образа цели
-                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: msg });
+                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: t });
                 // console.log("goalMessageId: ", goalMessageId)
 
                 await insertGoal(bot.instanceName, {
-                  host: exist.host,
+                  host: hostname,
                   title: text,
                   goal_id: goal.goalId,
                   channel_message_id: goalMessageId,
                   channel_id: goalChannelId
                 })
 
-                let t = msg
+                
 
                 let tempChannelId = goalChannelId.replace('-100', '')
-                let projectChannelId
+                
+                
 
-                if (project) {
-                  if (project.id) {
-                  
-                    let pr = await getProject(bot.instanceName, project.id)
-                    if (pr) {
-                    
-                      projectChannelId = pr.id
-                      t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
-                      // t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
-                      await ctx.reply(`Добавляем цель в проект`)
-                    
-                    } else {
-                      ctx.reply(`Проект не найден`)
-                    }
-                    
-                    
-                  } else {
-                    ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
-                  }
-
-                } else {
-                  gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
-                }
 
                 // console.log("goalId", goalId)
                 
@@ -2008,8 +2050,16 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
 
-                if (project && project.id) {
-                  const id = await sendMessageToUser(bot, { id:  projectChannelId}, { text: msg });
+                if (project && project.id && pr) {
+                  const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: msg });
+                  
+                  await insertGoal(bot.instanceName, {
+                    host: pr.host,
+                    title: text,
+                    goal_id: goal.goalId,
+                    channel_message_id: projectMessageId,
+                    channel_id: projectChannelId
+                  })
                 }
 
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
@@ -2127,6 +2177,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
               if (union.type == 'goalsChannel' || 'projectChannel'){
                 let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id)
                 // console.log("ИНСТРУКЦИЯ:Ж ", goal, ctx.update.message)
+                
                 let goalid = goal ? goal.goal_id : null
 
                 buttons.push(Markup.button.callback('👍', `upvote ${union.host} ${goalid}`));
