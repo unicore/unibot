@@ -1988,8 +1988,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   }
 
                 } else {
+                  console.log("GOAL -> ", goal)
                   t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
-                      
+                  console.log(t)
                   gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
                   t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
                 }
