@@ -622,7 +622,7 @@ module.exports.init = async (botModel, bot) => {
 
       // let res2 = await ctx.getChat()
       
-      await welcome(bot, ctx)
+      // await welcome(bot, ctx)
      
       //dont have any reactions on public chats
     }
@@ -753,6 +753,12 @@ async function finishEducation(ctx, id) {
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, "-1001598098546")
 
   })
+
+
+  bot.command('/create_dao', async (ctx) => {
+    // finishEducation(ctx)
+    await pushEducation(bot, ctx, 0);
+  });
 
   bot.command('/welcome', async (ctx) => {
     finishEducation(ctx)
@@ -1963,42 +1969,51 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 // console.log("goalChannelId: ", goalChannelId)
                 
-                let t = msg
+                let t
+                let text_to_channel
 
                 if (project) {
                   if (project.id) {
-                  
                     pr = await getProject(bot.instanceName, project.id)
+
                     if (pr) {
-                    
                       projectChannelId = pr.id
                       t = await constructGoalMessage(bot, pr.host, null, goal.goalId)
+                      text_to_channel = t
                       t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
                       // t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
                       await ctx.reply(`Добавляем цель в проект`)
                       
+                      const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
                       
+                      await insertGoal(bot.instanceName, {
+                        host: pr.host,
+                        title: text,
+                        goal_id: goal.goalId,
+                        channel_message_id: projectMessageId,
+                        channel_id: projectChannelId
+                      })
                     } else {
                       await ctx.reply(`Проект не найден`)
                     }
-                    
-                    
                   } else {
                     await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
                   }
 
                 } else {
-                  console.log("GOAL -> ", goal)
-                  t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
-                  console.log(t)
+                  t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
+                      
                   gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  text_to_channel = t
                   t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
+
                 }
 
                 
                 //TODo редактирование образа цели
-                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: t });
+                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: text_to_channel });
                 // console.log("goalMessageId: ", goalMessageId)
+
 
                 await insertGoal(bot.instanceName, {
                   host: hostname,
@@ -2006,6 +2021,20 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   goal_id: goal.goalId,
                   channel_message_id: goalMessageId,
                   channel_id: goalChannelId
+                })
+
+
+                //SEND to global goal channel
+                console.log("text_to_channel: ", text_to_channel, t)
+                const globalGoalMessageId = await sendMessageToUser(bot, {id: bot.getEnv().GOALS_CHANNEL_ID}, { text: text_to_channel || t });
+
+
+                await insertGoal(bot.instanceName, {
+                  host: hostname,
+                  title: text,
+                  goal_id: goal.goalId,
+                  channel_message_id: globalGoalMessageId,
+                  channel_id: bot.getEnv().GOALS_CHANNEL_ID
                 })
 
                 
@@ -2019,22 +2048,19 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 
                 // await ctx.deleteMessage(ctx.update.message.message_id)
 
-                await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
-
-                if (project && project.id && pr) {
-                  const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: msg });
-                  
-                  await insertGoal(bot.instanceName, {
-                    host: pr.host,
-                    title: text,
-                    goal_id: goal.goalId,
-                    channel_message_id: projectMessageId,
-                    channel_id: projectChannelId
-                  })
-                }
-
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
+
+                // console.log("project", projectChannelId, project, pr)
+                
+
+                    
+                if (project && project.id) {
+                  
+                }
+
+                await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
+                
               } 
             }
 
@@ -2141,6 +2167,13 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
           console.log("___________________________")
           console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
           
+          if (ctx.update.message.forward_from_chat.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
+            union = {
+              type: 'goalsChannel',
+              host: 'core',
+              id: bot.getEnv().GOALS_CHANNEL_ID
+            }
+
           if (union){ //если словили пересылку из прикрепленного канала
             if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
 
