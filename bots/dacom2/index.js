@@ -1583,62 +1583,62 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
             for (const tag of tags) {
               if (tag.tag === 'project'){
                 
-                let gexist = tags.find(el => el.tag == 'goal')
+                // let gexist = tags.find(el => el.tag == 'goal')
                 
-                if (!gexist) {
+                // if (!gexist) {
 
-                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                //   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                  
-                  if (!current_chat){
-                    ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
-                    return
-                  }
+                //   if (!current_chat){
+                //     ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+                //     return
+                //   }
 
-                  if (current_chat.ownerId != user.id){
-                    await ctx.reply(`Только организатор союза может создавать проекты сейчас.`)
-                    return
-                  }
+                //   if (current_chat.ownerId != user.id){
+                //     await ctx.reply(`Только организатор союза может создавать проекты сейчас.`)
+                //     return
+                //   }
 
-                  if (text.length >= 100){
-                    await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
-                    return
-                  } 
+                //   if (text.length >= 100){
+                //     await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
+                //     return
+                //   } 
 
-                  const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
-                  let goalChatResult = await createChat(bot, user, current_chat.host, current_chat.unionName, "project")
+                //   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
+                //   let goalChatResult = await createChat(bot, user, current_chat.host, current_chat.unionName, "project")
                   
 
-                  let goal = {
-                    hostname: current_chat.host,
-                    title: text,
-                    description: "",
-                    target: "0.0000 FLOWER",
-                    parent_id: 0,
-                  }
+                //   let goal = {
+                //     hostname: current_chat.host,
+                //     title: text,
+                //     description: "",
+                //     target: "0.0000 FLOWER",
+                //     parent_id: 0,
+                //   }
 
-                  goal.goalId = await createGoal(bot, ctx, user, goal)
+                //   goal.goalId = await createGoal(bot, ctx, user, goal)
 
-                  await insertGoal(bot.instanceName, {
-                    host: current_chat.host,
-                    title: text,
-                    goal_id: goal.goalId,
-                    type: 'project',
-                    // channel_message_id: goalMessageId,
-                    channel_id: goalChatResult.channelId
-                  })
+                //   await insertGoal(bot.instanceName, {
+                //     host: current_chat.host,
+                //     title: text,
+                //     goal_id: goal.goalId,
+                //     type: 'project',
+                //     // channel_message_id: goalMessageId,
+                //     channel_id: goalChatResult.channelId
+                //   })
 
 
-                  await insertProject(bot.instanceName, {
-                    host: current_chat.host,
-                    channelLink: goalChatResult.channelLink,
-                  })
+                //   await insertProject(bot.instanceName, {
+                //     host: current_chat.host,
+                //     channelLink: goalChatResult.channelLink,
+                //   })
 
-                  await ctx.deleteMessage(id);  
+                //   await ctx.deleteMessage(id);  
                   
-                  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-                  await sleep(3000)
+                //   const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                //   await sleep(3000)
 
-                  await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
+                //   await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
 
 
                 } else {
