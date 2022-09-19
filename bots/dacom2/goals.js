@@ -19,7 +19,9 @@ async function fetchHost(bot, hostname) {
   return hosts[0]
 }
 async function fetchGoal(bot, hostname, goalId) {
+  console.log("fetchGoal: ", hostname, goalId)
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals', goalId, goalId, 1);
+  console.log("result: ", goals)
   return goals[0]
 }
 
