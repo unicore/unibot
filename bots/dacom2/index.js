@@ -2014,6 +2014,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                     if (pr) {
                       projectChannelId = pr.id
+                      console.log("construct0: ", pr.host)
+                
                       t = await constructGoalMessage(bot, pr.host, null, goal.goalId)
                       text_to_channel = t
                       t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
@@ -2037,6 +2039,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   }
 
                 } else {
+                  console.log("construct1: ", current_chat.host)
                   t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
                       
                   gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
@@ -2046,7 +2049,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 }
 
                 let tttttt = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
-                console.log("TTT:", tttttt, current_chat.host, goal.goalId, goal)
+                console.log("construct2: ", current_chat.host)
+                
                 //TODo редактирование образа цели
                 const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: tttttt });
                 // console.log("goalMessageId: ", goalMessageId)
