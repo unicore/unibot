@@ -2190,16 +2190,17 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
           try{
             union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
           } catch(e){}
-          
+
           console.log("___________________________")
           // console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
           
-          if (union.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
-            union = {
-              type: 'goalsChannel',
-              host: 'core',
-              id: bot.getEnv().GOALS_CHANNEL_ID
-            }
+          if (union)
+            if (union.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
+              union = {
+                type: 'goalsChannel',
+                host: 'core',
+                id: bot.getEnv().GOALS_CHANNEL_ID
+              }
 
           if (union){ //если словили пересылку из прикрепленного канала
             if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
