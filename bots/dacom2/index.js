@@ -1605,7 +1605,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   } 
 
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
-                  let goalChatResult = await createChat(bot, user, current_chat.host, current_chat.unionName, "project")
+                  let goalChatResult = await createChat(bot, user, current_chat.host, text, "project")
                   
 
                   let goal = {
