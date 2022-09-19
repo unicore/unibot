@@ -1981,7 +1981,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 console.log("goal.goalId: ", goal)
                 goal.goalId = await createGoal(bot, ctx, user, goal)
-                
+                const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
                 await sleep(1000) //waiting until trx will included to block
                 
 
