@@ -767,7 +767,7 @@ async function finishEducation(ctx, id) {
       console.log(projects)
       let text = ""
       
-      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID)
+      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString())
       
 
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
