@@ -2079,8 +2079,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 if (project && project.id) {
                   
                 }
-
-                await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
+                
+                if (t)
+                  await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
                 
               } 
             }
@@ -2124,37 +2125,37 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
             // 
           } 
           else if (user.state === 'set_withdraw_amount') {
-            
-              // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-              // if (!current_chat) {
-              //   await ctx.reply(`Союз не найден`)
-              //   return
-              // }
+              let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-              // const helix = await getHelixParams(bot, exist.host);
+              if (!current_chat) {
+                await ctx.reply(`Союз не найден`)
+                return
+              }
 
-              // let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
-              // const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
+              const helix = await getHelixParams(bot, exist.host);
+
+              let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+              const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
               
 
-              // if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+              if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
               
-              // else if (parseFloat(min) > parseFloat(amount)){
+              else if (parseFloat(min) > parseFloat(amount)){
                 
-              //   ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+                ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
               
-              // } else {
+              } else {
 
-              //   user.state = "set_withdraw_address"
-              //   user.on_withdraw = {
-              //     amount
-              //   }
-              //   await saveUser(bot.instanceName, user);
+                user.state = "set_withdraw_address"
+                user.on_withdraw = {
+                  amount
+                }
+                await saveUser(bot.instanceName, user);
 
-              //   ctx.reply("Введите адрес для получения USDT.TRC20: ")
+                ctx.reply("Введите адрес для получения USDT.TRC20: ")
 
-              // }
+              }
 
 
             } 
