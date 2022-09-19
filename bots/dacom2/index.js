@@ -1978,9 +1978,11 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   parent_id: 0,
                 }
 
+
                 console.log("goal.goalId: ", goal)
                 goal.goalId = await createGoal(bot, ctx, user, goal)
                 
+                await sleep(1000) //waiting until trx will included to block
                 
 
                 
