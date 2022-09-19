@@ -2186,11 +2186,15 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
       }
     } else {
       if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
-          let union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
-          console.log("___________________________")
-          console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
+          let union 
+          try{
+            union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
+          } catch(e){}
           
-          if (ctx.update.message.forward_from_chat.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
+          console.log("___________________________")
+          // console.log("UNION: ", union, ctx.update.message.sender_chat.id, ctx.update.message.forward_from_chat.id)
+          
+          if (union.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
             union = {
               type: 'goalsChannel',
               host: 'core',
