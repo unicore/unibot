@@ -1641,9 +1641,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 //   await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
 
 
-                } else {
-                  console.log("NOT INSIDE!", tags.indexOf('goal') == -1)
-                }
+                // } else {
+                //   console.log("NOT INSIDE!", tags.indexOf('goal') == -1)
+                // }
 
               } else if (tag.tag === 'report'){
 
