@@ -574,6 +574,22 @@ async function getProjectsCount(suffix, ownerId) {
 }
 
 
+async function getProjects(suffix, ownerId) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    let projects = await collection.find({ownerId, type: 'projectChannel'}).toArray();
+
+    return projects
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+
 async function getProject(suffix, number) {
   try {
 
@@ -692,5 +708,6 @@ module.exports = {
   getWithdraw,
   getProjectsCount,
   getProject,
+  getProjects,
   insertProject,
 };

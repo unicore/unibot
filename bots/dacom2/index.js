@@ -33,6 +33,7 @@ const {
   goalWithdraw,
   retireAction,
   getGoalInstructions,
+  printProjects
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -122,7 +123,8 @@ const {
   getUserByEosName,
   getChat,
   getProject,
-  insertProject
+  insertProject,
+  getProjects
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -754,6 +756,22 @@ async function finishEducation(ctx, id) {
 
   })
 
+  bot.command('/list', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    console.log('current_chat: ', current_chat)
+    let projects = await getProjects(bot.instanceName, user.id)
+    console.log(projects)
+    let text = `Проекты DAO ${current_chat.unionName}:\n`
+
+    for (const project of projects) {
+      text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>`
+    }
+
+    await ctx.replyWithHTML(text)
+
+  });
 
   bot.command('/create_dao', async (ctx) => {
     // finishEducation(ctx)

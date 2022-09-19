@@ -8,6 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
+  getProjects
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -1181,6 +1182,10 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
   }
 }
 
+async function printProjects(bot, ctx) {
+  
+}
+
 async function exitTailAction(bot, hostname, user, tailid) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
@@ -1292,5 +1297,6 @@ module.exports = {
   printHelixStat,
   goalWithdraw,
   retireAction,
-  getGoalInstructions
+  getGoalInstructions,
+  printProjects
 };
