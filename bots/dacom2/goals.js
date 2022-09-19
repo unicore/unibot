@@ -104,6 +104,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   if (!goal && goalId)
     goal = await fetchGoal(bot, hostname, goalId);
   
+  console.log("GOAL ON FETHC: ", goal, hostname, goalId)
   if (goal){
     console.log("GOAL MATCH2: ", goal.id)
 

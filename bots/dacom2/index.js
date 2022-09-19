@@ -2044,7 +2044,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 }
 
                 let tttttt = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
-                
+                console.log("TTT:", tttttt, current_chat.host, goal.goalId, goal)
                 //TODo редактирование образа цели
                 const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: tttttt });
                 // console.log("goalMessageId: ", goalMessageId)
