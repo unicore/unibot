@@ -1967,7 +1967,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 let msg
 
-                let hostname = pr ? pr.host : exist.host
+                let hostname = pr ? pr.host : current_chat.host
 
                 // console.log("GOAL DETECTED:")
                 let goal = {
@@ -1981,8 +1981,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 console.log("goal.goalId: ", goal)
                 goal.goalId = await createGoal(bot, ctx, user, goal)
-                const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-                await sleep(1000) //waiting until trx will included to block
+                // const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                // await sleep(1000) //waiting until trx will included to block
                 
 
                 
