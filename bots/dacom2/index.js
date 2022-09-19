@@ -2042,12 +2042,22 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 } else {
                   console.log("construct1: ", current_chat.host)
                   t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
+                  console.log("current_chat2: ", current_chat)
+                  let gc1 = await getUnionByHostType(bot, current_chat.host, "goalsChannel")  
+                  console.log(gc1)
+                  // gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+
+                  // const globalGoalMessageId = await sendMessageToUser(bot, {id: bot.getEnv().GOALS_CHANNEL_ID}, { text: text_to_channel || t });
+                  let gchat = await getUnion(bot.instanceName, (bot.getEnv().GOALS_CHANNEL_ID).toString())
+
                   
-                  // let gc1 = await getUnionByHostType(bot, current_chat.host, "goalsChannel")  
-                  gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  
+
                   text_to_channel = t
-                  t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
+                  if (gchat)
+                    t += `\n\nЦели КР: ${gchat.link}`
+                  
+                  if (current_chat)
+                    t += `\n\nОбсуждение: ${current_chat.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
 
                 }
 
