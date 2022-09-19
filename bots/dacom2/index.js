@@ -764,8 +764,13 @@ async function finishEducation(ctx, id) {
       console.log('current_chat: ', current_chat)
       let projects = await getProjects(bot.instanceName, user.id)
       console.log(projects)
-      let text = `Проекты DAO ${current_chat.unionName}:\n`
+      let text = ""
+      let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      if (exist)
+        text += `Цели DAO: ${exist.link}`
+      text += `Проекты DAO ${current_chat.unionName}:\n`
 
+      
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
       }
