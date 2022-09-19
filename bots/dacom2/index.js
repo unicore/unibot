@@ -109,6 +109,7 @@ const {
   getUnion,
   getUnionByType,
   insertGoal,
+  getUnionByHostType,
   addMainChatMessageToGoal,
   getGoalByChatMessage,
   insertTask,
@@ -2041,8 +2042,10 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 } else {
                   console.log("construct1: ", current_chat.host)
                   t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
-                      
+                  
+                  // let gc1 = await getUnionByHostType(bot, current_chat.host, "goalsChannel")  
                   gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  
                   text_to_channel = t
                   t += `\n\nОбсуждение: ${gc.link}` // https://t.me/c/${tempChannelId}/${goalMessageId}
 

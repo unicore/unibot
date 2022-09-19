@@ -546,6 +546,24 @@ async function getUnionByType(suffix, ownerEosname, type) {
   }
 }
 
+
+// eslint-disable-next-line camelcase
+async function getUnionByHostType(suffix, host, type) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    let res = await collection.findOne({
+      host,
+      type
+    });
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
 async function insertProject(suffix, project){
   try {
     const db = await loadDB();
@@ -710,4 +728,5 @@ module.exports = {
   getProject,
   getProjects,
   insertProject,
+  getUnionByHostType
 };
