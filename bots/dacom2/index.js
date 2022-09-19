@@ -2060,7 +2060,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
 
                 //SEND to global goal channel
-                console.log("text_to_channel: ", text_to_channel, t)
+                console.log("text_to_channel: ", text_to_channel, t, tttttt)
                 const globalGoalMessageId = await sendMessageToUser(bot, {id: bot.getEnv().GOALS_CHANNEL_ID}, { text: text_to_channel || t });
 
 
