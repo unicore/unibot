@@ -748,7 +748,7 @@ async function finishEducation(ctx, id) {
     await pushEducation(bot, ctx, currentSlideIndex);
   });
 
-  bot.command('/make_me_admin', async(ctx) => {
+  bot.command('make_me_admin', async(ctx) => {
     console.log("on start union", ctx)
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
@@ -756,7 +756,7 @@ async function finishEducation(ctx, id) {
 
   })
 
-  bot.command('/list', async (ctx) => {
+  bot.command('list', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
@@ -776,23 +776,23 @@ async function finishEducation(ctx, id) {
     }
   });
 
-  bot.command('/create_dao', async (ctx) => {
+  bot.command('create_dao', async (ctx) => {
     // finishEducation(ctx)
     await pushEducation(bot, ctx, 0);
   });
 
-  bot.command('/welcome', async (ctx) => {
+  bot.command('welcome', async (ctx) => {
     finishEducation(ctx)
     // await pushEducation(bot, ctx, 0);
   });
 
-  bot.command('/help', async (ctx) => {
+  bot.command('help', async (ctx) => {
     finishEducation(ctx)
     // await pushEducation(bot, ctx, 0);
   });
 
 
-  bot.command(`/create_union`, async (ctx) => {
+  bot.command(`create_union`, async (ctx) => {
 
     await startUnion(bot, ctx)
 
@@ -2079,7 +2079,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 if (project && project.id) {
                   
                 }
-                
+
                 if (t)
                   await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
                 
