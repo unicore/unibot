@@ -767,7 +767,7 @@ async function finishEducation(ctx, id) {
       let text = `Проекты DAO ${current_chat.unionName}:\n`
 
       for (const project of projects) {
-        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>`
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
       }
 
       await ctx.replyWithHTML(text)
