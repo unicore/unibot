@@ -767,8 +767,9 @@ async function finishEducation(ctx, id) {
       console.log(projects)
       let text = ""
       
+
       let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString())
-      
+      console.log(bot.getEnv().GOALS_CHANNEL_ID.toString(), gl)
 
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
       if (gl)
@@ -2042,9 +2043,10 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                 }
 
+                let tttttt = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
                 
                 //TODo редактирование образа цели
-                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: text_to_channel });
+                const goalMessageId = await sendMessageToUser(bot, {id: goalChannelId}, { text: tttttt });
                 // console.log("goalMessageId: ", goalMessageId)
 
 
@@ -2070,22 +2072,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   channel_id: bot.getEnv().GOALS_CHANNEL_ID
                 })
 
-                
-
-                let tempChannelId = goalChannelId.replace('-100', '')
-                
-                
-
-
-                // console.log("goalId", goalId)
-                
-                // await ctx.deleteMessage(ctx.update.message.message_id)
-
+               
                 await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
-
-
-                // console.log("project", projectChannelId, project, pr)
-                
 
                     
                 if (project && project.id) {
