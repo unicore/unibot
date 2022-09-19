@@ -760,17 +760,20 @@ async function finishEducation(ctx, id) {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-    console.log('current_chat: ', current_chat)
-    let projects = await getProjects(bot.instanceName, user.id)
-    console.log(projects)
-    let text = `Проекты DAO ${current_chat.unionName}:\n`
+    if (current_chat){
+      console.log('current_chat: ', current_chat)
+      let projects = await getProjects(bot.instanceName, user.id)
+      console.log(projects)
+      let text = `Проекты DAO ${current_chat.unionName}:\n`
 
-    for (const project of projects) {
-      text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>`
+      for (const project of projects) {
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>`
+      }
+
+      await ctx.replyWithHTML(text)
+    } else {
+      console.log('LiST current chat is not found')
     }
-
-    await ctx.replyWithHTML(text)
-
   });
 
   bot.command('/create_dao', async (ctx) => {
@@ -2121,36 +2124,37 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
             // 
           } 
           else if (user.state === 'set_withdraw_amount') {
-              let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+            
+              // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-              if (!current_chat) {
-                await ctx.reply(`Союз не найден`)
-                return
-              }
+              // if (!current_chat) {
+              //   await ctx.reply(`Союз не найден`)
+              //   return
+              // }
 
-              const helix = await getHelixParams(bot, exist.host);
+              // const helix = await getHelixParams(bot, exist.host);
 
-              let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
-              const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
+              // let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+              // const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
               
 
-              if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+              // if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
               
-              else if (parseFloat(min) > parseFloat(amount)){
+              // else if (parseFloat(min) > parseFloat(amount)){
                 
-                ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+              //   ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
               
-              } else {
+              // } else {
 
-                user.state = "set_withdraw_address"
-                user.on_withdraw = {
-                  amount
-                }
-                await saveUser(bot.instanceName, user);
+              //   user.state = "set_withdraw_address"
+              //   user.on_withdraw = {
+              //     amount
+              //   }
+              //   await saveUser(bot.instanceName, user);
 
-                ctx.reply("Введите адрес для получения USDT.TRC20: ")
+              //   ctx.reply("Введите адрес для получения USDT.TRC20: ")
 
-              }
+              // }
 
 
             } 
