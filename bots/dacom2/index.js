@@ -767,7 +767,7 @@ async function finishEducation(ctx, id) {
       let text = ""
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
       if (exist)
-        text += `Цели DAO: ${exist.link}`
+        text += `Цели DAO: ${exist.link}\n`
       text += `Проекты DAO ${current_chat.unionName}:\n`
 
       
