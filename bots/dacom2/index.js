@@ -760,12 +760,19 @@ async function finishEducation(ctx, id) {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    
     if (current_chat){
       console.log('current_chat: ', current_chat)
       let projects = await getProjects(bot.instanceName, user.id)
       console.log(projects)
       let text = ""
+      
+      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID)
+      
+
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      if (gl)
+        text += `Канал целей Коллективного Разума: ${gl.link}\n`
       if (exist)
         text += `Цели DAO: ${exist.link}\n`
       text += `Проекты DAO ${current_chat.unionName}:\n`
