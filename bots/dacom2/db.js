@@ -577,12 +577,12 @@ async function insertProject(suffix, project){
   }
 }
 
-async function getProjectsCount(suffix, ownerId) {
+async function getProjectsCount(suffix) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let tickets = await collection.find({ownerId, type: 'projectChannel'}).toArray();
+    let tickets = await collection.find({type: 'projectChannel'}).toArray();
 
     return tickets.length
 
@@ -592,12 +592,12 @@ async function getProjectsCount(suffix, ownerId) {
 }
 
 
-async function getProjects(suffix, ownerId) {
+async function getProjects(suffix) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({ownerId, type: 'projectChannel'}).toArray();
+    let projects = await collection.find({type: 'projectChannel'}).toArray();
 
     return projects
 
