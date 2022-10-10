@@ -125,7 +125,8 @@ const {
   getChat,
   getProject,
   insertProject,
-  getProjects
+  getProjects,
+  getMyProjects
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -798,7 +799,7 @@ async function finishEducation(ctx, id) {
     
     if (current_chat){
       console.log('current_chat: ', current_chat)
-      let projects = await getProjects(bot.instanceName, current_chat.hostname)
+      let projects = await getMyProjects(bot.instanceName, current_chat.hostname)
       console.log(projects)
       let text = ""
       
@@ -807,10 +808,8 @@ async function finishEducation(ctx, id) {
       console.log(bot.getEnv().GOALS_CHANNEL_ID.toString(), gl)
 
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-      if (gl)
-        text += `Канал целей Коллективного Разума: ${gl.link}\n`
       if (exist)
-        text += `Цели DAO: ${exist.link}\n`
+        text += `Канал целей DAO: ${exist.link}\n`
       text += `Проекты DAO ${current_chat.unionName}:\n`
 
       

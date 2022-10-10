@@ -592,12 +592,27 @@ async function getProjectsCount(suffix) {
 }
 
 
-async function getProjects(suffix, host) {
+async function getProjects(suffix) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
     let projects = await collection.find({type: 'projectChannel'}).toArray();
+
+    return projects
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function getMyProjects(suffix, host) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    let projects = await collection.find({type: 'projectChannel', host}).toArray();
 
     return projects
 
@@ -727,6 +742,7 @@ module.exports = {
   getProjectsCount,
   getProject,
   getProjects,
+  getMyProjects,
   insertProject,
   getUnionByHostType
 };
