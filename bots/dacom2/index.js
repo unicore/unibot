@@ -632,7 +632,7 @@ module.exports.init = async (botModel, bot) => {
       await ctx.reply(t, clearMenu);
 
      
-     
+
       //TODO запуск WELCOME
       // let res = await ctx.getChatAdministrators()
       // console.log(res)
@@ -2134,25 +2134,26 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
 
                 //SEND to global goal channel
-                console.log("text_to_channel: ", text_to_channel, t, tttttt)
-                const globalGoalMessageId = await sendMessageToUser(bot, {id: bot.getEnv().GOALS_CHANNEL_ID}, { text: text_to_channel || t });
+                
+                let globalGoalMessageId
 
+                if (user.is_private == false){
 
-                await insertGoal(bot.instanceName, {
-                  host: hostname,
-                  title: text,
-                  goal_id: goal.goalId,
-                  channel_message_id: globalGoalMessageId,
-                  channel_id: bot.getEnv().GOALS_CHANNEL_ID
-                })
-
-               
-                await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
-
-                    
-                if (project && project.id) {
+                  globalGoalMessageId = await sendMessageToUser(bot, {id: bot.getEnv().GOALS_CHANNEL_ID}, { text: text_to_channel || t });
                   
+                  await insertGoal(bot.instanceName, {
+                    host: hostname,
+                    title: text,
+                    goal_id: goal.goalId,
+                    channel_message_id: globalGoalMessageId,
+                    channel_id: bot.getEnv().GOALS_CHANNEL_ID
+                  })
+
+
                 }
+
+ 
+                await insertMessage(bot.instanceName, user, user.id, text, goalMessageId, 'goal', {goalId: goal.goalId, chatId: goalChannelId});
 
                 if (t)
                   await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
