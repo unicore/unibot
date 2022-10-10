@@ -620,6 +620,19 @@ module.exports.init = async (botModel, bot) => {
       let chatId = ctx.message.chat.id
       let userId = ctx.update.message.from.id
 
+      const clearMenu = Markup.removeKeyboard();
+        
+      // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
+      // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
+
+      // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
+
+
+      let t = 'Добро пожаловать.\n\n';
+      await ctx.reply(t, clearMenu);
+
+     
+     
       //TODO запуск WELCOME
       // let res = await ctx.getChatAdministrators()
       // console.log(res)
