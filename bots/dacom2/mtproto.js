@@ -20,7 +20,10 @@ async function connect(){
   return client
 }
 
-async function createChat(bot, user, hostname, unionName, type) {
+async function createChat(bot, user, hostname, unionName, type, is_private) {
+  if (!is_private)
+    is_private = false
+  
   const client = await connect()
   // await client.sendMessage('me', { message: 'Hello!' });
   // const request = new Api.messages.SendMessage({peer: "me", message: "hello"})
@@ -145,7 +148,8 @@ async function createChat(bot, user, hostname, unionName, type) {
       type: type + 'Chat', 
       unionName,
       link: chatLink,
-      projectCount: projectCount + 1
+      projectCount: projectCount + 1,
+      is_private
     })
 
     await insertUnion(bot.instanceName, {
@@ -156,7 +160,8 @@ async function createChat(bot, user, hostname, unionName, type) {
       type: type + "Channel", 
       unionName,
       link: channelLink,
-      projectCount: projectCount + 1
+      projectCount: projectCount + 1,
+      is_private
     })
     console.log('GOALS CHANNEL: ', result)
 

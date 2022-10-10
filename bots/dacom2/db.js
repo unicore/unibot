@@ -597,7 +597,7 @@ async function getProjects(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel'}).toArray();
+    let projects = await collection.find({type: 'projectChannel', is_private: false}).toArray();
 
     return projects
 

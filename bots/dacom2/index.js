@@ -797,10 +797,8 @@ async function finishEducation(ctx, id) {
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
     
-    if (current_chat){
-      console.log('current_chat: ', current_chat)
-      let projects = await getMyProjects(bot.instanceName, current_chat.hostname)
-      console.log(projects)
+    if (current_chat) {
+      let projects = await getMyProjects(bot.instanceName, current_chat.host)
       let text = ""
       
 
@@ -809,8 +807,8 @@ async function finishEducation(ctx, id) {
 
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
       if (exist)
-        text += `Канал целей DAO: ${exist.link}\n`
-      text += `Проекты DAO ${current_chat.unionName}:\n`
+        text += `Канал целей ${exist.link}\n`
+      text += `Проекты ${current_chat.unionName}:\n`
 
       
       for (const project of projects) {
@@ -822,6 +820,17 @@ async function finishEducation(ctx, id) {
       console.log('LiST current chat is not found')
     }
   });
+
+
+  bot.command('make_new_projects_private', async (ctx) => {
+    // finishEducation(ctx)
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    user.is_private = true
+
+    await saveUser(bot.instanceName, user)
+    await ctx.reply('Теперь все новые проекты в этом DAO будут доступны только в этом DAO.')
+  });
+
 
   bot.command('create_dao', async (ctx) => {
     // finishEducation(ctx)
@@ -1652,7 +1661,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   } 
 
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
-                  let goalChatResult = await createChat(bot, user, current_chat.host, text, "project")
+                  let goalChatResult = await createChat(bot, user, current_chat.host, text, "project", user.is_private)
                   
 
                   let goal = {
