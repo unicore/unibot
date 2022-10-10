@@ -592,12 +592,12 @@ async function getProjectsCount(suffix) {
 }
 
 
-async function getProjects(suffix) {
+async function getProjects(suffix, host) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel'}).toArray();
+    let projects = await collection.find({type: 'projectChannel', host}).toArray();
 
     return projects
 

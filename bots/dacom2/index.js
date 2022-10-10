@@ -764,7 +764,41 @@ async function finishEducation(ctx, id) {
     
     if (current_chat){
       console.log('current_chat: ', current_chat)
-      let projects = await getProjects(bot.instanceName, user.id)
+      let projects = await getProjects(bot.instanceName)
+      console.log(projects)
+      let text = ""
+      
+
+      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString())
+      console.log(bot.getEnv().GOALS_CHANNEL_ID.toString(), gl)
+
+      let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      if (gl)
+        text += `Канал целей Коллективного Разума: ${gl.link}\n`
+      if (exist)
+        text += `Цели DAO: ${exist.link}\n`
+      text += `Проекты DAO ${current_chat.unionName}:\n`
+
+      
+      for (const project of projects) {
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
+      }
+
+      await ctx.replyWithHTML(text)
+    } else {
+      console.log('LiST current chat is not found')
+    }
+  });
+
+
+  bot.command('projects', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    
+    if (current_chat){
+      console.log('current_chat: ', current_chat)
+      let projects = await getProjects(bot.instanceName, current_chat.hostname)
       console.log(projects)
       let text = ""
       
