@@ -1272,7 +1272,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
     // console.log("donate", ctx.update.message.reply_to_message)
     // console.log(goal)
 
-    let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+    // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "unionChat")
+    let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "unionChat")  
+
     if (exist){
       let address
       if (user)
@@ -1763,8 +1765,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                     if (!task){
 
-                      exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  
+                      // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                      exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+
                       ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие. Канал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
                   
                     } else {
@@ -1843,8 +1846,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 } else {
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 
-                  exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  
+                  // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+
                   ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
                 }
 
@@ -1979,8 +1983,8 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 } else {
                   // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 
-                  exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  
+                  // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
                 
                   ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
                 }
@@ -2004,13 +2008,13 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 }
                 // console.log("goalChannel: ", exist)
                 
-                exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                
+                exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+      
                 if (!exist){
-                  exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
+                  exist = await getUnionByHostType(bot.instanceName, current_chat.host, "unionChannel")  
                   if (!exist){
-                    exist = await getUnionByType(bot.instanceName, user.eosname, "unionChat")
-
+                    exist = await getUnionByHostType(bot.instanceName, current_chat.host, "unionChat")  
+                
                     const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для целей вашего DAO" });
                     let goalChatResult = await createChat(bot, user, current_chat.host, exist.unionName, "goals")
                     await ctx.deleteMessage(id);
