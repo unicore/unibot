@@ -790,12 +790,12 @@ async function finishEducation(ctx, id) {
       if (gl)
         text += `Канал целей Коллективного Разума: ${gl.link}\n`
       if (exist)
-        text += `Цели DAO: ${exist.link}\n`
-      text += `Проекты DAO ${current_chat.unionName}:\n`
+        text += `Цели DAO: ${exist.link} | ${exist.host}\n`
+      text += `Проекты DAO ${current_chat.unionName} | ${exist.host}:\n`
 
       
       for (const project of projects) {
-        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName} (${project.host})</a>\n`
       }
 
       await ctx.replyWithHTML(text)
@@ -821,12 +821,13 @@ async function finishEducation(ctx, id) {
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
       if (exist)
         text += `Канал целей ${exist.link}\n`
-      text += `Проекты ${current_chat.unionName}:\n`
+      text += `Проекты ${current_chat.unionName} | ${exist.host}:\n`
 
       
       for (const project of projects) {
-        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName} (${project.host})</a>\n`
       }
+
 
       await ctx.replyWithHTML(text)
     } else {
@@ -2036,11 +2037,10 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
 
                 console.log("goal.goalId: ", goal)
+
                 goal.goalId = await createGoal(bot, ctx, user, goal)
                 // const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
                 // await sleep(1000) //waiting until trx will included to block
-                
-
                 
 
                 if (!goal.goalId){
@@ -2070,9 +2070,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
                     if (pr) {
                       projectChannelId = pr.id
-                      console.log("construct0: ", pr.host)
+                      console.log("construct0: ", goal.hostname)
                 
-                      t = await constructGoalMessage(bot, pr.host, null, goal.goalId)
+                      t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
                       text_to_channel = t
                       t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
                       // t += `\nОбсуждение: https://t.me/c/${tempChannelId}/${goalMessageId}`
@@ -2081,7 +2081,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                       const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
                       
                       await insertGoal(bot.instanceName, {
-                        host: pr.host,
+                        host: goal.hostname,
                         title: text,
                         goal_id: goal.goalId,
                         channel_message_id: projectMessageId,
@@ -2160,7 +2160,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 
               }
 
-               
+
             }
 
           }
