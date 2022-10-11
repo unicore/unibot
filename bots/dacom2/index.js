@@ -1569,7 +1569,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
       
     }
 
-    if (user) {
+    if (user && user.id != 777000) {
 
       //CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
       if (ctx.update.message.chat.type !== 'private') {
@@ -1715,13 +1715,15 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   console.log("NOT INSIDE!", tags.indexOf('goal') == -1)
                 }
 
-              } else if (tag.tag === 'report'){
+              } else if (tag.tag === 'report') {
 
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                if (!current_chat){
+                
+                if (!current_chat) {
                   ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
                   return
                 }
+                
                 console.log("on report!")
                 if (ctx.update.message.reply_to_message || tag.id){
                   
