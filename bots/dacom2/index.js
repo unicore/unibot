@@ -779,16 +779,17 @@ async function finishEducation(ctx, id) {
     if (current_chat){
       console.log('current_chat: ', current_chat)
       let projects = await getProjects(bot.instanceName)
-      console.log(projects)
       let text = ""
       
 
       let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString())
       console.log(bot.getEnv().GOALS_CHANNEL_ID.toString(), gl)
 
-      let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+      console.log("LIST: ", exist, current_chat.host)
       if (gl)
         text += `Канал целей Коллективного Разума: ${gl.link}\n`
+      
       if (exist)
         text += `Цели DAO: ${exist.link}\n`
       text += `Проекты DAO ${current_chat.unionName}:\n`
@@ -818,9 +819,13 @@ async function finishEducation(ctx, id) {
       let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString())
       console.log(bot.getEnv().GOALS_CHANNEL_ID.toString(), gl)
 
-      let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+      
+      let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+      // console.log(gc1)
+                  
       if (exist)
-        text += `Канал целей ${exist.link}\n`
+        text += `Канал целей ${current_chat.link}\n`
       text += `Проекты ${current_chat.unionName}:\n`
 
       
@@ -1806,7 +1811,6 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                           buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
                           
                           const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-                          
 
                           await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
                           // await sendMessageToUser(bot, {id: current_chat.id}, { text });
@@ -2100,7 +2104,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                   console.log("construct1: ", current_chat.host)
                   t = await constructGoalMessage(bot, current_chat.host, null, goal.goalId)
                   console.log("current_chat2: ", current_chat)
-                  let gc1 = await getUnionByHostType(bot, current_chat.host, "goalsChannel")  
+                  let gc1 = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
                   console.log(gc1)
                   // gc = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
 
