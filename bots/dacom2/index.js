@@ -660,8 +660,8 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.on('new_chat_members', async (ctx) => {
-    console.log("welcome")
-    welcome(bot, ctx)
+    // console.log("welcome")
+    // welcome(bot, ctx)
     
     //TODO set admin rights and publish next instructions 
     //
