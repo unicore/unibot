@@ -825,7 +825,7 @@ async function finishEducation(ctx, id) {
       // console.log(gc1)
                   
       if (exist)
-        text += `Канал целей ${current_chat.link}\n`
+        text += `Канал целей ${exist.link}\n`
       text += `Проекты ${current_chat.unionName}:\n`
 
       
