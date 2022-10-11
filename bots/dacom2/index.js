@@ -2158,7 +2158,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 if (t)
                   await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
                 
-              } 
+              }
+
+               
             }
 
           }
