@@ -790,12 +790,12 @@ async function finishEducation(ctx, id) {
       if (gl)
         text += `Канал целей Коллективного Разума: ${gl.link}\n`
       if (exist)
-        text += `Цели DAO: ${exist.link} | ${exist.host}\n`
-      text += `Проекты DAO ${current_chat.unionName} | ${exist.host}:\n`
+        text += `Цели DAO: ${exist.link}\n`
+      text += `Проекты DAO ${current_chat.unionName}:\n`
 
       
       for (const project of projects) {
-        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName} (${project.host})</a>\n`
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
       }
 
       await ctx.replyWithHTML(text)
@@ -821,11 +821,11 @@ async function finishEducation(ctx, id) {
       let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
       if (exist)
         text += `Канал целей ${exist.link}\n`
-      text += `Проекты ${current_chat.unionName} | ${exist.host}:\n`
+      text += `Проекты ${current_chat.unionName}:\n`
 
       
       for (const project of projects) {
-        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName} (${project.host})</a>\n`
+        text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
       }
 
 
