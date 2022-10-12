@@ -443,8 +443,8 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let host = await fetchHost(bot, hostname)
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
-  console.log("BEFORE SINCIDE: ", user.eosname, host.architect, report.approved)
-  
+  console.log("BEFORE SINCIDE: ", user.eosname, hostname, host, report.approved)
+
   if (user.eosname == host.architect && report.approved == 0){
     console.log("SINSIDE")
     actions.push({
