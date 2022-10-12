@@ -443,7 +443,8 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let host = await fetchHost(bot, hostname)
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
-
+  console.log("BEFORE SINCIDE: ", user.eosname, host.architect, report.approved)
+  
   if (user.eosname == host.architect && report.approved == 0){
     console.log("SINSIDE")
     actions.push({
@@ -673,7 +674,6 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const conditions = await fetchConditions(hostname);
   let upower = await fetchUPower(hostname, user.eosname);
 
-  console.log('goals', goals.length);
   let index = 1;
   // eslint-disable-next-line no-restricted-syntax
   for (const goal of goals) {
