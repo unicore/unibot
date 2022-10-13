@@ -2,7 +2,7 @@ const { Markup } = require('telegraf');
 const axios = require('axios');
 const { ChainsSingleton, generateAccount: generateUniAccount } = require('unicore');
 const EosApi = require('eosjs-api');
-const Octokit = require('@octokit/rest');
+const {Octokit} = require('@octokit/rest');
 
 const { restoreAccount } = require('./restore');
 const {
@@ -552,11 +552,11 @@ module.exports.init = async (botModel, bot) => {
 
   bot.eosapi = EosApi(options);
 
-  if (bot.getEnv().GITHUB_TOKEN) {
-    bot.octokit = new Octokit({
-      auth: bot.getEnv().GITHUB_TOKEN,
-    });
-  }
+  // if (bot.getEnv().GITHUB_TOKEN) {
+  //   bot.octokit = new Octokit({
+  //     auth: bot.getEnv().GITHUB_TOKEN,
+  //   });
+  // }
 
   bot.start(async (ctx) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
