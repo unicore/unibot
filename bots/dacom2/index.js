@@ -900,7 +900,7 @@ async function upgradeHost(eos, target_host, host, user) {
               host: target_host,
               architect: user.eosname,
             }
-          }
+          },
           ]
         }, {
           blocksBehind: 3,

@@ -179,6 +179,8 @@ async function constructReportMessage(bot, hostname, report, reportId){
     let from = (user.username && user.username != "") ? '@' + user.username : report.username
     text += `#ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
+    
+    console.log("BOT.octokit: ", bot.octokit)
 
     if (bot.octokit) {
       try {
