@@ -1746,7 +1746,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                             goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
                           } catch(e) {return}
                           console.log("AFTER GOAL: ", goal)
-                          await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
+                          if (goal){
+                            await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
+                          }
 
                           await ctx.deleteMessage(ctx.update.message.message_id)
                           
@@ -2253,8 +2255,8 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               } catch(e) {return}
               
               console.log("resend!", goal, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id)
-
-              await sendMessageToBrothers(bot, user, goal, text, "text")
+              if (goal)
+                await sendMessageToBrothers(bot, user, goal, text, "text")
               // if (goals.length > 1){
               //   cons
               // }
