@@ -198,15 +198,10 @@ async function constructReportMessage(bot, hostname, report, reportId){
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
-            console.log({owner: githubCommitUrl[0].split('/')[3],
-                          repo: githubCommitUrl[0].split('/')[4],
-                          commit_sha: githubCommitUrl[0].split('/')[6]})
-
-
             const commitData = await bot.octokit.repos.getCommit({
               owner: githubCommitUrl[0].split('/')[3],
               repo: githubCommitUrl[0].split('/')[4],
-              commit_sha: githubCommitUrl[0].split('/')[6],
+              ref: githubCommitUrl[0].split('/')[6],
             });
 
             const repoData = await bot.octokit.repos.get({
