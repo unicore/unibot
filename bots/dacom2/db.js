@@ -425,7 +425,7 @@ async function insertReport(suffix, report) {
 
 
 
-async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id) {
+async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id, chat_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomGoals_${suffix}`);
@@ -433,7 +433,7 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
     
     await collection.updateOne(
       { channel_message_id },
-      { $set: {"chat_message_id": chat_message_id} },
+      { $set: {"chat_message_id": chat_message_id, "chat_id": chat_id.toString()} },
       { upsert: false },
     );
   } catch (e) {
@@ -474,6 +474,24 @@ async function getGoalByChatMessage(suffix, host, channel_message_id) {
     console.log('error: ', e.message);
   }
 }
+
+// eslint-disable-next-line camelcase
+async function getAllHeadGoalsMessages(suffix, goal_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+
+    let res = await collection.find({
+      goal_id: goal_id
+    }).toArray();
+
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
 
 
 // eslint-disable-next-line camelcase
@@ -744,5 +762,6 @@ module.exports = {
   getProjects,
   getMyProjects,
   insertProject,
-  getUnionByHostType
+  getUnionByHostType,
+  getAllHeadGoalsMessages
 };
