@@ -874,7 +874,7 @@ async function finishEducation(ctx, id) {
   })
 
 
-async function upgradeHost(eos, target_host, host) {
+async function upgradeHost(eos, target_host, host, user) {
 
         console.log("TARGET HOST: ", target_host, host)
 
@@ -888,7 +888,20 @@ async function upgradeHost(eos, target_host, host) {
               permission: 'active',
             }],
             data: host
-          }]
+          },
+          {
+            account: "unicore",
+            name: 'setarch',
+            authorization: [{
+              actor: target_host,
+              permission: 'active',
+            }],
+            data: {
+              host: target_host,
+              architect: user.eosname,
+            }
+          }
+          ]
         }, {
           blocksBehind: 3,
           expireSeconds: 30,
@@ -944,7 +957,7 @@ async function startHost(eos, target_host, host) {
 }
 
 
-async function setupHost(bot, ctx, eosname, wif, chat) {
+async function setupHost(bot, ctx, eosname, wif, chat, user) {
     
     try{
       console.log("before start")
@@ -988,7 +1001,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
           meta: JSON.stringify({})
         }
 
-      let upgrade_res = await upgradeHost(eos, eosname, host)
+      let upgrade_res = await upgradeHost(eos, eosname, host, user)
       let setparams_res = await setParamsToHost(eos, eosname, helix)
       let start_res = await startHost(eos, eosname, eosname)
     } catch(e){
@@ -1058,7 +1071,7 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
                 link: chat.invite_link,
               })
 
-              await setupHost(bot, ctx, host.eosname, host.wif, chat)
+              await setupHost(bot, ctx, host.eosname, host.wif, chat, user)
 
               await ctx.reply(`DAO успешно создано в этом чате.`)
               await finishEducation(ctx)
@@ -1450,7 +1463,9 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
 
     if (curator == ""){
+    
       ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
+    
     } else {
       
       let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
@@ -1658,6 +1673,11 @@ async function setupHost(bot, ctx, eosname, wif, chat) {
 
           } else if (tags.length > 0) {
             for (const tag of tags) {
+              if (tag.tag === 'log') {
+                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+                ctx.reply('this is log')                  
+              }
+
               if (tag.tag === 'project'){
                 
                 let gexist = tags.find(el => el.tag == 'goal')
