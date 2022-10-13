@@ -475,6 +475,25 @@ async function getGoalByChatMessage(suffix, host, channel_message_id) {
   }
 }
 
+
+
+// eslint-disable-next-line camelcase
+async function getGoal(suffix, goal_id, chat_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomGoals_${suffix}`);
+
+    let res = await collection.findOne({
+      goal_id,
+      chat_id
+    });
+    return res 
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
 // eslint-disable-next-line camelcase
 async function getAllHeadGoalsMessages(suffix, goal_id) {
   try {
@@ -763,5 +782,6 @@ module.exports = {
   getMyProjects,
   insertProject,
   getUnionByHostType,
-  getAllHeadGoalsMessages
+  getAllHeadGoalsMessages,
+  getGoal
 };

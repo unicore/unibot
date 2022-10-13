@@ -127,7 +127,8 @@ const {
   getProject,
   insertProject,
   getProjects,
-  getMyProjects
+  getMyProjects,
+  getGoal
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -1738,6 +1739,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                           await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
                           // await sendMessageToUser(bot, {id: current_chat.id}, { text });
+                          let goal
+                          console.log("GOAL: ", goal, )
+                          try{
+                            
+                            goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
+                          } catch(e) {return}
+                          console.log("AFTER GOAL: ", goal)
+                          await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
 
                           await ctx.deleteMessage(ctx.update.message.message_id)
                           
@@ -1846,6 +1855,8 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     let task_text = await constructTaskMessage(bot, current_chat.host, task)
 
                     let chat_message_id = (await ctx.reply(task_text, {reply_to_message_id: ctx.update.message.message_id, ...request})).message_id //
+
+                    await sendMessageToBrothers(bot, user, goal, task_text, "task", request)
 
                     await insertTask(bot.instanceName, {
                       host: current_chat.host,
@@ -2103,6 +2114,27 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     // const tags = getHashtags(ctx.update.message);
     // await checkText(user, ctx, tags, text)
   })
+
+
+  async function sendMessageToBrothers(bot, user, goal, text, type, menu){
+    let goals = await getAllHeadGoalsMessages(bot.instanceName, goal.goal_id)
+            
+      goals = goals.filter(g => goal._id.toString() != g._id.toString())
+      console.log("goals: ", goals, goal._id, goal._id.toString())
+      
+      for (const g of goals) {
+        if (g.chat_message_id){
+          let ntext
+          
+          if (type == 'text')
+            ntext = `${user.username || user.eosname} пишет:\n${text}`
+          else ntext = text
+
+          await sendMessageToUser(bot, { id: g.chat_id }, { text: ntext }, {reply_to_message_id : g.chat_message_id, ...menu});  
+        }
+        
+      }
+  }
   
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -2209,38 +2241,29 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             
             await checkText(user, ctx, tags, text)
 
+          } else {
+            //RESEND to another chats
+            let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+            
+            if (current_chat) {
+              let goal 
+              
+              try{
+                goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.forward_from_message_id ? ctx.update.message.forward_from_message_id : ctx.update.message.reply_to_message.forward_from_message_id)
+              } catch(e) {return}
+              
+              console.log("resend!", goal, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id)
+
+              await sendMessageToBrothers(bot, user, goal, text, "text")
+              // if (goals.length > 1){
+              //   cons
+              // }
+            }      
+  
           }
 
-          //RESEND to another chats
-          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
           
-          if (current_chat) {
-            let goal 
-            
-            try{
-              goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.forward_from_message_id ? ctx.update.message.forward_from_message_id : ctx.update.message.reply_to_message.forward_from_message_id)
-            } catch(e) {return}
-            
-            console.log("resend!", goal, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id)
-
-            let goals = await getAllHeadGoalsMessages(bot.instanceName, goal.goal_id)
-            
-            goals = goals.filter(g => goal._id.toString() != g._id.toString())
-            console.log("goals: ", goals, goal._id, goal._id.toString())
-            
-            for (const g of goals) {
-              if (g.chat_message_id){
-                let ntext
-                ntext = `${user.username || user.eosname} пишет:\n${text}`
-                await sendMessageToUser(bot, { id: g.chat_id }, { text: ntext }, {reply_to_message_id : g.chat_message_id});  
-              }
-              
-            }
-            // if (goals.length > 1){
-            //   cons
-            // }
-          }      
-
 
         }
       
