@@ -2254,7 +2254,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.forward_from_message_id ? ctx.update.message.forward_from_message_id : ctx.update.message.reply_to_message.forward_from_message_id)
               } catch(e) {return}
               
-              console.log("resend!", goal, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id)
               if (goal)
                 await sendMessageToBrothers(bot, user, goal, text, "text")
               // if (goals.length > 1){
