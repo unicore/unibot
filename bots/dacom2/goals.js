@@ -192,9 +192,10 @@ async function constructReportMessage(bot, hostname, report, reportId){
           });
 
           text += `#PullRequest ${prData.data.title}\n`;
-          text + `В проекте: ${prData.data.base.repo.full_name}\n`;
-          text += `+${prData.data.additions} -${prData.data.deletions}\n`;
-          text += `📁 ${prData.data.changed_files} файлов затронуто\n`;
+          // text + `В проекте: ${prData.data.base.repo.full_name}\n`;
+          text += `📁 файлов затронуто: ${prData.data.changed_files}\n`;
+          text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
+          
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
@@ -210,9 +211,10 @@ async function constructReportMessage(bot, hostname, report, reportId){
             });
 
             text += `#Commit ${commitData.data.commit.message}\n`;
-            text += `В проекте: ${repoData.data.full_name}\n`;
-            text += `+${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
-            text += `📁 ${commitData.data.files.length} файлов затронуто\n`;
+            // text += `В проекте: ${repoData.data.full_name}\n`;
+            text += `📁 файлов затронуто: ${commitData.data.files.length}\n`;
+            text += `\tстроки: +${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
+            
           }
         }
         text += '\n';
