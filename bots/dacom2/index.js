@@ -1016,10 +1016,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   async function startUnion(bot, ctx){
     console.log("on start Union", ctx)
 
-
     // let res = await ctx.getChatAdministrators()
-    // console.log(res)
-    let bot_is_admin = true
+    // // console.log(res)
+    // let bot_is_admin = false
 
 
     // res.map(user => {
@@ -1031,82 +1030,82 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     //   }
     // })
 
-    if (!bot_is_admin) {
-      ctx.reply(`Для создания DAO в чате робот @${bot.getEnv().BOTNAME} должен быть назначен администратором.`)
-    } else {
+    // if (!bot_is_admin) {
+    //   ctx.reply(`Для создания DAO в чате робот @${bot.getEnv().BOTNAME} должен быть назначен администратором.`)
+    // } else {
 
-      //CHECK union for exist in current chat
+    //   //CHECK union for exist in current chat
 
-      let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    //   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
       
-      console.log("current_union: ", current_chat, ctx.chat.id)
+    //   console.log("current_union: ", current_chat, ctx.chat.id)
       
-      if (current_chat){
-        await ctx.reply(`DAO уже активно в этом чате. Показать команды: /help`)
-      } else {
-        let user = await checkAccountForExist(bot, ctx, ctx.from)
-        console.log("IT IS USER: ", user)
-        //TODO make a host
-        if (user) {
-          let type = "union"
-          let chat = await ctx.getChat()
+    //   if (current_chat){
+    //     await ctx.reply(`DAO уже активно в этом чате. Показать команды: /help`)
+    //   } else {
+    //     let user = await checkAccountForExist(bot, ctx, ctx.from)
+    //     console.log("IT IS USER: ", user)
+    //     //TODO make a host
+    //     if (user) {
+    //       let type = "union"
+    //       let chat = await ctx.getChat()
           
-          try {
+    //       try {
             
-            let host = {
-              ownerId: user.id,
-              ownerEosname: user.eosname, 
-              chatId: chat.id.toString(),
-              chatLink: chat.invite_link,
-            }
+    //         let host = {
+    //           ownerId: user.id,
+    //           ownerEosname: user.eosname, 
+    //           chatId: chat.id.toString(),
+    //           chatLink: chat.invite_link,
+    //         }
 
-            host = await generateHost(bot, ctx, host);
-            console.log("GENERATED HOST: ", host)
-            if (host){
+    //         host = await generateHost(bot, ctx, host);
+    //         console.log("GENERATED HOST: ", host)
+    //         if (host){
 
-              await insertUnion(bot.instanceName, {
-                ownerId: user.id,
-                ownerEosname: user.eosname, 
-                host: host.eosname,
-                id: chat.id.toString(),
-                type: type + 'Chat', 
-                unionName: chat.title,
-                link: chat.invite_link,
-              })
+    //           await insertUnion(bot.instanceName, {
+    //             ownerId: user.id,
+    //             ownerEosname: user.eosname, 
+    //             host: host.eosname,
+    //             id: chat.id.toString(),
+    //             type: type + 'Chat', 
+    //             unionName: chat.title,
+    //             link: chat.invite_link,
+    //           })
 
-              await setupHost(bot, ctx, host.eosname, host.wif, chat, user)
+    //           await setupHost(bot, ctx, host.eosname, host.wif, chat, user)
 
-              await ctx.reply(`DAO успешно создано в этом чате.`)
-              await finishEducation(ctx)
-            } else {
-              await ctx.reply(`Произошла ошибка при регистрации DAO, попробуйте повторить позже.`)
-            }
+    //           await ctx.reply(`DAO успешно создано в этом чате.`)
+    //           await finishEducation(ctx)
+    //         } else {
+    //           await ctx.reply(`Произошла ошибка при регистрации DAO, попробуйте повторить позже.`)
+    //         }
       
-          } catch(e){
-            ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку с сообщением: ${e.message}`)
-          }
+    //       } catch(e){
+    //         ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку с сообщением: ${e.message}`)
+    //       }
 
-        } else {
-          ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку.`)
-        }
+    //     } else {
+    //       ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку.`)
+    //     }
         
       
-      }
+    //   }
 
       
       
-      // ctx.reply(`@${bot.getEnv().BOTNAME} готов к запуску DAO. `)
+    //   // ctx.reply(`@${bot.getEnv().BOTNAME} готов к запуску DAO. `)
       
-      // console.log('ctx.from', ctx.from)
+    //   // console.log('ctx.from', ctx.from)
       
-      // let user = await getUser(bot.instanceName, from.id);
-      // console.log('user: ', user)
-      /* Регистрация DAO в бч и бд
-       * Одно DAO = 1 аккаунт
-       * Проверка запускающего пользователя на наличие аккаунта в бч, если нет - создать
-       * 
-      */
-    }
+    //   // let user = await getUser(bot.instanceName, from.id);
+    //   // console.log('user: ', user)
+    //   /* Регистрация DAO в бч и бд
+    //    * Одно DAO = 1 аккаунт
+    //    * Проверка запускающего пользователя на наличие аккаунта в бч, если нет - создать
+    //    * 
+    //   */
+    // }
   }
 
   async function checkAccountForExist(bot, ctx, from){
