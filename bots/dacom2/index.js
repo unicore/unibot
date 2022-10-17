@@ -1017,7 +1017,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     console.log("on start Union", ctx)
 
 
-    let res = await ctx.getChatAdministrators()
+    // let res = await ctx.getChatAdministrators()
     // console.log(res)
     let bot_is_admin = true
 
