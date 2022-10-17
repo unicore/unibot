@@ -1016,19 +1016,20 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   async function startUnion(bot, ctx){
     console.log("on start Union", ctx)
 
+
     let res = await ctx.getChatAdministrators()
     // console.log(res)
-    let bot_is_admin = false
+    let bot_is_admin = true
 
 
-    res.map(user => {
-      console.log("user.user.username", user.user.username)
-      console.log("botname: ", bot.getEnv().BOTNAME)
+    // res.map(user => {
+    //   console.log("user.user.username", user.user.username)
+    //   console.log("botname: ", bot.getEnv().BOTNAME)
 
-      if (user.user.username == bot.getEnv().BOTNAME){
-        bot_is_admin = true
-      }
-    })
+    //   if (user.user.username == bot.getEnv().BOTNAME){
+    //     bot_is_admin = true
+    //   }
+    // })
 
     if (!bot_is_admin) {
       ctx.reply(`Для создания DAO в чате робот @${bot.getEnv().BOTNAME} должен быть назначен администратором.`)
