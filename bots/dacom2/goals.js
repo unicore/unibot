@@ -119,7 +119,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
     let text = ""
     text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
     text += `${goal.title}\n\n`
-    text += `Одобрена: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
+    text += `Статус: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
     // text += `Постановщик: ${goal.creator}\n`
 
     let coordinator = ""
@@ -130,7 +130,9 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
       coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
     }
 
-    text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
+    if (goal.benefactor != "")
+      text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
+    
     text += `Голоса: ${goal.positive_votes} POWER`
 
     // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`

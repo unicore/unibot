@@ -1381,7 +1381,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     } else {
       
       let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
+      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString())
       
       let curator_object = await getUserByUsername(bot.instanceName, curator)
 
@@ -1390,7 +1390,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         try {
           await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
           await ctx.deleteMessage(ctx.update.message.message_id)
-          await ctx.reply(`У цели появился новый координатор: @${curator}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
+          await ctx.reply(`Назначен новый координатор цели: @${curator}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
         } catch(e){
           console.log(e)
           await ctx.reply(`Ошибка: ${e.message}`,{reply_to_message_id: ctx.update.message.reply_to_message.message_id})
@@ -1526,6 +1526,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   await insertProject(bot.instanceName, {
                     host: current_chat.host,
                     channelLink: goalChatResult.channelLink,
+                    goal_id: goal.goalId
                   })
 
                   await ctx.deleteMessage(id);  
