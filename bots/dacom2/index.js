@@ -1403,53 +1403,53 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   })
 
   bot.on('edited_message', async (ctx) => {
-   if (ctx.update.edited_message.forward_from_chat){
-      let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
-      // console.log("current_chat: ", current_chat)
-      if (current_chat){
-        let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.edited_message.forward_from_message_id, ctx.update.edited_message.sender_chat.id.toString())
-        if (goal) {
-          let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
-          if (trueGoal){
-            let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
-            if (editor){
-              try {
-                let text = ctx.update.edited_message.text
-                let index1 = text.indexOf("\n");
+   // if (ctx.update.edited_message.forward_from_chat){
+   //    let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
+   //    // console.log("current_chat: ", current_chat)
+   //    if (current_chat){
+   //      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.edited_message.forward_from_message_id, ctx.update.edited_message.sender_chat.id.toString())
+   //      if (goal) {
+   //        let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
+   //        if (trueGoal){
+   //          let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
+   //          if (editor){
+   //            try {
+   //              let text = ctx.update.edited_message.text
+   //              let index1 = text.indexOf("\n");
 
-                text = text.substr(index1 + 1, text.length)
-                let index2 = text.indexOf("\n\nОдобрена: ");
+   //              text = text.substr(index1 + 1, text.length)
+   //              let index2 = text.indexOf("\n\nОдобрена: ");
 
-                text = text.substr(0, index2)
+   //              text = text.substr(0, index2)
                 
-                await editGoal(bot, ctx, editor, {
-                  editor: trueGoal.creator,
-                  id: trueGoal.id,
-                  hostname: goal.host, 
-                  title: text,
-                  description: "",
-                  meta: {},
-                })
-                console.log("scucss edit: ", text)
+   //              await editGoal(bot, ctx, editor, {
+   //                editor: trueGoal.creator,
+   //                id: trueGoal.id,
+   //                hostname: goal.host, 
+   //                title: text,
+   //                description: "",
+   //                meta: {},
+   //              })
+   //              console.log("scucss edit: ", text)
                 
-              } catch(e){
-                console.log(e)
+   //            } catch(e){
+   //              console.log(e)
                 
-              }
+   //            }
               
-            } else {
-              // console.log("no")
-            }
+   //          } else {
+   //            // console.log("no")
+   //          }
             
-          }
-        } else {
+   //        }
+   //      } else {
 
-          console.log("not find the goal")
-        }
-      } else {
-        console.log("not find the chat")
-      }
-    }
+   //        console.log("not find the goal")
+   //      }
+   //    } else {
+   //      console.log("not find the chat")
+   //    }
+   //  }
     
   });
 
