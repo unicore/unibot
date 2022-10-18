@@ -2246,13 +2246,17 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           } else {
             //RESEND to another chats
             let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-            
+            console.log("on resend")
             if (current_chat) {
               let goal 
               
               try{
                 goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.forward_from_message_id ? ctx.update.message.forward_from_message_id : ctx.update.message.reply_to_message.forward_from_message_id)
-              } catch(e) {return}
+                console.log("get goal by messages", goal)
+              } catch(e) {
+                console.log("catch error: 2257", e)
+                return
+              }
               
               if (goal)
                 await sendMessageToBrothers(bot, user, goal, text, "text")
