@@ -425,14 +425,14 @@ async function insertReport(suffix, report) {
 
 
 
-async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id, chat_id) {
+async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id, chat_id, channel_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomGoals_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     
     await collection.updateOne(
-      { channel_message_id },
+      { channel_message_id, channel_id },
       { $set: {"chat_message_id": chat_message_id, "chat_id": chat_id.toString()} },
       { upsert: false },
     );
@@ -460,14 +460,15 @@ async function addMainChatMessageToReport(suffix, report_channel_message_id, upd
 
 
 // eslint-disable-next-line camelcase
-async function getGoalByChatMessage(suffix, host, channel_message_id) {
+async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomGoals_${suffix}`);
 
     let res = await collection.findOne({
       host,
-      channel_message_id
+      channel_message_id,
+      channel_id
     });
     return res 
   } catch (e) {
@@ -501,7 +502,7 @@ async function getAllHeadGoalsMessages(suffix, goal_id) {
     const collection = db.collection(`dacomGoals_${suffix}`);
 
     let res = await collection.find({
-      goal_id: goal_id
+      goal_id: goal_id.toString()
     }).toArray();
 
     return res 
