@@ -156,7 +156,7 @@ async function constructTaskMessage(bot, hostname, task, taskId){
   let from = (user.username && user.username != "") ? '@' + user.username : task.creator
 
 
-  text += `#ДЕЙСТВИЕ_${task.id} от ${from}: \n`
+  text += `🏳️ #ДЕЙСТВИЕ_${task.id} от ${from}: \n`
   text += `${task.title}\n\n`
   text += `Ставка: ${level}\n`
 
@@ -177,7 +177,7 @@ async function constructReportMessage(bot, hostname, report, reportId){
 
     let user = await getUserByEosName(bot.instanceName, report.username)
     let from = (user.username && user.username != "") ? '@' + user.username : report.username
-    text += `#ОТЧЁТ_${report.report_id} от ${from}: \n`
+    text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
     
 
@@ -217,7 +217,6 @@ async function constructReportMessage(bot, hostname, report, reportId){
             
           }
         }
-        text += '\n';
       } catch (e) {
         console.log('github error', e);
       }

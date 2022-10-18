@@ -1403,38 +1403,24 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   })
 
   bot.on('edited_message', async (ctx) => {
-    // console.log('edited_message', ctx.update.edited_message)
-    // console.log("edited_chat_id: ", ctx.update.edited_message.forward_from_chat.id)
-
-    // let user = await getUser(bot.instanceName, ctx.update.edited_message.forward_from_chat.id);
-    if (ctx.update.edited_message.forward_from_chat){
+   if (ctx.update.edited_message.forward_from_chat){
       let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
       // console.log("current_chat: ", current_chat)
       if (current_chat){
-        console.log('on goal_edit: ', ctx.update)
         let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.edited_message.forward_from_message_id, ctx.update.edited_message.sender_chat.id.toString())
-        console.log(goal)
         if (goal) {
-          // console.log("true", true)
           let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
-          // console.log("trueGoal:", trueGoal)
           if (trueGoal){
-            // console.log(true)
             let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
-            // console.log()
             if (editor){
               try {
                 let text = ctx.update.edited_message.text
-                console.log("text on edit1: ", text)
                 let index1 = text.indexOf("\n");
 
                 text = text.substr(index1 + 1, text.length)
-                console.log("text on edit1: ",  index1, text)
                 let index2 = text.indexOf("\n\nОдобрена: ");
 
                 text = text.substr(0, index2)
-                console.log("text on edit1: ",  index2, text)
-
                 
                 await editGoal(bot, ctx, editor, {
                   editor: trueGoal.creator,
