@@ -169,6 +169,36 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   
 }   
 
+
+async function checkBotIsAdmin(bot, user, ctx, chatId) {
+  let res 
+  
+  try {
+
+    res = await bot.telegram.getChatAdministrators(chatId)
+
+  } catch(e) {
+    ctx.reply(`Ошибка! Бот ${bot.getEnv().BOTNAME} должен быть назначен администратором в новостном канале DAO. Для отмены установки новостного канала вызовите команду /cancel_set_news_channel`)
+    return {status: 'error', message: e.message}
+  }
+
+  let bot_is_admin = false
+  let user_is_admin = false
+  console.log("admins: ", res)
+
+  res.map(u => {
+    if (u.user.username == bot.getEnv().BOTNAME){
+      bot_is_admin = true
+    }
+
+    if (u.user.id == user.id){
+      user_is_admin = true
+    }
+  })
+
+  return {bot_is_admin, user_is_admin, status: 'ok'}
+}
+
 async function MigrateChat(bot, chatId){
   
   
@@ -416,5 +446,6 @@ module.exports = {
   setDiscussionGroup,
   exportChatLink,
   insertUnion,
-  makeChannelAdmin
+  makeChannelAdmin,
+  checkBotIsAdmin
 };

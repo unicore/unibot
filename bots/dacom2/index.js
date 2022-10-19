@@ -9,7 +9,7 @@ const {
   mainButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
-const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink, makeChannelAdmin, insertUnion} = require('./mtproto')
+const {createChat, makeAdmin, createGroupCall, setDiscussionGroup, exportChatLink, makeChannelAdmin, insertUnion, checkBotIsAdmin} = require('./mtproto')
 
 const {
   getHelixParams,
@@ -786,7 +786,7 @@ async function finishEducation(ctx, id) {
      
       let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
      
-      text += `Публичные проекты экосистемы UNICORE:\n`
+      text += `Публичные проекты экосистемы Коллективного Разума:\n`
  
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
@@ -1114,6 +1114,53 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.repy("Пользователь не зарегистрирован")
   })
 
+
+  bot.command("add_news_channel", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+    if (!current_chat){
+      ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+      return
+    }
+    
+    let newsChannel =  getUnionByHostType(bot.instanceName, current_chat.host, "unionNews")  
+    
+    if (!newsChannel){
+
+
+      user.state = 'set_news_channel'
+      await saveUser(bot.instanceName, user);
+      
+      await ctx.reply('Для подключения действующего новостного канала к DAO - перешлите сообщение из него сюда.')
+    } else {
+      ctx.reply(`Ошибка! Новостной канал уже подключен к DAO. `)
+    }
+
+  })
+
+
+  bot.command("cancel_set_news_channel", async(ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+    if (!current_chat){
+      ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+      return
+    }
+    
+    user.state = ''
+    await saveUser(bot.instanceName, user);
+    
+    await ctx.reply('Добавление новостного канала отменено.')
+
+
+  })
+
+
+  
 
   bot.command("iam", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
@@ -1944,7 +1991,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     if (user && user.id != 777000) {
 
       if (ctx.update.message.chat.type !== 'private') {
-   
+        
         if (true) {
           if (text == '/start_soviet'){
             
@@ -1962,15 +2009,73 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             
             await createGroupCall(bot, ctx.update.message.chat.id, time)
             
+          } else if (user.state == 'set_news_channel'){
+            
+            let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+            if (!current_chat) {
+              return
+            }
+
+            if (current_chat.ownerEosname != user.eosname) {
+              await ctx.reply('Только архитектор DAO может добавить новостной канал')
+              return
+            }
+
+            if (ctx.update.message.forward_from_chat){
+
+
+              let res = await checkBotIsAdmin(bot, user, ctx, ctx.update.message.forward_from_chat.id)
+              if (res.status == 'ok') {
+                if (!res.user_is_admin){
+                  ctx.reply(`Ошибка! Вы не являетесь администратором канала`)
+                  return
+                }
+
+                if (!res.bot_is_admin){
+                 ctx.reply(`Ошибка! Бот не является администратором канала`)
+                  return 
+                }
+
+                let res2 = await ctx.telegram.getChat(ctx.update.message.forward_from_chat.id)
+               
+                if (res2.type == 'channel'){
+                  await insertUnion(bot.instanceName, {
+                    ownerId: user.id,
+                    ownerEosname: user.eosname, 
+                    host: current_chat.host,
+                    id: res2.id.toString(),
+                    type: "unionNews", 
+                    unionName: res2.title,
+                    link: res2.invite_link,
+                  })
+
+                  user.state = ""
+                  await saveUser(bot.instanceName, user);
+                  await ctx.reply(`Новостной канал успешно подключен к DAO`)
+
+                }
+                
+            }
+
+                
+
+            } else {
+              ctx.reply(`Перешлите сообщение из новостного канала DAO или отмените установку командой /cancel_set_news_channel`)
+            }
+
           }
 
 
-          if (text == '/new_cycle'){
+
+          else if (text == '/new_cycle'){
             ctx.reply("Введите дату начала цикла развития:")
             user.state = "start_cycle"
             user.new_cycle = {}
             await saveUser(bot.instanceName, user);
+          
           } else if (user.state == 'start_cycle'){
+          
             ctx.reply(`Дата начала: ${text}`)
             user.state = "create_cycle"
             //TODO text -> DATE
@@ -1978,6 +2083,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
             await saveUser(bot.instanceName, user);
             ctx.reply("Введите название цикла развития:")
+          
           } 
 
            else if (user.state == 'create_cycle'){
@@ -2013,8 +2119,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
+          if (user.state === 'set_news_channel'){
 
-          if (user.state === 'chat') {
+            ctx.reply('Ожидаю сообщения')
+          }
+
+          else if (user.state === 'chat') {
             
             try{
               const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
