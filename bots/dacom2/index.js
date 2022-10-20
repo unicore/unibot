@@ -2173,8 +2173,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
               let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+              console.log("cant find current chat, skip")
 
-              if (current_chat) {
+              if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL)
+                console.log("should works", ctx.chat)
+
+              if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) {
 
                 const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
                 let text2 = `${text}`
