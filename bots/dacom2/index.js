@@ -445,46 +445,49 @@ async function nextQuiz(bot, user, ctx) {
   } else {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
-    user.state = ""
-    let unionName = quiz.answers[1].answer
-    let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
-    
-    let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
-    chatResult = {chatLink: "https://google.com", chatId: "-1001618007293"}
-    const icomeMenu = Markup
-      .keyboard(mainButtons, { columns: 2 }).resize();
+    // user.state = ""
+    // let unionName = quiz.answers[1].answer
    
-    let t1 = '';
-    t1 += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
+    // let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
+    // let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
+    // chatResult = {chatLink: "https://google.com", chatId: "-1001618007293"}
     
-    t1 += `\nПоказать это сообщение: /help,`
-    // t += `\nСоздать проект: напишите сообщение с тегом #project`
-    // t += `\nСовершить взнос: /donate,`
-    t1 += `\nКапитализация DAO: /stat,`
-    t1 += "\nВаш кошелёк: /wallet,"
+    // const icomeMenu = Markup
+    //   .keyboard(mainButtons, { columns: 2 }).resize();
+   
+    // let t1 = '';
+    // t1 += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
     
-    const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
-
-    const buttons = [];
-
-    buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
-    const t = 'Войдите в ваше DAO и получите инструкции:';
-    ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
-
-    k = 0
-    let text = ``
-    //`${quiz.answers[1].answer}, `
-    // text += `${quiz.answers[2].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
+    // t1 += `\nПоказать это сообщение: /help,`
+    // // t += `\nСоздать проект: напишите сообщение с тегом #project`
+    // // t += `\nСовершить взнос: /donate,`
+    // t1 += `\nКапитализация DAO: /stat,`
+    // t1 += "\nВаш кошелёк: /wallet,"
     
-    for (const answer of quiz.answers) {
-      if (k > 0) {
-        text += `\n${answer.message}`
-        text += `\n${answer.answer}\n`
-      }
-      k++
-    }
+    // const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
 
+    // const buttons = [];
+
+    // buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
+    // const t = 'Войдите в ваше DAO и получите инструкции:';
+    // ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+
+    // k = 0
+    // let text = ``
+    // //`${quiz.answers[1].answer}, `
+    // // text += `${quiz.answers[2].answer}, `
+    // text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
+    
+    // for (const answer of quiz.answers) {
+    //   if (k > 0) {
+    //     text += `\n${answer.message}`
+    //     text += `\n${answer.answer}\n`
+    //   }
+    //   k++
+    // }
+    
+    let id = await ctx.reply("Создание DAO временно ограничено. Мы свяжемся с вами в ближайшее время.")
+    
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
@@ -492,7 +495,7 @@ async function nextQuiz(bot, user, ctx) {
 
     user.state = "chat"
     user.resume_channel_id = id3
-    console.log("TEXT: ", text)   
+    
     await saveUser(bot.instanceName, user)  
     
 
