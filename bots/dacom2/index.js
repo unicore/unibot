@@ -2181,6 +2181,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) {
 
                 const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
+                
+                console.log('msg', msg)
+                
                 let text2 = `${text}`
                 if (msg && msg.message_id) {
                   const id = await sendMessageToUser(bot, { id: msg.id }, { text: text2 });
