@@ -486,10 +486,11 @@ async function nextQuiz(bot, user, ctx) {
       k++
     }
     
+    console.log("text on send: ", text)
     let id = await ctx.reply("Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.")
     
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
-
+    console.log("after send")
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
 
 
@@ -497,7 +498,7 @@ async function nextQuiz(bot, user, ctx) {
     user.resume_channel_id = id3
     
     await saveUser(bot.instanceName, user)  
-    
+    console.log("after all")
 
 
     
