@@ -120,6 +120,13 @@ async function getCondition(bot, hostname, key) {
   return 0;
 }
 
+
+async function getDacs(bot, hostname) {
+  const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'dacs');
+  
+  return conditions;
+}
+
 async function getCurrentUserDeposit(bot, hostname, username) {
   const hoststat = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'hoststat', username, username, 1);
 
@@ -1272,6 +1279,36 @@ async function getGoalInstructions(){
   return text
 }
 
+
+
+async function addToTeam(bot, ctx, user, hostname, dac, title) {
+  const eos = await bot.uni.getEosPassInstance(user.wif);
+
+    await eos.transact({
+      actions: [{
+        account: 'unicore',
+        name: 'adddac',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          username: dac,
+          host: hostname,
+          weight: 1,
+          limit_type: "",
+          income_limit: "0.0000 FLOWER",
+          title: "",
+          descriptor: ""
+        },
+      }],
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    });
+
+}
+
 module.exports = {
   getHelixParams,
   getUserHelixBalances,
@@ -1298,5 +1335,7 @@ module.exports = {
   goalWithdraw,
   retireAction,
   getGoalInstructions,
-  printProjects
+  printProjects,
+  getDacs,
+  addToTeam
 };

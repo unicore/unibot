@@ -401,7 +401,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 
 
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
-  console.log("set Bene")
+  
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
 

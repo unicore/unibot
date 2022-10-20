@@ -33,7 +33,9 @@ const {
   goalWithdraw,
   retireAction,
   getGoalInstructions,
-  printProjects
+  printProjects,
+  getDacs,
+  addToTeam
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -704,8 +706,22 @@ module.exports.init = async (botModel, bot) => {
 
 
   function getHashtags(message) {
-    const { text, entities } = message;
+
+    let text, entities 
+
     const result = [];
+    
+    if (message.caption_entities){
+      
+      entities = message.caption_entities;
+      text = message.caption
+
+    } else {
+      entities = message.entities;
+      text = message.text
+
+    }
+
 
     if (entities) {
       entities.forEach((entity) => {
@@ -859,7 +875,7 @@ async function finishEducation(ctx, id) {
 
 async function upgradeHost(eos, target_host, host, user) {
 
-        // console.log("TARGET HOST: ", target_host, host)
+        console.log("TARGET HOST: ", target_host, host)
 
         return eos.transact({ 
           actions: [
@@ -982,12 +998,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           meta: JSON.stringify({})
         }
 
+
       let upgrade_res = await upgradeHost(eos, eosname, host, user)
       let setparams_res = await setParamsToHost(eos, eosname, helix)
       let start_res = await startHost(eos, eosname, eosname)
     } catch(e){
       ctx.reply(`ошибка при запуске союза, обратитесь в поддержку с сообщением: ${e.message}`)
-      console.log(e.message)
+      console.log(e)
     }
 
 }
@@ -1449,6 +1466,50 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   })
 
+
+  bot.command("add_to_team", async(ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+  
+    //TODO only architect can set coordinator!
+
+    let text = ctx.update.message.text
+    let entities = ctx.update.message.entities
+    let dac = ""
+
+    entities.map(entity => {
+      if (entity.type == 'mention')
+        dac = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
+    })
+    
+
+    if (dac == ""){
+    
+      ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
+    
+    } else {
+      
+      let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
+      
+      let curator_object = await getUserByUsername(bot.instanceName, dac)
+
+      if (current_chat && curator_object) {
+        
+        try {
+          await addToTeam(bot, ctx, user, current_chat.host, curator_object.eosname)
+          console.log('ok')
+          await ctx.deleteMessage(ctx.update.message.message_id)
+          await ctx.reply(`Добавлен новый член команды: @${dac}`)
+        } catch(e){
+          console.log(e)
+          await ctx.reply(`Ошибка: ${e.message}`)
+        }
+        
+      } else {
+
+      }
+    }
+  })
+
   bot.on('edited_message', async (ctx) => {
    // if (ctx.update.edited_message.forward_from_chat){
    //    let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
@@ -1506,17 +1567,26 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     
 //   });
   async function checkText(user, ctx, tags, text){
+    
     for (const tag of tags) {
               if (tag.tag === 'log') {
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                console.log('currentChat: ', current_chat)
+                
                 if (current_chat){
-                  let target = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
-                  let ntext 
-                  console.log("ownerEosname == user.eosname", target.ownerEosname, user.eosname, target.ownerEosname === user.eosname)
-                  if (target && target.ownerEosname === user.eosname){
-                    console.log('target: ', target)
-                    await sendMessageToUser(bot, {id: target.id}, { text });
+                  let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")  
+                  // let user_in_team = true
+                  let dacs = await getDacs(bot, target.host)
+                  
+                  user_in_team = dacs.find(el => el.dac == user.eosname)
+
+                  if (target && user_in_team){
+                    
+                    if (ctx.update.message.caption)
+                      await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
+                    else 
+                      await sendMessageToUser(bot, {id: target.id}, { text });
+                      
+
                     ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
                   }
                 }
@@ -1597,14 +1667,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   return
                 }
                 
-                console.log("on report!")
+                
                 if (ctx.update.message.reply_to_message || tag.id){
                   
                   try {
                     let task
                     let reply_to
 
-                    console.log("TEXT: ", text)
                     let [duration, ...data] = text.split(',');
                     data = data.join(',').trim();
                     duration = duration.replace(/[^0-9]/g, '');
@@ -1626,9 +1695,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     
                     reply_to = task.chat_message_id
                     
-                    console.log("RECIEVE REPORT!")
-                    console.log("TASK:", task)
-
                     if (!task){
 
                       // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
@@ -1668,15 +1734,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                           let new_text = await constructReportMessage(bot, current_chat.host, null, reportId)
 
-                          // let new_text = ""
-                          // new_text += `Деятель: ${user.eosname}\n`
-                          // new_text += `Затрачено: ${duration} ч.\n`
-                          // new_text += `За час: ${asset_per_hour}\n\n`
-                          // new_text += `Отчёт: ${text}`
-
-                          // let text2 = cutEntities(text, tags)
                           const buttons = [];
-                          console.log("rvote", reportId)
                           buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
                           
                           const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
@@ -1684,21 +1742,17 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                           await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
                           // await sendMessageToUser(bot, {id: current_chat.id}, { text });
                           let goal
-                          console.log("GOAL: ", goal, )
                           try{
                             
                             goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
                           } catch(e) {return}
-                          console.log("AFTER GOAL: ", goal)
+                          
                           if (goal){
                             await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
                           }
 
                           await ctx.deleteMessage(ctx.update.message.message_id)
                           
-                          // ctx.reply("Отчёт принят и ожидает утверждения", {reply_to_message_id: ctx.update.message.message_id})
-
-                        // }
 
                       } catch(e) {
                         console.error(e)
@@ -1971,9 +2025,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
-    let { text } = ctx.update.message;
+    let text 
 
+    if (ctx.update.message.caption)
+      text = ctx.update.message.caption
+    else text = ctx.update.message.text
+    
+    console.log(ctx.update.message)
     const tags = getHashtags(ctx.update.message);
 
     if (tags.length > 0) {
@@ -1985,14 +2043,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         
         user.eosname = await generateAccount(bot, ctx, false, user.ref);
         await saveUser(bot.instanceName, user)
-      
     }
 
     if (user && user.id != 777000) {
-
+      console.log('here!', tags)
       if (ctx.update.message.chat.type !== 'private') {
         
         if (true) {
+          console.log("INDSID!")
           if (text == '/start_soviet'){
             
             ctx.reply("Введите дату начала и время Совета в формате 2022-08-09T20:00:00:")
@@ -2094,7 +2152,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             await saveUser(bot.instanceName, user);
          
           } else if (tags.length > 0) {
-            
+            console.log("CHECK!")
             await checkText(user, ctx, tags, text)
 
           } else {
