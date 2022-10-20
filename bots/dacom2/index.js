@@ -2180,15 +2180,16 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
               if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) {
 
-                const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
-                
-                console.log('msg', msg)
+                // const msg = await getMessage(bot.instanceName, ctx.chat.id, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
+                let target = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id)
+                      
+                // console.log('msg', msg)
                 
                 let text2 = `${text}`
-                if (msg && msg.message_id) {
-                  const id = await sendMessageToUser(bot, { id: msg.id }, { text: text2 });
+                if (target) {
+                  const id = await sendMessageToUser(bot, { id: target.id }, { text: text2 });
 
-                  await insertMessage(bot.instanceName, user, user.id, text, id, 'partnerChat');
+                  await insertMessage(bot.instanceName, user, target.id, text, id, 'partnerChat');
                   // await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});//goalId: goal.goalId, 
                   await ctx.reply('Ответ отправлен партнёру в ЛС', {reply_to_message_id : ctx.message.message_id})
                 }
