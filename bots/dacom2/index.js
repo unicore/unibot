@@ -850,6 +850,16 @@ async function finishEducation(ctx, id) {
   });
 
 
+  bot.command('make_new_projects_public', async (ctx) => {
+    // finishEducation(ctx)
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    user.is_private = false
+
+    await saveUser(bot.instanceName, user)
+    await ctx.reply('Теперь все новые проекты в этом DAO будут публичны.')
+  });
+
+
   bot.command('create_dao', async (ctx) => {
     // finishEducation(ctx)
     await pushEducation(bot, ctx, 0);
