@@ -486,12 +486,11 @@ async function nextQuiz(bot, user, ctx) {
       k++
     }
     
-    console.log("text on send: ", text)
     let id = await ctx.reply("Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.")
     
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
-    console.log("after send")
-    await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
+    // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');    
+    await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});//goalId: goal.goalId, 
 
 
     user.state = "chat"
@@ -2170,7 +2169,25 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             await checkText(user, ctx, tags, text)
 
           } else {
-         
+            console.log("on ELSE")
+            if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
+
+              let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+              if (current_chat) {
+
+                const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
+                let text2 = `${text}`
+                if (msg && msg.message_id) {
+                  const id = await sendMessageToUser(bot, { id: msg.id }, { text: text2 });
+
+                  await insertMessage(bot.instanceName, user, user.id, text, id, 'partnerChat');
+                  // await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});//goalId: goal.goalId, 
+                  await ctx.reply('Ответ отправлен партнёру в ЛС', {reply_to_message_id : ctx.message.message_id})
+                }
+              }
+
+            }
           }
 
         }
@@ -2196,10 +2213,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             ctx.reply('Ожидаю сообщения')
           }
 
-          else if (user.state === 'chat') {
+          else if (user.state === 'chat' || user.state === '') {
             
             try{
-              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
+              let text2 = `Партнёр пишет: ${text}`
+              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, {reply_to_message_id : user.resume_chat_id});
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -2264,13 +2282,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             } 
 
 
-        } else {
-          console.log("message2")
-          await insertMessage(bot.instanceName, user, 'user', text);
-        }
+        } 
+        // else {
+        //   console.log("message2")
+        //   await insertMessage(bot.instanceName, user, 'user', text);
+        // }
       }
     } else {
-      if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
+        if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
           let union 
           try{
             union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
@@ -2315,12 +2334,30 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})              
                 await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, {"report_chat_message_id":ctx.message.message_id})
               
+              } else {
+
               }
               
               await insertMessage(bot.instanceName, {id: "bot"}, "bot", text, ctx.message.message_id, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
 
             
             }
+          } else {
+
+                if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
+                  if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
+                    if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+                      user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+                      
+                      if (user && !user.resume_chat_id){
+                        // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+                        user.resume_chat_id = ctx.update.message.message_id
+                        await saveUser(bot.instanceName, user);  
+                      }
+                      
+                    }
+                  }
+                }
           }
         } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
         
