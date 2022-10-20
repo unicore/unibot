@@ -472,21 +472,21 @@ async function nextQuiz(bot, user, ctx) {
     // const t = 'Войдите в ваше DAO и получите инструкции:';
     // ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
 
-    // k = 0
-    // let text = ``
-    // //`${quiz.answers[1].answer}, `
-    // // text += `${quiz.answers[2].answer}, `
-    // text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
+    k = 0
+    let text = ``
+    //`${quiz.answers[1].answer}, `
+    // text += `${quiz.answers[2].answer}, `
+    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
     
-    // for (const answer of quiz.answers) {
-    //   if (k > 0) {
-    //     text += `\n${answer.message}`
-    //     text += `\n${answer.answer}\n`
-    //   }
-    //   k++
-    // }
+    for (const answer of quiz.answers) {
+      if (k > 0) {
+        text += `\n${answer.message}`
+        text += `\n${answer.answer}\n`
+      }
+      k++
+    }
     
-    let id = await ctx.reply("Создание DAO временно ограничено. Мы свяжемся с вами в ближайшее время.")
+    let id = await ctx.reply("Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.")
     
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
 
