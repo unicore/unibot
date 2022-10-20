@@ -494,7 +494,7 @@ async function nextQuiz(bot, user, ctx) {
 
 
     user.state = "chat"
-    user.resume_channel_id = id3
+    user.partners_channel_id = id3
     
     await saveUser(bot.instanceName, user)  
     console.log("after all")
@@ -584,8 +584,8 @@ module.exports.init = async (botModel, bot) => {
 
         } else {
 
-          user.resume_chat_id = null
-          user.resume_channel_id = null
+          user.partners_chat_id = null
+          user.partners_channel_id = null
         }
 
         if (!user.eosname) {
@@ -2217,7 +2217,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             
             try{
               let text2 = `Партнёр пишет: ${text}`
-              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, {reply_to_message_id : user.resume_chat_id});
+              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, {reply_to_message_id : user.partners_chat_id});
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -2349,9 +2349,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                       user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
                       
-                      if (user && !user.resume_chat_id){
+                      if (user && !user.partners_chat_id){
                         // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-                        user.resume_chat_id = ctx.update.message.message_id
+                        user.partners_chat_id = ctx.update.message.message_id
                         await saveUser(bot.instanceName, user);  
                       }
                       

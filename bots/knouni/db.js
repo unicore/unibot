@@ -140,12 +140,12 @@ async function getUserByEosName(suffix, eosname) {
 }
 
 
-async function getUserByResumeChannelId(suffix, request_channel_id) {
+async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUsers_${suffix}`);
 
-    return await collection.findOne({ request_channel_id });
+    return await collection.findOne({ resume_channel_id });
   } catch (e) {
     console.log('error: ', e.message);
   }
