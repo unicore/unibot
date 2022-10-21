@@ -2,6 +2,7 @@ const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
 const { saveUser, getUserByEosName } = require('./db');
+const {notify} = require('./notifier')
 
 async function getVotesCount(bot, hostname, username) {
   let votes = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'votes');
@@ -165,7 +166,7 @@ async function constructTaskMessage(bot, hostname, task, taskId){
   return text
 }
 
-async function constructReportMessage(bot, hostname, report, reportId){
+async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId)
     report = await fetchReport(bot, hostname, reportId);
 
@@ -447,10 +448,8 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let host = await fetchHost(bot, hostname)
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
-  console.log("BEFORE SINCIDE: ", user.eosname, hostname, host, report.approved)
-
+  
   if (user.eosname == host.architect && report.approved == 0){
-    console.log("SINSIDE")
     actions.push({
         account: 'unicore',
         name: 'approver',
@@ -490,6 +489,9 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     });
 
     await editReportMsg(bot, ctx, user, hostname, reportId)
+    let report = await fetchReport(bot, hostname, reportId);
+  
+    return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
 
   } catch (e) {

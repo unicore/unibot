@@ -4,6 +4,8 @@ const { ChainsSingleton, generateAccount: generateUniAccount } = require('unicor
 const EosApi = require('eosjs-api');
 const {Octokit} = require('@octokit/rest');
 
+const {notify} = require('./notifier')
+
 const { restoreAccount } = require('./restore');
 const {
   mainButtons, backToMainMenu, demoButtons,
@@ -1588,19 +1590,22 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 if (current_chat){
                   let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")  
                   // let user_in_team = true
-                  let dacs = await getDacs(bot, target.host)
-                  
-                  user_in_team = dacs.find(el => el.dac == user.eosname)
+                  if (target) {
 
-                  if (target && user_in_team){
+                    let dacs = await getDacs(bot, target.host)
                     
-                    if (ctx.update.message.caption)
-                      await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
-                    else 
-                      await sendMessageToUser(bot, {id: target.id}, { text });
-                      
+                    user_in_team = dacs.find(el => el.dac == user.eosname)
 
-                    ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                    if (target && user_in_team){
+                      
+                      if (ctx.update.message.caption)
+                        await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
+                      else 
+                        await sendMessageToUser(bot, {id: target.id}, { text });
+                        
+
+                      ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                    }
                   }
                 }
                                 
@@ -1680,29 +1685,49 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   return
                 }
                 
-                
-                if (ctx.update.message.reply_to_message || tag.id){
+                let is_fast_report = (tags.find(t => t.tag == 'goal') && tags.find(t => t.tag == 'task') && tags.find(t => t.tag == 'report'))
+                if (ctx.update.message.reply_to_message || tag.id || is_fast_report){
                   
                   try {
                     let task
                     let reply_to
 
                     let [duration, ...data] = text.split(',');
-                    data = data.join(',').trim();
-                    duration = duration.replace(/[^0-9]/g, '');
-                    duration = Number(duration);
+                    
+                    if (!is_fast_report){
 
-                    if ((!duration && duration !== 0) || !data)
-                    {
-                      await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
-                      return
+                      data = data.join(',').trim();
+                      duration = duration.replace(/[^0-9]/g, '');
+                      duration = Number(duration);
+
+                      if ((!duration && duration !== 0) || !data)
+                      {
+                        await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
+                        return
+                      }
+                    } else {
+
+                      data = text
+                      duration = 10
                     }
 
-                    if (tag.id){
-                      task = await getTaskById(bot.instanceName, current_chat.host, tag.id)
+                    if (!is_fast_report){
                       
+                      if (tag.id) {
+                      
+                        task = await getTaskById(bot.instanceName, current_chat.host, tag.id)
+                        
+                      } else {
+
+                        task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id)
+
+                      }
                     } else {
-                      task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id)
+                     
+                      let task_tag = tags.find(t => t.tag == 'task')
+
+                      task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id)
+                        
 
                     }
                     
@@ -1710,10 +1735,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     
                     if (!task){
 
-                      // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                      exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
-
-                      ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие. Канал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                      ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие.`, {reply_to_message_id: ctx.update.message.message_id})
                   
                     } else {
 
@@ -1751,20 +1773,29 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                           buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
                           
                           const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-
-                          await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
-                          // await sendMessageToUser(bot, {id: current_chat.id}, { text });
-                          let goal
-                          try{
+                          if (!is_fast_report) {
                             
-                            goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
-                          } catch(e) {return}
-                          
-                          if (goal){
-                            await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
+                            await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
+                            await ctx.deleteMessage(ctx.update.message.message_id)
+                         
+                          } else {
+                            console.log(task)
+                            await ctx.reply("Отчёт принят и ожидает проверки", {reply_to_message_id: ctx.update.message.message_id})
+                            await sendMessageToUser(bot, {id: task.chat_id}, { text: new_text }, {reply_to_message_id: reply_to, ...request});
+                              
                           }
+                          
+                          // await sendMessageToUser(bot, {id: current_chat.id}, { text });
+                         
+                          // let goal
+                          // try{
+                          //   goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
+                          // } catch(e) {return}
+                          
+                          // if (goal){
+                          //   await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
+                          // }
 
-                          await ctx.deleteMessage(ctx.update.message.message_id)
                           
 
                       } catch(e) {
@@ -1792,7 +1823,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
                   exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
 
-                  ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                  ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
                 }
 
               } else if (tag.tag === 'task'){
@@ -1927,11 +1958,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                 } else {
                   // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                
-                  // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
-                
-                  ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.\nКанал целей: ${exist.link}`, {reply_to_message_id: ctx.update.message.message_id})
+                  if(!tags.find(t => t.tag == 'report')) {
+
+
+                    // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                    exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
+                  
+                    ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
+                  }
                 }
 
               } else if (tag.tag === 'goal') {
@@ -1954,72 +1988,75 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   return
                 }
 
-                let text_goal = text
-
-                const buttons = [];
-
-                buttons.push(Markup.button.callback('голосовать', 'vote'));
                 
-                const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-                
-                let t
-                let text_to_channel
+                if (!tags.find(t => t.tag == 'report') && !tags.find(t => t.tag == 'task')) {
 
-                
-                if (project.id) {
-                  let pr
-                  let projectChannelId
-                    
-                  pr = await getProject(bot.instanceName, project.id)
+                  let text_goal = text
 
-                  if (pr) {
-                    
-                    projectChannelId = pr.id
-                    
-                    let msg
-                    let hostname = pr.host 
+                  const buttons = [];
 
-                    let goal = {
-                      hostname: hostname,
-                      title: text,
-                      description: "",
-                      target: "0.0000 FLOWER",
-                      parent_id: 0,
+                  buttons.push(Markup.button.callback('голосовать', 'vote'));
+                  
+                  const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+                  
+                  let t
+                  let text_to_channel
+
+                  
+                  if (project.id) {
+                    let pr
+                    let projectChannelId
+                      
+                    pr = await getProject(bot.instanceName, project.id)
+
+                    if (pr) {
+                      
+                      projectChannelId = pr.id
+                      
+                      let msg
+                      let hostname = pr.host 
+
+                      let goal = {
+                        hostname: hostname,
+                        title: text,
+                        description: "",
+                        target: "0.0000 FLOWER",
+                        parent_id: 0,
+                      }
+                      
+                      console.log("goal: ", goal)
+
+                      goal.goalId = await createGoal(bot, ctx, user, goal)
+                      
+                      if (!goal.goalId){
+                        ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
+                        return
+                      }
+
+                      t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
+                      text_to_channel = t
+                      t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
+                      await ctx.reply(`Добавляем цель в проект`)
+                      
+                      const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
+                      
+                      await insertGoal(bot.instanceName, {
+                        host: goal.hostname,
+                        title: text,
+                        goal_id: goal.goalId,
+                        channel_message_id: projectMessageId,
+                        channel_id: projectChannelId
+                      })
+                    } else {
+                      await ctx.reply(`Проект не найден`)
                     }
-                    
-                    console.log("goal: ", goal)
-
-                    goal.goalId = await createGoal(bot, ctx, user, goal)
-                    
-                    if (!goal.goalId){
-                      ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
-                      return
-                    }
-
-                    t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
-                    text_to_channel = t
-                    t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
-                    await ctx.reply(`Добавляем цель в проект`)
-                    
-                    const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
-                    
-                    await insertGoal(bot.instanceName, {
-                      host: goal.hostname,
-                      title: text,
-                      goal_id: goal.goalId,
-                      channel_message_id: projectMessageId,
-                      channel_id: projectChannelId
-                    })
                   } else {
-                    await ctx.reply(`Проект не найден`)
+                    await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
                   }
-                } else {
-                  await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
-                }
 
-                if (t)
-                  await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
-                
+                  if (t)
+                    await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
+                }
               }
 
 
@@ -2446,8 +2483,10 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     const hostname = ctx.match[1];
     const reportId = parseInt(ctx.match[2], 10);
     
-    await rvoteAction(bot, ctx, user, hostname, reportId, true)
-    
+    let report = await rvoteAction(bot, ctx, user, hostname, reportId, true)
+    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+    await notify(bot, current_chat, hostname, 'acceptReport', {...report})
   });
 
 
