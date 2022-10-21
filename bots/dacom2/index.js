@@ -1147,7 +1147,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   })
 
 
-  bot.command("add_news_channel", async(ctx) => {
+  bot.command("add_channel", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
@@ -1498,7 +1498,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
     if (dac == ""){
     
-      ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
+      ctx.reply("Для добавления члена команды отметьте пользователя /add_to_team @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     
     } else {
       
@@ -1587,15 +1587,17 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 
                 if (current_chat) {
+
                   let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")  
-                  // let user_in_team = true
+                  
                   if (target) {
 
                     let dacs = await getDacs(bot, target.host)
                     
                     user_in_team = dacs.find(el => el.dac == user.eosname)
+                    
                     if (!user_in_team) {
-                      ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
+                      await ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
                       return
                     }
 
