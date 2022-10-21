@@ -1298,7 +1298,7 @@ async function addToTeam(bot, ctx, user, hostname, dac, title) {
           weight: 1,
           limit_type: "",
           income_limit: "0.0000 FLOWER",
-          title: "",
+          title: title,
           descriptor: ""
         },
       }],

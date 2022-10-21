@@ -794,6 +794,29 @@ async function finishEducation(ctx, id) {
 
   })
 
+
+  bot.command('team', async(ctx) => {
+    
+    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+    let dacs = await getDacs(bot, current_chat.host)
+
+    let text = ''
+    let k = 0
+    let u
+    
+    for (const dac of dacs) {
+      k++
+      u = await getUserByEosName(bot.instanceName, dac.dac)
+      text+= `Команда DAO ${current_chat.unionName}:\n`
+      text+= `${k}. ${'@' + u.username || u.eosname}\n`
+      text+= `\t\t\t роль: ${dac.role == '' ? 'не определена' : dac.role}\n`
+    }
+
+    await ctx.reply(text)
+
+  })
+
+
   bot.command('list', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -1490,11 +1513,18 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let entities = ctx.update.message.entities
     let dac = ""
 
+    
+
     entities.map(entity => {
       if (entity.type == 'mention')
         dac = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
     })
     
+    text = text.replace('/add_to_team ', '')
+    text = text.replace('@'+dac, "")
+    
+    let role = text.replace(' ', '')
+    console.log('text: ', role)
 
     if (dac == ""){
     
@@ -1509,7 +1539,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       if (current_chat && curator_object) {
         
         try {
-          await addToTeam(bot, ctx, user, current_chat.host, curator_object.eosname)
+          await addToTeam(bot, ctx, user, current_chat.host, curator_object.eosname, role)
           console.log('ok')
           await ctx.deleteMessage(ctx.update.message.message_id)
           await ctx.reply(`Добавлен новый член команды: @${dac}`)
@@ -2020,6 +2050,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                
                 if (!current_chat) 
                   return
+                
+                let dacs = await getDacs(bot, current_chat.host)
+                let user_in_team = dacs.find(el => el.dac == user.eosname)
+
+                if (!user_in_team) {
+                  await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
+                }
 
                 let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
                
