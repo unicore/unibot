@@ -1157,10 +1157,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       return
     }
     
-    let newsChannel =  getUnionByHostType(bot.instanceName, current_chat.host, "unionNews")  
-    
+    let newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, "unionNews")  
+    console.log("newsChannel", newsChannel)
     if (!newsChannel){
-
 
       user.state = 'set_news_channel'
       await saveUser(bot.instanceName, user);
@@ -1587,7 +1586,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               if (tag.tag === 'log') {
                 let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                 
-                if (current_chat){
+                if (current_chat) {
                   let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")  
                   // let user_in_team = true
                   if (target) {
@@ -1595,6 +1594,10 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     let dacs = await getDacs(bot, target.host)
                     
                     user_in_team = dacs.find(el => el.dac == user.eosname)
+                    if (!user_in_team) {
+                      ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
+                      return
+                    }
 
                     if (target && user_in_team){
                       
@@ -1604,7 +1607,48 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                         await sendMessageToUser(bot, {id: target.id}, { text });
                         
 
-                      ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                      await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                    }
+                  } else {
+
+                    let project = tags.find(el => el.tag == 'project')
+                    
+                    if (project) {
+                    
+                      if (project.id) {
+                        let pr = await getProject(bot.instanceName, project.id)
+
+                        let goal = tags.find(el => el.tag == 'goal')
+                        if (goal) {
+                            let g = await getGoal(bot.instanceName, goal.id)
+                            if (g){
+                              if (ctx.update.message.caption)
+                                await sendMessageToUser(bot, {id: g.chat_id}, ctx.update.message, {caption: text, reply_to_message_id: g.chat_message_id});
+                              else 
+                                await sendMessageToUser(bot, {id: g.chat_id}, { text }, {reply_to_message_id: g.chat_message_id});
+                              
+                              await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                              
+                            }
+                        } else {
+
+                          if (ctx.update.message.caption)
+                            await sendMessageToUser(bot, {id: pr.id}, ctx.update.message, {caption: text});
+                          else 
+                            await sendMessageToUser(bot, {id: pr.id}, { text });
+                          
+                          await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
+                            
+                        }
+                        
+                      } else {
+
+                        await ctx.reply(`Ошибка! Предоставьте идентификатор проекта.`)  
+
+                      }
+                      
+                      //todo check project_tag
+                      
                     }
                   }
                 }
@@ -1614,8 +1658,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               if (tag.tag === 'project'){
                 
                 let gexist = tags.find(el => el.tag == 'goal')
+                let logexist = tags.find(el => el.tag == 'log')
                 
-                if (!gexist) {
+                if (!gexist && !logexist) {
 
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                  
@@ -1989,7 +2034,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 }
 
                 
-                if (!tags.find(t => t.tag == 'report') && !tags.find(t => t.tag == 'task')) {
+                if (!tags.find(t => t.tag == 'report') && !tags.find(t => t.tag == 'task') && !tags.find(t => t.tag == 'log')) {
 
                   let text_goal = text
 
