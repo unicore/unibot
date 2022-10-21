@@ -476,9 +476,9 @@ async function nextQuiz(bot, user, ctx) {
 
     k = 0
     let text = ``
-    //`${quiz.answers[1].answer}, `
-    // text += `${quiz.answers[2].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username} [${user.eosname}]\n`
+    
+    // +${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, //phone
+    text += `@${user.username} [${user.eosname}]\n`
     
     for (const answer of quiz.answers) {
       if (k > 0) {
@@ -803,11 +803,11 @@ async function finishEducation(ctx, id) {
     let text = ''
     let k = 0
     let u
-    
+    text+= `Команда ${current_chat.unionName}:\n`
+      
     for (const dac of dacs) {
       k++
       u = await getUserByEosName(bot.instanceName, dac.dac)
-      text+= `Команда DAO ${current_chat.unionName}:\n`
       text+= `${k}. ${'@' + u.username || u.eosname}\n`
       text+= `\t\t\t роль: ${dac.role == '' ? 'не определена' : dac.role}\n`
     }
@@ -830,7 +830,7 @@ async function finishEducation(ctx, id) {
      
       let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")  
      
-      text += `Публичные проекты экосистемы Коллективного Разума:\n`
+      text += `Все публичные проекты экосистемы:\n`
  
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`
