@@ -1180,9 +1180,15 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       return
     }
     
+    if (current_chat.ownerEosname != user.eosname){
+      await ctx.reply(`Вы не создавали это DAO и не можете добавить к нему новостной канал.`)
+      return
+    }
+
     let newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, "unionNews")  
     console.log("newsChannel", newsChannel)
-    if (!newsChannel){
+   
+    if (!newsChannel) {
 
       user.state = 'set_news_channel'
       await saveUser(bot.instanceName, user);
@@ -2077,7 +2083,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
                     return
                   }
-                  
+
                   let text_goal = text
 
                   const buttons = [];
