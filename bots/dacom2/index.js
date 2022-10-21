@@ -2054,9 +2054,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 let dacs = await getDacs(bot, current_chat.host)
                 let user_in_team = dacs.find(el => el.dac == user.eosname)
 
-                if (!user_in_team) {
-                  await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
-                }
+
 
                 let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
                
@@ -2075,6 +2073,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 
                 if (!tags.find(t => t.tag == 'report') && !tags.find(t => t.tag == 'task') && !tags.find(t => t.tag == 'log')) {
 
+                  if (!user_in_team) {
+                    await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
+                    return
+                  }
+                  
                   let text_goal = text
 
                   const buttons = [];
