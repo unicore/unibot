@@ -11,7 +11,6 @@ module.exports = {
   rules: {
     'no-console': 'off',
     'linebreak-style': ['error', 'unix'],
-    'no-undef': 'off',
     'no-use-before-define': 'off',
     'no-restricted-syntax': 'off',
     'no-async-promise-executor': 'off',

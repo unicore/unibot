@@ -178,15 +178,15 @@ async function startQuiz(bot, ctx, user) {
 
   await saveQuiz(bot.instanceName, user, q);
 
-  
+
   const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
-  
+
   await ctx.reply('Добро пожаловать!.', request);
 
-  
+
   const buttons = [];
   buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
-  
+
 
   return ctx.reply('Институт Коллективного Разума готов принять вашу заявку на сотрудничество. У нас к вам будет всего несколько вопросов. После ответа на них, вы будете приглашены к деятельности лабораторий Института за вознаграждение.\n\nПожалуйста, поделитесь контактом для продолжения. 🌐', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
@@ -239,8 +239,8 @@ async function nextQuiz(bot, user, ctx) {
     let text = `${quiz.answers[1].answer}, `
     text += `${quiz.answers[2].answer}, `
     text += `+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, @${user.username}\n`
-    
-    k = 0
+
+    let k = 0
 
     for (const answer of quiz.answers) {
       if (k > 2){
@@ -249,21 +249,21 @@ async function nextQuiz(bot, user, ctx) {
       }
       k++
     }
-  
+
     let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
-    
+
     user.state = "chat"
     user.resume_channel_id = id
 
     if (!user.eosname) {
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
-    } 
-  
-    await saveUser(bot.instanceName, user)  
-    
-    
+    }
+
+    await saveUser(bot.instanceName, user)
+
+
   }
 }
 
@@ -384,7 +384,7 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
-    } 
+    }
 
   });
 
@@ -398,13 +398,13 @@ module.exports.init = async (botModel, bot) => {
 
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
-        
+
         // console.log('need find reply: ', ctx.update.message.reply_to_message);
-        
+
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
-          
+
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
@@ -413,7 +413,7 @@ module.exports.init = async (botModel, bot) => {
 
 
           }
-        
+
 
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -447,7 +447,7 @@ module.exports.init = async (botModel, bot) => {
             await saveUser(bot.instanceName, user);
 
             // ctx.reply('Сообщение отправлено');
-          } 
+          }
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
         }
@@ -461,9 +461,9 @@ module.exports.init = async (botModel, bot) => {
               if (user && !user.resume_chat_id){
                 // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
                 user.resume_chat_id = ctx.update.message.message_id
-                await saveUser(bot.instanceName, user);  
+                await saveUser(bot.instanceName, user);
               }
-              
+
             }
           }
         } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя

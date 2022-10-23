@@ -123,7 +123,7 @@ async function getCondition(bot, hostname, key) {
 
 async function getDacs(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'dacs');
-  
+
   return conditions;
 }
 
@@ -202,7 +202,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   toPrint += `\n\tНа столе: ${params.currentPool.filled}`;
   toPrint += `\n\tДо заполнения: ${params.currentPool.remain}`;
   toPrint += `\n\tДо перезагрузки: ${params.currentPool.expired_time}`;
-  
+
   // toPrint += `\n\nМаксимальный взнос: ${maxDeposit === 0 ? 'не ограничен' : `${(maxDeposit / 10000).toFixed(4)} FLOWER`}`;
   toPrint += '\n----------------------------------';
 
@@ -257,12 +257,12 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   let reply_to
   if (ctx.update.message.reply_to_message)
     reply_to = ctx.update.message.reply_to_message.message_id
-  
+
   try {
     if (params.currentPool.expired_time === 'режим ожидания') {
       await ctx.deleteMessage();
       // eslint-disable-next-line max-len
-      
+
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
       let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
@@ -395,22 +395,22 @@ async function printHelixStat(bot, user, hostname, ctx) {
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-    
+
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
     console.log("estimateSysIncome", estimateSysIncome)
-    
+
     let cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
     let hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
     let ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
     let dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    
+
     // console.log("royalty: ", royalty)
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
     let convert_rate = params.host.sale_shift / 10000
     let levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
-    
+
 
     // text += '\n---------------------------------';
     text += `\n| Союз: ${params.host.username} | ${params.host.title}`;
@@ -418,9 +418,9 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n| Взносы: ${estimateSysIncome.free_flow_percent}% FLOWER`;
     // text += `\n| Кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     text += `\n| Интеллектуальная собственность: ${params.host.approved_reports} объектов`;
-    
+
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     // text += `\n| Свободный поток: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     // text += `\n|\t\t\t\t\tЦелевой поток: ${cfund_percent}%`;
     // text += `\n|\t\t\t\t\tФракционный поток: ${hfund_percent}%`;
@@ -429,12 +429,12 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `${levels}`
     // text += `\n| Кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     // text += `\n| Всего кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
-    
+
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     // text += `\n| Всего фракций: ${totalShares} POWER`;
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     text += `\n| Капитализация: ${convert_rate * totalShares * outUsdRate} USD`;
     text += `\n|\t\t\t\t\tВсего фракций: ${totalShares} POWER`;
     // text += `\n|\t\t\t\t\tСтоимость: ${convert_rate * totalShares} FLOWER`;
@@ -446,7 +446,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n|\t\t\t\t\tФракционный фонд: ${hfund_percent}%`;
     // text += `\n|\t\t\t\t\tКорпоративный фонд: ${dacs_percent}%`;
     // text += `\n|\t\t\t\t\tПартнёрский фонд: ${ref_percent}%`;
-    
+
     // text += `\n|\t\t\t\t\tСтоимость: ${(parseFloat(liquidBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
     // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
     // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
@@ -459,7 +459,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
     text += `\nПоказать помощь: /help`
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
-    
+
     let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
 
     setTimeout(
@@ -509,6 +509,7 @@ async function printWallet(bot, user, ctx, hostname) {
     let params
     let totalShares
     let estimateSysIncome
+    let royalty
 
     if (hostname){
       params = await getHelixParams(bot, hostname);
@@ -517,13 +518,13 @@ async function printWallet(bot, user, ctx, hostname) {
       userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
       io = await getUserIntelOwn(bot, hostname, user.eosname)
       estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    
+
       royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-      
+
     }
 
 
-    
+
     // text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
     text += `\n| Цветки: ${totalBal}`;
@@ -533,7 +534,7 @@ async function printWallet(bot, user, ctx, hostname) {
     // text += `\n| Память: ${ram}`;
     text += `\n| Курс: ${parseFloat(outUsdRate).toFixed(8)} USD / FLOWER`;
     text += `\n| Стоимость: ${(parseFloat(totalBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
-    
+
     if (hostname) {
       text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
       // text += `\n| Взносы: ${0} FLOWER`;
@@ -549,7 +550,7 @@ async function printWallet(bot, user, ctx, hostname) {
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else {
       text += `\n\nсообщение будет удалено через 30 секунд`;
-    
+
       let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
 
       setTimeout(
@@ -599,7 +600,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-    
+
     const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
@@ -610,9 +611,9 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
     let convert_rate = params.host.sale_shift / 10000
-  
+
     let io = await getUserIntelOwn(bot, hostname, user.eosname)
-    
+
     // text += '\n---------------------------------';
     text += `\n| Аккаунт: ${user.eosname}`;
     text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
@@ -632,10 +633,10 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     text += '\n---------------------------------';
     text += `\nСсылка для приглашений: ${link}\n`; //
     text += `\n\nсообщение будет удалено через 30 секунд.`;
-    
+
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
-    
+
     let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
 
     setTimeout(
@@ -788,7 +789,7 @@ async function retireAction(bot, user, amount, address) {
       reject(e)
     });
 
-  })  
+  })
 }
 
 async function massWithdrawAction(bot, user, hostname, balances) {
@@ -805,10 +806,10 @@ async function massWithdrawAction(bot, user, hostname, balances) {
   }
 }
 
- 
+
 async function getUserIntelOwn(bot, hostname, username) {
   const ios = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'intelown', username, username, 1);
-  
+
   return ios[0] || {total_reports: 0, approved_reports: 0}
 }
 
@@ -1190,7 +1191,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 }
 
 async function printProjects(bot, ctx) {
-  
+
 }
 
 async function exitTailAction(bot, hostname, user, tailid) {
@@ -1262,7 +1263,7 @@ async function getWelcome(){
   text += `Для создания цели напишите ваш запрос с тегом #goal в этот чат.`
   text += `Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий`
   text += `Получайте фракции (POWER) `
-  
+
   return text
 }
 

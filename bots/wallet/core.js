@@ -87,7 +87,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     }
 
     totalPurchaseAmount = `${(parseFloat(totalPurchaseAmount) + parseFloat(balance.purchase_amount)).toFixed(4)} FLOWER`;
-  
+
 
     if (hostname) {
       if (parseFloat(balance.available) < parseFloat(balance.purchase_amount)) {
@@ -355,7 +355,7 @@ async function withdrawAllUserRefBalances(bot, user) {
   await Promise.all(messagePromises);
 }
 
-async function cantBuyTicket(bot, user) {
+async function cantBuyTicket(ctx, bot, user) {
 
   const params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
@@ -370,7 +370,7 @@ async function printWallet(bot, user, ctx) {
     // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
     // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-    
+
   if (user && user.eosname) {
     // const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
@@ -384,21 +384,21 @@ async function printWallet(bot, user, ctx) {
     // let currentTicket = tickets[0]
 
     // buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
-    
+
     // if (balances.length === 0)
       buttons.push(Markup.button.callback('🎫 купить лицензию', `buyticket`));
     // else
       // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
 
     buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
-    
+
 
     const refStat = await getRefStat(bot, user.eosname, bot.getEnv().SYMBOL);
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    
+
     const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
     const assetBlockedNow = balances.totalBalances;
@@ -426,7 +426,7 @@ async function printWallet(bot, user, ctx) {
     // text += `\n| Билет: ${currentTicket._id.toString().substring(0, 6) }`;
     text += '\n---------------------------------';
     text += `\n| До итогов: ${helix.currentPool.expired_time}`
-    
+
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
@@ -510,7 +510,7 @@ async function retireAction(bot, user, amount, address) {
       reject(e)
     });
 
-  })  
+  })
 }
 
 
