@@ -139,7 +139,6 @@ async function getUserByEosName(suffix, eosname) {
   return null;
 }
 
-
 async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
     const db = await loadDB();
@@ -340,7 +339,6 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
-
 // eslint-disable-next-line camelcase
 async function insertRequest(suffix, user, message_id, message) {
   try {
@@ -355,7 +353,6 @@ async function insertRequest(suffix, user, message_id, message) {
     console.log('error: ', e.message);
   }
 }
-
 
 async function closeRequest(suffix, message_id) {
   try {

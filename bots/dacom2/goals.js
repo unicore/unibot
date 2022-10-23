@@ -26,12 +26,10 @@ async function fetchGoal(bot, hostname, goalId) {
   return goals[0]
 }
 
-
 async function fetchReport(bot, hostname, reportId) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'reports3', reportId, reportId, 1);
   return goals[0]
 }
-
 
 async function fetchTask(bot, hostname, taskId) {
   const tasks = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'tasks', taskId, taskId, 1);
@@ -85,7 +83,6 @@ async function disableButtons(bot, ctx, up) {
   }
 }
 
-
 async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
   let report = await fetchReport(bot, hostname, reportId);
@@ -101,7 +98,6 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
     console.log("error on enable buttons: ", e.message)
   }
 }
-
 
 async function constructGoalMessage(bot, hostname, goal, goalId){
   if (!goal && goalId)
@@ -147,7 +143,6 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
 }
 
-
 async function constructTaskMessage(bot, hostname, task, taskId){
   if (!task && taskId)
     task = await fetchTask(bot, hostname, taskId);
@@ -157,7 +152,6 @@ async function constructTaskMessage(bot, hostname, task, taskId){
 
   let user = await getUserByEosName(bot.instanceName, task.creator)
   let from = (user.username && user.username !== "") ? '@' + user.username : task.creator
-
 
   text += `🏳️ #ДЕЙСТВИЕ_${task.id} от ${from}: \n`
   text += `${task.title}\n\n`
@@ -182,7 +176,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let from = (user.username && user.username !== "") ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
-
 
     if (bot.octokit) {
       try {
@@ -301,7 +294,6 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 
   //get message from chat
 
-
   try{
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
   } catch(e){
@@ -313,23 +305,15 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   //     modified = true
   // })
 
-
   // console.log("modified", modified)
-
 
   // console.log(buttons)
 
-
-
 }
-
-
 
 async function editReportMsg(bot, ctx, user, hostname, reportId) {
   let report = await fetchReport(bot, hostname, reportId);
   let new_text = await constructReportMessage(bot, hostname, report)
-
-
 
   let buttons = [];
   buttons.push(Markup.button.callback(`👍 (${report.voters.length})`, `rvote ${hostname} ${reportId}`));
@@ -348,10 +332,6 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
   }
 
 }
-
-
-
-
 
 async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 
@@ -386,12 +366,10 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
    let message_id = ctx.update.message.reply_to_message.message_id
    let chat_id = ctx.update.message.reply_to_message.chat.id
 
-
   const buttons = [];
 
   buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${taskId} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
   const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-
 
    try{
     await bot.telegram.editMessageText(chat_id, message_id, null, text, request);
@@ -400,11 +378,9 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   }
 }
 
-
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
 
   const eos = await bot.uni.getEosPassInstance(user.wif);
-
 
     await eos.transact({
       actions: [{
@@ -437,8 +413,6 @@ async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
     console.log("same message!", e)
   }
 }
-
-
 
 async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   const eos = await bot.uni.getEosPassInstance(user.wif);

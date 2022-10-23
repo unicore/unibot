@@ -139,7 +139,6 @@ async function getUserByEosName(suffix, eosname) {
   return null;
 }
 
-
 async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
     const db = await loadDB();

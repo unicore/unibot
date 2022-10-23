@@ -138,7 +138,6 @@ const {
 const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
-
 async function generateHost(bot, ctx, host) {
   return new Promise(async (resolve, reject) => {
 
@@ -182,7 +181,6 @@ async function generateHost(bot, ctx, host) {
         // await ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
       }
 
-
     } catch (e) {
       console.log(e)
 
@@ -191,12 +189,9 @@ async function generateHost(bot, ctx, host) {
 
     }
 
-
   })
 
 }
-
-
 
 async function generateAccount(bot, ctx, isAdminUser, ref, userext) {
   const user = userext || ctx.update.message.from;
@@ -248,11 +243,9 @@ async function generateAccount(bot, ctx, isAdminUser, ref, userext) {
   return user.eosname;
 }
 
-
 async function isAdmin(bot, id) {
   return Number(id) === Number(bot.getEnv().ADMIN_ID);
 }
-
 
 async function checkForExistBCAccount(bot, ctx) {
   const user = ctx.update.message.from.id || ctx.update.callback_query.from.id;
@@ -266,7 +259,6 @@ async function checkForExistBCAccount(bot, ctx) {
   return true;
 }
 
-
 const quizDefinition = [
   { message: 'Contacts' },
   { message: 'Как вас зовут?' },
@@ -274,13 +266,11 @@ const quizDefinition = [
   { message: 'Расскажите о себе и/или пришлите профиль в любой соцсети' },
 ];
 
-
 async function welcome(bot, ctx){
 
     await pushEducation(bot, ctx, 0);
 
 };
-
 
 async function finishEducation(bot, ctx, id) {
 
@@ -304,7 +294,6 @@ async function finishEducation(bot, ctx, id) {
     await ctx.replyWithHTML(t);
   }
   //Ваша интеллектуальная собственность: /iam,\n
-
 
 }
 
@@ -342,7 +331,6 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
     let current_chat = await getUnion(bot.instanceName, (id).toString())
 
-
     if (currentSlideIndex + 1 === education.length){
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
       // buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
@@ -350,10 +338,8 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
 
-
       if (!current_chat)
         buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
-
 
     } else {
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
@@ -366,11 +352,8 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
         buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
     }
 
-
-
     let text = '';
     text += `Создать DAO.`// [${currentSlideIndex + 1} / ${education.length}]`
-
 
     text += `\n\n${slide.text}`;
 
@@ -406,7 +389,6 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
     ctx.reply(`error 2: ${e.message}`)
   }
 }
-
 
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
@@ -460,7 +442,6 @@ async function nextQuiz(bot, user, ctx) {
       q.buttons.map((b) => {
         buttons.push(b);
       });
-
 
       await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
     } else {
@@ -520,15 +501,11 @@ async function nextQuiz(bot, user, ctx) {
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
     await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});//goalId: goal.goalId,
 
-
     user.state = "chat"
     user.partners_channel_id = id3
 
     await saveUser(bot.instanceName, user)
     console.log("after all")
-
-
-
 
   }
 }
@@ -627,7 +604,6 @@ module.exports.init = async (botModel, bot) => {
         const menu = Markup
           .keyboard(mainButtons, { columns: 2 }).resize();
 
-
         // buttons.push(Markup.button.callback('🆕 создать союз', `createunion`));
         const clearMenu = Markup.removeKeyboard();
 
@@ -636,7 +612,6 @@ module.exports.init = async (botModel, bot) => {
 
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-
         let t = 'Добро пожаловать.\n\n';
         await ctx.reply(t, clearMenu);
 
@@ -644,8 +619,6 @@ module.exports.init = async (botModel, bot) => {
 
         //TODO UNCOMMENT IT
         // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
-
 
       }
     } else {
@@ -662,11 +635,8 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-
       let t = 'Добро пожаловать.\n\n';
       await ctx.reply(t, clearMenu);
-
-
 
       //TODO запуск WELCOME
       // let res = await ctx.getChatAdministrators()
@@ -712,7 +682,6 @@ module.exports.init = async (botModel, bot) => {
     ctx.reply('Главный Вход: https://intellect.run');
   });
 
-
   bot.hears('🤝 мои союзы', async (ctx) => {
     await getUser(bot.instanceName, ctx.update.message.from.id);
     await checkForExistBCAccount(bot, ctx);
@@ -724,9 +693,6 @@ module.exports.init = async (botModel, bot) => {
     ctx.reply('Союз - это цифровое объединение людей в чате с копилкой. Копилки пополняются из разных направлений и распределяется по фондам союзов и их партнёров. Партнёр - это участник, принявший кодекс и принятый в систему на равных правах со всеми партнёрами системы. Каждый участник союза - это партнёр всех союзов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   });
 
-
-
-
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // if (ctx.update.message.chat.type === 'private') {
@@ -734,7 +700,6 @@ module.exports.init = async (botModel, bot) => {
     // }
 
   });
-
 
   function getHashtags(message) {
 
@@ -752,7 +717,6 @@ module.exports.init = async (botModel, bot) => {
       text = message.text
 
     }
-
 
     if (entities) {
       entities.forEach((entity) => {
@@ -794,7 +758,6 @@ module.exports.init = async (botModel, bot) => {
 
   })
 
-
   bot.command('team', async(ctx) => {
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
@@ -815,7 +778,6 @@ module.exports.init = async (botModel, bot) => {
     await ctx.reply(text)
 
   })
-
 
   bot.command('list', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -843,7 +805,6 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
   bot.command('projects', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -867,7 +828,6 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
   bot.command('make_new_projects_private', async (ctx) => {
     // finishEducation(bot, ctx)
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -877,7 +837,6 @@ module.exports.init = async (botModel, bot) => {
     await ctx.reply('Теперь все новые проекты в этом DAO будут доступны только в этом DAO.')
   });
 
-
   bot.command('make_new_projects_public', async (ctx) => {
     // finishEducation(bot, ctx)
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -886,7 +845,6 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user)
     await ctx.reply('Теперь все новые проекты в этом DAO будут публичны.')
   });
-
 
   bot.command('create_dao', async (ctx) => {
     // finishEducation(bot, ctx)
@@ -903,13 +861,11 @@ module.exports.init = async (botModel, bot) => {
     // await pushEducation(bot, ctx, 0);
   });
 
-
   bot.command(`create_union`, async (ctx) => {
 
     await startUnion(bot, ctx)
 
   })
-
 
 async function upgradeHost(eos, target_host, host, user) {
 
@@ -946,7 +902,6 @@ async function upgradeHost(eos, target_host, host, user) {
 
 }
 
-
 async function setParamsToHost(eos, target_host, host) {
       return  eos.transact({
           actions: [
@@ -965,8 +920,6 @@ async function setParamsToHost(eos, target_host, host) {
         })
 
 }
-
-
 
 async function startHost(eos, target_host, host) {
 
@@ -990,7 +943,6 @@ async function startHost(eos, target_host, host) {
         })
 
 }
-
 
 async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
@@ -1035,7 +987,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           levels: [1000000],
           meta: JSON.stringify({})
         }
-
 
       let upgrade_res = await upgradeHost(eos, eosname, host, user)
       let setparams_res = await setParamsToHost(eos, eosname, helix)
@@ -1115,7 +1066,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку.`)
         }
 
-
       }
 
     }
@@ -1169,7 +1119,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.repy("Пользователь не зарегистрирован")
   })
 
-
   bot.command("add_channel", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1200,7 +1149,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
   })
 
-
   bot.command("cancel_set_news_channel", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1216,11 +1164,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
     await ctx.reply('Добавление новостного канала отменено.')
 
-
   })
-
-
-
 
   bot.command("iam", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
@@ -1237,7 +1181,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.reply("Пользователь не зарегистрирован")
   })
 
-
   bot.command("wallet", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1253,7 +1196,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.reply("Пользователь не зарегистрирован")
   })
 
-
   bot.command("helix", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1266,7 +1208,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       await printHelixWallet(bot, ctx, user, current_chat.host);
     else ctx.reply("Пользователь не зарегистрирован")
   })
-
 
   bot.command("withdraw", async(ctx) => {
     await checkForExistBCAccount(bot, ctx);
@@ -1341,9 +1282,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       await ctx.deleteMessage(msg_id)
     }
 
-
   })
-
 
   async function getMaxWithdrawAmount(bot, user, ctx) {
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
@@ -1355,7 +1294,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     return {min, max}
 
   }
-
 
   bot.action("withdraw", async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -1372,7 +1310,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
 
   });
-
 
   async function getAddress(bot, user, ctx, host, unionchat, currency, type, meta) {
     try{
@@ -1465,8 +1402,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
   })
 
-
-
   bot.command("set_coordinator", async(ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -1509,7 +1444,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   })
 
-
   bot.command("add_to_team", async(ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -1518,8 +1452,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let text = ctx.update.message.text
     let entities = ctx.update.message.entities
     let dac = ""
-
-
 
     entities.map(entity => {
       if (entity.type === 'mention')
@@ -1644,7 +1576,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                       else
                         await sendMessageToUser(bot, {id: target.id}, { text });
 
-
                       await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
                     }
                   } else {
@@ -1720,7 +1651,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
                   let goalChatResult = await createChat(bot, user, current_chat.host, text, "project", user.is_private)
 
-
                   let goal = {
                     hostname: current_chat.host,
                     title: text,
@@ -1740,7 +1670,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     channel_id: goalChatResult.channelId
                   })
 
-
                   await insertProject(bot.instanceName, {
                     host: current_chat.host,
                     channelLink: goalChatResult.channelLink,
@@ -1753,7 +1682,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   await sleep(3000)
 
                   await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
-
 
                 } else {
                   console.log("NOT INSIDE!", tags.indexOf('goal') === -1)
@@ -1811,7 +1739,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                       task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id)
 
-
                     }
 
                     reply_to = task.chat_message_id
@@ -1849,7 +1776,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                             // report_channel_message_id: reportMessageId
                           })
 
-
                           let new_text = await constructReportMessage(bot, current_chat.host, null, reportId)
 
                           const buttons = [];
@@ -1879,8 +1805,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                           //   await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
                           // }
 
-
-
                       } catch(e) {
                         console.error(e)
                         if (e.message === 'assertion failure with message: Task is not regular, but report is exist')
@@ -1890,15 +1814,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                       }
 
-
                     }
-
 
                   } catch(e) {
                     ctx.reply(e.message)
                   }
-
-
 
                 } else {
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
@@ -1934,8 +1854,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   try{
                     // await ctx.deleteMessage(ctx.update.message.message_id);
                   } catch(e){}
-
-
 
                   // (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
 
@@ -2000,7 +1918,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     //TODO insert task
                     await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', {chatId: ctx.update.message.chat.id, task_id: task_id, goal_id: goal.goal_id});//goalId: goal.goalId,
 
-
                   } catch(e) {
                     ctx.reply(e.message,{reply_to_message_id: ctx.update.message.message_id})
                   }
@@ -2036,13 +1953,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   //     await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId,
                   //   }
 
-
                   // }
 
                 } else {
                   // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
                   if(!tags.find(t => t.tag === 'report')) {
-
 
                     // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
                     let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
@@ -2060,8 +1975,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 let dacs = await getDacs(bot, current_chat.host)
                 let user_in_team = dacs.find(el => el.dac === user.eosname)
 
-
-
                 let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
 
                 if (exist.type !== "unionChat"){
@@ -2075,7 +1988,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   ctx.reply('Ошибка! Любая цель должна принадлежать к проекту. Форма создания цели: text #project_<number> #goal')
                   return
                 }
-
 
                 if (!tags.find(t => t.tag === 'report') && !tags.find(t => t.tag === 'task') && !tags.find(t => t.tag === 'log')) {
 
@@ -2094,7 +2006,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                   let t
                   let text_to_channel
-
 
                   if (project.id) {
                     let pr
@@ -2152,15 +2063,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 }
               }
 
-
             }
   }
-
 
   bot.on('channel_post', async (ctx) => {
 
   })
-
 
   async function sendMessageToBrothers(bot, user, goal, text, type, menu){
 
@@ -2224,7 +2132,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
           if (ctx.update.message.forward_from_chat) {
 
-
             let res = await checkBotIsAdmin(bot, user, ctx, ctx.update.message.forward_from_chat.id)
             if (res.status === 'ok') {
               if (!res.user_is_admin) {
@@ -2257,7 +2164,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               }
 
             }
-
 
           } else {
             ctx.reply(`Перешлите сообщение из новостного канала DAO или отмените установку командой /cancel_set_news_channel`)
@@ -2369,7 +2275,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
               const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
 
-
               if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
 
               else if (parseFloat(min) > parseFloat(amount)){
@@ -2388,7 +2293,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
               }
 
-
             }
 
             else if (user.state === 'set_withdraw_address') {
@@ -2406,9 +2310,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
               ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
 
-
             }
-
 
         }
         // else {
@@ -2469,7 +2371,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
               await insertMessage(bot.instanceName, {id: "bot"}, "bot", text, ctx.message.message_id, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
 
-
             }
           } else {
 
@@ -2493,9 +2394,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
      }
    }
 
-
   });
-
 
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
     const withdraw_id = ctx.match[1];
@@ -2511,7 +2410,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     await sendMessageToUser(bot, user, { text: `Заявка на вывод ${wobj.amount} успешно обработана` });
   });
 
-
   bot.action('withdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     user.state = ""
@@ -2525,7 +2423,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     })
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
-
 
     //MASSWITHDRAWACTION
     massWithdrawAction(bot, user, bot.getEnv().CORE_HOST, balances.all).then(res => {
@@ -2546,7 +2443,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
         await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-
         await updateWithdraw(bot.instanceName, withdraw_id, "waiting")
 
       }).catch(e => {
@@ -2561,7 +2457,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     //
   });
 
-
   bot.action(/rvote (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const hostname = ctx.match[1];
@@ -2572,7 +2467,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
     await notify(bot, current_chat, hostname, 'acceptReport', {...report})
   });
-
 
   bot.action(/upvote (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -2594,14 +2488,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     console.log("downvote")
   });
 
-
   bot.action('createunion', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     await startQuiz(bot, ctx, user);
     await nextQuiz(bot, user, ctx);
   });
-
 
   bot.action('mypartners', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -2625,7 +2517,6 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       await ctx.replyWithHTML('Недостаточно прав');
     }
   });
-
 
   return null;
 };

@@ -15,7 +15,6 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
-
 async function insertRequest(suffix, user, message_id, message) {
   try {
     const db = await loadDB();
@@ -153,7 +152,6 @@ async function getUserByEosName(suffix, eosname) {
   }
   return null;
 }
-
 
 async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
@@ -355,7 +353,6 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
-
 async function insertTicket(suffix, user, ticket) {
   try {
     const db = await loadDB();
@@ -367,8 +364,6 @@ async function insertTicket(suffix, user, ticket) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function insertStudent(suffix, user, student) {
   try {
@@ -394,8 +389,6 @@ async function insertGoal(suffix, user, goal) {
   }
 }
 
-
-
 async function insertWithdraw(suffix, user, withdraw) {
   try {
     const db = await loadDB();
@@ -408,8 +401,6 @@ async function insertWithdraw(suffix, user, withdraw) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function updateWithdraw(suffix, withdraw_id, status) {
   try {
@@ -429,8 +420,6 @@ async function updateWithdraw(suffix, withdraw_id, status) {
   }
 }
 
-
-
 async function getWithdraw(suffix, withdraw_id) {
   try {
     const db = await loadDB();
@@ -442,7 +431,6 @@ async function getWithdraw(suffix, withdraw_id) {
     console.log('error: ', e.message);
   }
 }
-
 
 async function getTickets(suffix, user) {
   try {

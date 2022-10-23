@@ -364,7 +364,6 @@ const quizDefinition = [
   { message: 'Мы ищем свой путь в новой реальности и планируем своё будущее, объединяя людей в сообщества и проекты по интересам и компетенциям. Вы готовы взять свою ответственность за своё будущее?', buttons: ['Готов', 'Отмена'] },
 ];
 
-
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
 
@@ -512,7 +511,6 @@ module.exports.init = async (botModel, bot) => {
         console.log("\n\nTEST 4!\n\n")
       }
     }
-
     
     const buttons = ["🎫 купить билет"];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
@@ -539,7 +537,6 @@ module.exports.init = async (botModel, bot) => {
       // ctx.reply(`Для доступа к вашему кошельку перейдите в бота: @${(await bot.telegram.getMe()).username}`)
     }
   });
-
 
   async function buyTicket(bot, user, ctx, currency) {
     try{
@@ -591,7 +588,6 @@ module.exports.init = async (botModel, bot) => {
     if (orders.length > 0) ctx.reply('Если у вас нет USDT, воспользуйтесь инструкцией для их покупки: \n\nПосле чего, выберите заявку и нажмите на неё:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
   });
-
 
   bot.hears('🎫 купить билет', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);

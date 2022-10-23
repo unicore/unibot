@@ -6,7 +6,6 @@ const { loadDB } = require('./db');
 async function sendMessageToUser(bot, user, message, extra) {
   try{
 
-
     let id = {};
     console.log("MESSAGE ON CREATE: ", id)
 

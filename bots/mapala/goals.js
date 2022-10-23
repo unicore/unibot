@@ -162,7 +162,6 @@ async function createGoal(bot, ctx, user) {
           meta: JSON.stringify({}),
         }
 
-
   try {
     // console.log("goal",goal)
     let res = await eos.transact({
@@ -238,7 +237,6 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   //   index += 1;
   // }
 
-
   const maxVotesCondition = conditions.find((el) => el.key_string === 'maxuvotes');
   const maxVotesCount = maxVotesCondition ? maxVotesCondition.value : 0;
 
@@ -248,7 +246,6 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const totalShares = helix.host.total_shares > 0 ? helix.host.total_shares : 1;
   const totalSharesAsset = `${((Number(userPower.power) / parseFloat(totalShares)) * parseFloat(helix.host.quote_amount)).toFixed(4)} ${helix.host.quote_symbol}`;
   const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
-
 
   const votesCount = await getVotesCount(bot, hostname, user.eosname);
 
@@ -294,7 +291,6 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
     text += `\nДо начала накопления: ${totalPrevGoalsAmount} билетов`
     text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`  
     // text += `\nвывод средств доступен сразу по`
-
 
   } else {
     text += `\nЦель не установлена`
