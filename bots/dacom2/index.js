@@ -327,7 +327,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
 
         if (!current_chat)
-          buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion'));
+        { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       } else {
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
@@ -336,7 +336,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
         if (!current_chat)
-          buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion'));
+        { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       }
 
       let text = '';
@@ -1059,7 +1059,7 @@ module.exports.init = async (botModel, bot) => {
       return
     }
     if (user)
-      await printHelixStat(bot, user, current_chat.host, ctx);
+    { await printHelixStat(bot, user, current_chat.host, ctx); }
     else ctx.repy('Пользователь не зарегистрирован')
   })
 
@@ -1118,7 +1118,7 @@ module.exports.init = async (botModel, bot) => {
     }
 
     if (user)
-      await printPublicWallet(bot, user, current_chat.host, ctx);
+    { await printPublicWallet(bot, user, current_chat.host, ctx); }
     else ctx.reply('Пользователь не зарегистрирован')
   })
 
@@ -1133,7 +1133,7 @@ module.exports.init = async (botModel, bot) => {
     }
 
     if (user)
-      await printWallet(bot, user, ctx, current_chat.host || 'core');
+    { await printWallet(bot, user, ctx, current_chat.host || 'core'); }
     else ctx.reply('Пользователь не зарегистрирован')
   })
 
@@ -1146,7 +1146,7 @@ module.exports.init = async (botModel, bot) => {
       return
     }
     if (user)
-      await printHelixWallet(bot, ctx, user, current_chat.host);
+    { await printHelixWallet(bot, ctx, user, current_chat.host); }
     else ctx.reply('Пользователь не зарегистрирован')
   })
 
@@ -1205,7 +1205,7 @@ module.exports.init = async (botModel, bot) => {
     if (exist) {
       let address
       if (user)
-        address = await getAddress(bot, user, ctx, exist.host, exist.id, 'USDT.TRC20', 'donate', {goal_id: goal.goal_id});
+      { address = await getAddress(bot, user, ctx, exist.host, exist.id, 'USDT.TRC20', 'donate', {goal_id: goal.goal_id}); }
       else ctx.reply('Пользователь не зарегистрирован', {reply_to_message_id: ctx.update.message.message_id})
 
       if (address) {
@@ -1266,7 +1266,7 @@ module.exports.init = async (botModel, bot) => {
       );
 
       if (result.data.status === 'ok')
-        return result.data.address
+      { return result.data.address }
       else {
         ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ', {reply_to_message_id: ctx.update.message.message_id})
       }
@@ -1291,7 +1291,7 @@ module.exports.init = async (botModel, bot) => {
 
     entities.map(entity => {
       if (entity.type === 'bot_command')
-        priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', '')))
+      { priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', ''))) }
     })
 
     // TODO get task from message
@@ -1335,7 +1335,7 @@ module.exports.init = async (botModel, bot) => {
 
     entities.map(entity => {
       if (entity.type === 'mention')
-        curator = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
+      { curator = (text.substr(entity.offset + 1, entity.length).replace(' ', '')) }
     })
 
     if (curator === '') {
@@ -1373,7 +1373,7 @@ module.exports.init = async (botModel, bot) => {
 
     entities.map(entity => {
       if (entity.type === 'mention')
-        dac = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
+      { dac = (text.substr(entity.offset + 1, entity.length).replace(' ', '')) }
     })
 
     text = text.replace('/add_to_team ', '')
@@ -1481,9 +1481,9 @@ module.exports.init = async (botModel, bot) => {
 
             if (target && user_in_team) {
               if (ctx.update.message.caption)
-                await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
+              { await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text}); }
               else
-                await sendMessageToUser(bot, {id: target.id}, { text });
+              { await sendMessageToUser(bot, {id: target.id}, { text }); }
 
               await ctx.reply('Сообщение отправлено', {reply_to_message_id: ctx.update.message.message_id})
             }
@@ -1499,17 +1499,17 @@ module.exports.init = async (botModel, bot) => {
                   let g = await getGoal(bot.instanceName, goal.id)
                   if (g) {
                     if (ctx.update.message.caption)
-                      await sendMessageToUser(bot, {id: g.chat_id}, ctx.update.message, {caption: text, reply_to_message_id: g.chat_message_id});
+                    { await sendMessageToUser(bot, {id: g.chat_id}, ctx.update.message, {caption: text, reply_to_message_id: g.chat_message_id}); }
                     else
-                      await sendMessageToUser(bot, {id: g.chat_id}, { text }, {reply_to_message_id: g.chat_message_id});
+                    { await sendMessageToUser(bot, {id: g.chat_id}, { text }, {reply_to_message_id: g.chat_message_id}); }
 
                     await ctx.reply('Сообщение отправлено', {reply_to_message_id: ctx.update.message.message_id})
                   }
                 } else {
                   if (ctx.update.message.caption)
-                    await sendMessageToUser(bot, {id: pr.id}, ctx.update.message, {caption: text});
+                  { await sendMessageToUser(bot, {id: pr.id}, ctx.update.message, {caption: text}); }
                   else
-                    await sendMessageToUser(bot, {id: pr.id}, { text });
+                  { await sendMessageToUser(bot, {id: pr.id}, { text }); }
 
                   await ctx.reply('Сообщение отправлено', {reply_to_message_id: ctx.update.message.message_id})
                 }
@@ -1684,9 +1684,9 @@ module.exports.init = async (botModel, bot) => {
               } catch (e) {
                 console.error(e)
                 if (e.message === 'assertion failure with message: Task is not regular, but report is exist')
-                  ctx.reply('У вас уже есть отчёт по этому действию. ', {reply_to_message_id: ctx.update.message.message_id})
+                { ctx.reply('У вас уже есть отчёт по этому действию. ', {reply_to_message_id: ctx.update.message.message_id}) }
                 else
-                  ctx.reply(`Ошибка при создании отчёта. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
+                { ctx.reply(`Ошибка при создании отчёта. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id}) }
               }
             }
           } catch (e) {
@@ -1836,7 +1836,7 @@ module.exports.init = async (botModel, bot) => {
         let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
         if (!current_chat)
-          return
+        { return }
 
         let dacs = await getDacs(bot, current_chat.host)
         let user_in_team = dacs.find(el => el.dac === user.eosname)
@@ -1923,7 +1923,7 @@ module.exports.init = async (botModel, bot) => {
           }
 
           if (t)
-            await ctx.reply(t) // , , {reply_to_message_id : ctx.update.message.message_id}
+          { await ctx.reply(t) } // , , {reply_to_message_id : ctx.update.message.message_id}
         }
       }
     }
@@ -1942,7 +1942,7 @@ module.exports.init = async (botModel, bot) => {
     let text
 
     if (ctx.update.message.caption)
-      text = ctx.update.message.caption
+    { text = ctx.update.message.caption }
     else text = ctx.update.message.text
 
     console.log(ctx.update.message)
@@ -2050,7 +2050,7 @@ module.exports.init = async (botModel, bot) => {
             console.log('cant find current chat, skip')
 
             if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL)
-              console.log('should works', ctx.chat)
+            { console.log('should works', ctx.chat) }
 
             if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) {
               // const msg = await getMessage(bot.instanceName, ctx.chat.id, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
@@ -2159,12 +2159,12 @@ module.exports.init = async (botModel, bot) => {
         } catch (e) {}
 
         if (union)
-          if (union.id.toString() === bot.getEnv().GOALS_CHANNEL_ID)
-            union = {
-              type: 'goalsChannel',
-              host: 'core',
-              id: bot.getEnv().GOALS_CHANNEL_ID,
-            }
+        { if (union.id.toString() === bot.getEnv().GOALS_CHANNEL_ID)
+        { union = {
+          type: 'goalsChannel',
+          host: 'core',
+          id: bot.getEnv().GOALS_CHANNEL_ID,
+        } } }
 
         if (union) { // если словили пересылку из прикрепленного канала
           // eslint-disable-next-line no-constant-condition
