@@ -37,7 +37,7 @@ const {
   getGoalInstructions,
   printProjects,
   getDacs,
-  addToTeam
+  addToTeam,
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -83,12 +83,12 @@ const {
   constructReportMessage,
   rvoteAction,
   editGoalMsg,
-  fetchGoal
+  fetchGoal,
 } = require('./goals');
 
 const {
   createTask,
-  createReport
+  createReport,
 } = require('./tasks')
 
 const {
@@ -132,7 +132,7 @@ const {
   insertProject,
   getProjects,
   getMyProjects,
-  getGoal
+  getGoal,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -843,7 +843,7 @@ module.exports.init = async (botModel, bot) => {
             actor: target_host,
             permission: 'active',
           }],
-          data: host
+          data: host,
         },
         {
           account: 'unicore',
@@ -855,9 +855,9 @@ module.exports.init = async (botModel, bot) => {
           data: {
             host: target_host,
             architect: user.eosname,
-          }
+          },
         },
-      ]
+      ],
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
@@ -874,8 +874,8 @@ module.exports.init = async (botModel, bot) => {
             actor: target_host,
             permission: 'active',
           }],
-          data: host
-        }]
+          data: host,
+        }],
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
@@ -894,9 +894,9 @@ module.exports.init = async (botModel, bot) => {
           }],
           data: {
             host: target_host,
-            chost: target_host
-          }
-        }]
+            chost: target_host,
+          },
+        }],
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
@@ -942,7 +942,7 @@ module.exports.init = async (botModel, bot) => {
         quote_token_contract: 'eosio.token',
         voting_only_up: false,
         levels: [1000000],
-        meta: JSON.stringify({})
+        meta: JSON.stringify({}),
       }
 
       let upgrade_res = await upgradeHost(eos, eosname, host, user)
@@ -1252,17 +1252,17 @@ module.exports.init = async (botModel, bot) => {
           reply_to_message_id: ctx.update.message.reply_to_message.message_id,
           reply_to_message_chat_id: ctx.update.message.reply_to_message.chat.id,
           goal_message_id: ctx.update.message.reply_to_message.forward_from_message_id,
-          goal_channel_id: ctx.update.message.reply_to_message.forward_from_chat.id
+          goal_channel_id: ctx.update.message.reply_to_message.forward_from_chat.id,
         },
         type: type,
-        meta: meta
+        meta: meta,
       }
 
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`
 
       const result = await axios.post(
         path,
-        params
+        params,
       );
 
       if (result.data.status === 'ok')
@@ -1564,13 +1564,13 @@ module.exports.init = async (botModel, bot) => {
             goal_id: goal.goalId,
             type: 'project',
             // channel_message_id: goalMessageId,
-            channel_id: goalChatResult.channelId
+            channel_id: goalChatResult.channelId,
           })
 
           await insertProject(bot.instanceName, {
             host: current_chat.host,
             channelLink: goalChatResult.channelLink,
-            goal_id: goal.goalId
+            goal_id: goal.goalId,
           })
 
           await ctx.deleteMessage(id);
@@ -1642,7 +1642,7 @@ module.exports.init = async (botModel, bot) => {
                   task_id: task.task_id,
                   data: data,
                   duration_secs: 60 * duration,
-                  asset_per_hour: asset_per_hour
+                  asset_per_hour: asset_per_hour,
                 })
 
                 await insertReport(bot.instanceName, {
@@ -1753,7 +1753,7 @@ module.exports.init = async (botModel, bot) => {
               calendar: [],
               start_at: '2022-01-01T00:00:00',
               expired_at: '2022-01-01T00:00:00',
-              meta: ''
+              meta: '',
 
             }
             task_id = await createTask(bot, ctx, user, task)
@@ -1913,7 +1913,7 @@ module.exports.init = async (botModel, bot) => {
                 title: text,
                 goal_id: goal.goalId,
                 channel_message_id: projectMessageId,
-                channel_id: projectChannelId
+                channel_id: projectChannelId,
               })
             } else {
               await ctx.reply('Проект не найден')
@@ -2122,7 +2122,7 @@ module.exports.init = async (botModel, bot) => {
             } else {
               user.state = 'set_withdraw_address'
               user.on_withdraw = {
-                amount
+                amount,
               }
               await saveUser(bot.instanceName, user);
 
@@ -2163,7 +2163,7 @@ module.exports.init = async (botModel, bot) => {
             union = {
               type: 'goalsChannel',
               host: 'core',
-              id: bot.getEnv().GOALS_CHANNEL_ID
+              id: bot.getEnv().GOALS_CHANNEL_ID,
             }
 
         if (union) { // если словили пересылку из прикрепленного канала
@@ -2246,7 +2246,7 @@ module.exports.init = async (botModel, bot) => {
       amount: user.on_withdraw.amount,
       address: user.on_withdraw.address,
       created_at: new Date(),
-      status: 'created'
+      status: 'created',
     })
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);

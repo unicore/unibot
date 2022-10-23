@@ -8,7 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
-  getProjects
+  getProjects,
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -1274,7 +1274,7 @@ async function addToTeam(bot, ctx, user, hostname, dac, title) {
         limit_type: '',
         income_limit: '0.0000 FLOWER',
         title: title,
-        descriptor: ''
+        descriptor: '',
       },
     }],
   }, {
@@ -1311,5 +1311,5 @@ module.exports = {
   getGoalInstructions,
   printProjects,
   getDacs,
-  addToTeam
+  addToTeam,
 };

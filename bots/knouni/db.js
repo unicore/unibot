@@ -347,7 +347,7 @@ async function insertRequest(suffix, user, message_id, message) {
 
     await collection.insertOne({
       // eslint-disable-next-line camelcase
-      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false,
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -392,5 +392,5 @@ module.exports = {
   getChat,
   getUserByResumeChannelId,
   insertRequest,
-  closeRequest
+  closeRequest,
 };

@@ -82,7 +82,7 @@ const {
   getMessage,
   getUserByResumeChannelId,
   insertRequest,
-  closeRequest
+  closeRequest,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');

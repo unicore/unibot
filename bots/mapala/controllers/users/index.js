@@ -53,7 +53,7 @@ module.exports.payReciever = async (req, res) => {
   const {
     botName,
     eosname,
-    amount
+    amount,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'mapala');

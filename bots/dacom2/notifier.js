@@ -23,5 +23,5 @@ async function notify(bot, source, hostname, what, meta) {
 }
 
 module.exports = {
-  notify
+  notify,
 };

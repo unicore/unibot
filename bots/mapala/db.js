@@ -22,7 +22,7 @@ async function insertRequest(suffix, user, message_id, message) {
 
     await collection.insertOne({
       // eslint-disable-next-line camelcase
-      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false,
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -407,7 +407,7 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     await collection.updateOne(
       { '_id': mongoose.Types.ObjectId(withdraw_id) },
       { $set: {
-        status
+        status,
       } },
       { upsert: false },
     );
@@ -469,5 +469,5 @@ module.exports = {
   insertGoal,
   insertWithdraw,
   updateWithdraw,
-  getWithdraw
+  getWithdraw,
 };
