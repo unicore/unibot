@@ -414,7 +414,7 @@ module.exports.init = async (botModel, bot) => {
             re_register = true
           });
           
-          if (re_register == true){
+          if (re_register === true){
             user.eosname = (await generateAccount(bot, ctx, false, ref)).eosname;
             await saveUser(bot.instanceName, user);
           }
@@ -613,7 +613,7 @@ module.exports.init = async (botModel, bot) => {
         let { text } = ctx.update.message;
         // console.log("on else", text)
 
-        if (text == '/skip'){
+        if (text === '/skip'){
           const menu = Markup
             .keyboard(mainButtons, { columns: 2 }).resize();
 
@@ -797,9 +797,9 @@ module.exports.init = async (botModel, bot) => {
         }
       }
     } else {
-      if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
-          if (ctx.update.message.sender_chat.id == bot.getEnv().STUDENTS_CHANNEL){ //если словили пересылку из прикрепленного канала
-            if(ctx.update.message.forward_from_chat.id == bot.getEnv().STUDENTS_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+      if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
+          if (ctx.update.message.sender_chat.id === bot.getEnv().STUDENTS_CHANNEL){ //если словили пересылку из прикрепленного канала
+            if(ctx.update.message.forward_from_chat.id === bot.getEnv().STUDENTS_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
               user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
               if (user && !user.resume_chat_id){
@@ -847,7 +847,7 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     user.state = ""
 
-    if (user.is_student == false){
+    if (user.is_student === false){
       await startQuiz(bot, ctx, user)
       await nextQuiz(bot, user, ctx);
     } else {
@@ -1249,7 +1249,7 @@ bot.action('nextwelcome5', async (ctx) => {
       ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, на вашем балансе: ${max}. `); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
     }
 
-    // if (parseFloat(liquidBal) == 0){
+    // if (parseFloat(liquidBal) === 0){
     //   ctx.reply('Ошибка! У вас нет USDT для вывода. ')
     // } else {
 

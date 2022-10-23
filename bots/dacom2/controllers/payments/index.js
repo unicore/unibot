@@ -45,7 +45,7 @@ module.exports.payReciever = async (req, res) => {
     };
   }
 
-  if (type == "donate" && !meta){
+  if (type === "donate" && !meta){
     res.code(401);
     return {
       ok: false,
@@ -55,22 +55,22 @@ module.exports.payReciever = async (req, res) => {
 
 
   const user = await getUserByEosName(botName, eosname);
-  let sender = (user.username && user.username != "") ? '@' + user.username : user.eosname
+  let sender = (user.username && user.username !== "") ? '@' + user.username : user.eosname
   let message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`
 
   await insertMessage(botName, {id: chat.union_chat_id}, 'operator', message);
-  
+
   await sendMessageToUser(bot, {id: chat.union_chat_id}, { text: message });
 
   let message2 = `Поступил взнос в размере ${amount} от ${sender}`
 
   await insertMessage(botName, {id: chat.reply_to_message_chat_id}, 'operator', message, {reply_to_message_id: chat.reply_to_message_id});
-  
+
   await sendMessageToUser(bot, {id: chat.reply_to_message_chat_id}, { text: message2 }, {reply_to_message_id: chat.reply_to_message_id});
-  
+
   let goal = await getGoalByChatMessage(bot.instanceName, "core", chat.goal_message_id)
 
-  if (type == "donate"){
+  if (type === "donate"){
     let text = await constructGoalMessage(bot, hostname, null, meta.goal_id)
 
      try{
@@ -80,8 +80,8 @@ module.exports.payReciever = async (req, res) => {
     }
     // await editGoalMsg(bot, ctx, user, hostname, meta.goal_id, true)
   }
-  
-  
+
+
   return {
     ok: true,
   };

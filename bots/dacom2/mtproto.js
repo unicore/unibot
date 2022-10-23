@@ -36,19 +36,19 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   let chatTitle
   let projectCount 
 
-  if (type == 'union'){
+  if (type === 'union'){
     channelTitle = `Канал союза ${unionName}` 
     chatTitle = `Союз ${unionName}` 
-  } else if (type == 'goals'){
+  } else if (type === 'goals'){
     channelTitle = `Канал целей союза ${unionName}` 
     chatTitle = `Обсуждение целей союза ${unionName}` 
-  } else if (type == 'tasks'){
+  } else if (type === 'tasks'){
     channelTitle = `Канал действий союза ${unionName}` 
     chatTitle = `Обсуждение действий союза ${unionName}` 
-  } else if (type == 'reports'){
+  } else if (type === 'reports'){
     channelTitle = `Канал отчётов союза ${unionName}` 
     chatTitle = `Обсуждение отчётов союза ${unionName}` 
-  } else if (type == 'project'){
+  } else if (type === 'project'){
     projectCount = await getProjectsCount(bot.instanceName, user.id)
     //todo get projects
     channelTitle = `Проект #${projectCount + 1} ${unionName}` 
@@ -187,11 +187,11 @@ async function checkBotIsAdmin(bot, user, ctx, chatId) {
   console.log("admins: ", res)
 
   res.map(u => {
-    if (u.user.username == bot.getEnv().BOTNAME){
+    if (u.user.username === bot.getEnv().BOTNAME){
       bot_is_admin = true
     }
 
-    if (u.user.id == user.id){
+    if (u.user.id === user.id){
       user_is_admin = true
     }
   })
@@ -309,7 +309,7 @@ async function makeAdmin(bot, chatId, userId, ctx){
   }));
   
   
-  let newAdmin = chat.users.find(el => parseInt(el.id.value) == userId)
+  let newAdmin = chat.users.find(el => parseInt(el.id.value) === userId)
   console.log('newAdmin: ', newAdmin)
   let result
   
@@ -377,7 +377,7 @@ async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
   // }));
   
   
-  // let newAdmin = chat.users.find(el => parseInt(el.id.value) == userId)
+  // let newAdmin = chat.users.find(el => parseInt(el.id.value) === userId)
   // console.log('newAdmin: ', newAdmin)
   // let result
   

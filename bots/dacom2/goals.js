@@ -115,24 +115,24 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
     let total_shares = host.total_shares
     console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
     let user = await getUserByEosName(bot.instanceName, goal.creator)
-    let from = (user.username && user.username != "") ? '@' + user.username : goal.creator
+    let from = (user.username && user.username !== "") ? '@' + user.username : goal.creator
 
     let text = ""
     text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
     text += `${goal.title}\n\n`
-    text += `Статус: ${goal.status != 'waiting' ? "🟢" : "🟡"}\n`
+    text += `Статус: ${goal.status !== 'waiting' ? "🟢" : "🟡"}\n`
     // text += `Постановщик: ${goal.creator}\n`
 
     let coordinator = ""
 
-    if (goal.benefactor != ""){
+    if (goal.benefactor !== ""){
 
       let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
-      coordinator = (user.username && user.username != "") ? '@' + user.username : goal.benefactor
+      coordinator = (user.username && user.username !== "") ? '@' + user.username : goal.benefactor
     }
 
-    if (goal.benefactor != "")
-      text += `Координатор: ${goal.benefactor == "" ? 'не установлен' : coordinator}\n`
+    if (goal.benefactor !== "")
+      text += `Координатор: ${goal.benefactor === "" ? 'не установлен' : coordinator}\n`
     
     text += `Голоса: ${goal.positive_votes} POWER`
 
@@ -153,10 +153,10 @@ async function constructTaskMessage(bot, hostname, task, taskId){
     task = await fetchTask(bot, hostname, taskId);
 
   let text = ""
-  let level = task.priority == (0 || 1) ? "10 $/час" : (task.priority == 2 ? "20 $/час" : "40 $/час")
+  let level = task.priority === (0 || 1) ? "10 $/час" : (task.priority === 2 ? "20 $/час" : "40 $/час")
 
   let user = await getUserByEosName(bot.instanceName, task.creator)
-  let from = (user.username && user.username != "") ? '@' + user.username : task.creator
+  let from = (user.username && user.username !== "") ? '@' + user.username : task.creator
 
 
   text += `🏳️ #ДЕЙСТВИЕ_${task.id} от ${from}: \n`
@@ -179,7 +179,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let votes
 
     let user = await getUserByEosName(bot.instanceName, report.username)
-    let from = (user.username && user.username != "") ? '@' + user.username : report.username
+    let from = (user.username && user.username !== "") ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
     
@@ -225,19 +225,19 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       }
     }
 
-    text += `Одобрен: ${report.approved == '1' ? "🟢" : "🟡"}\n`
+    text += `Одобрен: ${report.approved === '1' ? "🟢" : "🟡"}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
 
     if (report.approved){
-      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
+      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
-      bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes == 0 ? report.positive_votes : goal.second_circuit_votes  ) * goal.total_power_on_distribution} POWER\n`
+      bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes  ) * goal.total_power_on_distribution} POWER\n`
       bonus = parseFloat(bonus).toFixed(2) + " POWER"
     } else {
-      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
+      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
-      // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes == report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
-      if (report.positive_votes == 0){
+      // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
+      if (report.positive_votes === 0){
         bonus = parseFloat(0).toFixed(2) + " POWER"
       } else {
         bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
@@ -309,7 +309,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   }
   // ctx.update.callback_query.message.reply_markup.inline_keyboard[0].map((el, index) => {
   //   console.log("index", index, el)
-  //   if (buttons[0][index].text != el.text)
+  //   if (buttons[0][index].text !== el.text)
   //     modified = true
   // })
 
@@ -449,7 +449,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
   
-  if (user.eosname == host.architect && report.approved == 0){
+  if (user.eosname === host.architect && report.approved === 0){
     actions.push({
         account: 'unicore',
         name: 'approver',

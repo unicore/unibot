@@ -262,7 +262,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const fillAmount = mingamount === 0 ? (mingpercent === 0 ? 'без ограничений' : `${mingpercent}% от суммы`) : `${parseFloat(mingamount / 10000).toFixed(4)} FLOWER`;
   let text = '';
 
-  let myGoal = goals.find(el => el.creator == user.eosname)
+  let myGoal = goals.find(el => el.creator === user.eosname)
   let k = 0
   
   let prevGoalsCount = goals.map(el => {
