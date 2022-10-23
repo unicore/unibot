@@ -66,7 +66,7 @@ async function sendMessageToAll(bot, message, extra) {
 
 async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId)
-    report = await fetchReport(bot, hostname, reportId);
+  { report = await fetchReport(bot, hostname, reportId); }
 
   if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);

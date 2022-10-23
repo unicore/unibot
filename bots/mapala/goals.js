@@ -263,7 +263,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 
   let prevGoalsCount = goals.map(el => {
     if (myGoal && el.id < myGoal.id)
-      k++
+    { k++ }
   })
 
   const buttons = [];

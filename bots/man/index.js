@@ -1712,7 +1712,7 @@ module.exports.init = async (botModel, bot) => {
             await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
             if (user.sins_count >= 100)
-              await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!')
+            { await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!') }
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 
