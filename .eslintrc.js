@@ -10,7 +10,6 @@ module.exports = {
   },
   rules: {
     'no-console': 'off',
-    eqeqeq: 'off',
     'no-constant-condition': 'off',
     'linebreak-style': 'off',
     'no-undef': 'off',

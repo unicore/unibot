@@ -417,9 +417,9 @@ module.exports.init = async (botModel, bot) => {
         }
       }
     } else {
-      if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
-          if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
-            if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+      if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
+          if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
+            if(ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
               user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
               
               if (user && !user.request_chat_id){

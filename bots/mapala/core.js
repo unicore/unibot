@@ -73,7 +73,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
 
   balances.forEach((balance) => {
     if (helix) {
-      balance.is_refreshed = balance.last_recalculated_win_pool_id == helix.host.current_pool_id
+      balance.is_refreshed = balance.last_recalculated_win_pool_id === helix.host.current_pool_id
     }
 
     if (balance.pool_color === 'white') {
@@ -385,7 +385,7 @@ async function printWallet(bot, user, ctx) {
 
     buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
     
-    if (balances.length == 0)
+    if (balances.length === 0)
       buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
     // else
       // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));

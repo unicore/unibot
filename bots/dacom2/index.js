@@ -170,7 +170,7 @@ async function generateHost(bot, ctx, host) {
           params,
         },
       );
-      if (message.data.status == 'ok') {
+      if (message.data.status === 'ok') {
         // TODO set partner info
         await saveHost(bot.instanceName, host);
         console.log("message.data: ", message.data)
@@ -348,7 +348,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
     text += `\n\n${slide.text}`;
     
-    if (currentSlideIndex === 0 && slide.img != "") {
+    if (currentSlideIndex === 0 && slide.img !== "") {
       if (slide.img.length > 0) {
         
         await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
@@ -809,7 +809,7 @@ async function finishEducation(ctx, id) {
       k++
       u = await getUserByEosName(bot.instanceName, dac.dac)
       text+= `${k}. ${'@' + u.username || u.eosname}\n`
-      text+= `\t\t\t роль: ${dac.role == '' ? 'не определена' : dac.role}\n`
+      text+= `\t\t\t роль: ${dac.role === '' ? 'не определена' : dac.role}\n`
     }
 
     await ctx.reply(text)
@@ -1056,7 +1056,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       console.log("user.user.username", user.user.username)
       console.log("botname: ", bot.getEnv().BOTNAME)
 
-      if (user.user.username == bot.getEnv().BOTNAME){
+      if (user.user.username === bot.getEnv().BOTNAME){
         bot_is_admin = true
       }
     })
@@ -1180,7 +1180,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       return
     }
     
-    if (current_chat.ownerEosname != user.eosname){
+    if (current_chat.ownerEosname !== user.eosname){
       await ctx.reply(`Вы не создавали это DAO и не можете добавить к нему новостной канал.`)
       return
     }
@@ -1426,7 +1426,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let priority = 0
 
     entities.map(entity => {
-      if (entity.type == 'bot_command')
+      if (entity.type === 'bot_command')
         priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', '')))
     })
 
@@ -1449,7 +1449,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             // await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
             await setTaskPriority(bot, ctx, user, current_chat.host, task.task_id, priority)
             await ctx.deleteMessage(ctx.update.message.message_id)
-            let tprior = (priority == 0 || priority == 1) ? "10 $/час" : ((priority == 2) ? "20 $/час" :"40 $/час")
+            let tprior = (priority === 0 || priority === 1) ? "10 $/час" : ((priority === 2) ? "20 $/час" :"40 $/час")
             await ctx.reply(`Координатор установил ставку действия: ${tprior}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
          
           } catch(e){
@@ -1477,11 +1477,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let curator = ""
 
     entities.map(entity => {
-      if (entity.type == 'mention')
+      if (entity.type === 'mention')
         curator = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
     })
 
-    if (curator == ""){
+    if (curator === ""){
     
       ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     
@@ -1522,7 +1522,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     
 
     entities.map(entity => {
-      if (entity.type == 'mention')
+      if (entity.type === 'mention')
         dac = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
     })
     
@@ -1532,7 +1532,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let role = text.replace(' ', '')
     console.log('text: ', role)
 
-    if (dac == ""){
+    if (dac === ""){
     
       ctx.reply("Для добавления члена команды отметьте пользователя /add_to_team @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     
@@ -1630,7 +1630,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                     let dacs = await getDacs(bot, target.host)
                     
-                    user_in_team = dacs.find(el => el.dac == user.eosname)
+                    user_in_team = dacs.find(el => el.dac === user.eosname)
                     
                     if (!user_in_team) {
                       await ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
@@ -1649,14 +1649,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     }
                   } else {
 
-                    let project = tags.find(el => el.tag == 'project')
+                    let project = tags.find(el => el.tag === 'project')
                     
                     if (project) {
                     
                       if (project.id) {
                         let pr = await getProject(bot.instanceName, project.id)
 
-                        let goal = tags.find(el => el.tag == 'goal')
+                        let goal = tags.find(el => el.tag === 'goal')
                         if (goal) {
                             let g = await getGoal(bot.instanceName, goal.id)
                             if (g){
@@ -1695,8 +1695,8 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
               if (tag.tag === 'project'){
                 
-                let gexist = tags.find(el => el.tag == 'goal')
-                let logexist = tags.find(el => el.tag == 'log')
+                let gexist = tags.find(el => el.tag === 'goal')
+                let logexist = tags.find(el => el.tag === 'log')
                 
                 if (!gexist && !logexist) {
 
@@ -1707,7 +1707,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                     return
                   }
 
-                  if (current_chat.ownerId != user.id){
+                  if (current_chat.ownerId !== user.id){
                     await ctx.reply(`Только организатор союза может создавать проекты сейчас.`)
                     return
                   }
@@ -1756,7 +1756,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
 
                 } else {
-                  console.log("NOT INSIDE!", tags.indexOf('goal') == -1)
+                  console.log("NOT INSIDE!", tags.indexOf('goal') === -1)
                 }
 
               } else if (tag.tag === 'report') {
@@ -1768,7 +1768,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   return
                 }
                 
-                let is_fast_report = (tags.find(t => t.tag == 'goal') && tags.find(t => t.tag == 'task') && tags.find(t => t.tag == 'report'))
+                let is_fast_report = (tags.find(t => t.tag === 'goal') && tags.find(t => t.tag === 'task') && tags.find(t => t.tag === 'report'))
                 if (ctx.update.message.reply_to_message || tag.id || is_fast_report){
                   
                   try {
@@ -1807,7 +1807,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                       }
                     } else {
                      
-                      let task_tag = tags.find(t => t.tag == 'task')
+                      let task_tag = tags.find(t => t.tag === 'task')
 
                       task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id)
                         
@@ -1883,7 +1883,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                       } catch(e) {
                         console.error(e)
-                        if (e.message == 'assertion failure with message: Task is not regular, but report is exist')
+                        if (e.message === 'assertion failure with message: Task is not regular, but report is exist')
                           ctx.reply(`У вас уже есть отчёт по этому действию. `, {reply_to_message_id: ctx.update.message.message_id})
                         else
                           ctx.reply(`Ошибка при создании отчёта. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
@@ -2041,7 +2041,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                 } else {
                   // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                  if(!tags.find(t => t.tag == 'report')) {
+                  if(!tags.find(t => t.tag === 'report')) {
 
 
                     // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
@@ -2058,18 +2058,18 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                   return
                 
                 let dacs = await getDacs(bot, current_chat.host)
-                let user_in_team = dacs.find(el => el.dac == user.eosname)
+                let user_in_team = dacs.find(el => el.dac === user.eosname)
 
 
 
                 let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
                
-                if (exist.type != "unionChat"){
+                if (exist.type !== "unionChat"){
                   await ctx.reply("Ошибка! Постановка целей доступна только в главном чате союза.", {reply_to_message_id: ctx.message.message_id})
                   return
                 }
                
-               let project = tags.find(el => el.tag == 'project')
+               let project = tags.find(el => el.tag === 'project')
                
                 if (!project){
                   ctx.reply('Ошибка! Любая цель должна принадлежать к проекту. Форма создания цели: text #project_<number> #goal')
@@ -2077,7 +2077,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 }
 
                 
-                if (!tags.find(t => t.tag == 'report') && !tags.find(t => t.tag == 'task') && !tags.find(t => t.tag == 'log')) {
+                if (!tags.find(t => t.tag === 'report') && !tags.find(t => t.tag === 'task') && !tags.find(t => t.tag === 'log')) {
 
                   if (!user_in_team) {
                     await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
@@ -2181,27 +2181,27 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       text = cutTags(bot, text, tags);
     }
 
-    if (!user && ctx.update.message.from.is_bot == false && ctx.update.message.from.id != 777000){
+    if (!user && ctx.update.message.from.is_bot === false && ctx.update.message.from.id !== 777000){
         user = ctx.update.message.from;
         
         user.eosname = await generateAccount(bot, ctx, false, user.ref);
         await saveUser(bot.instanceName, user)
     }
 
-    if (user && user.id != 777000) {
+    if (user && user.id !== 777000) {
       console.log('here!', tags)
       if (ctx.update.message.chat.type !== 'private') {
         
         if (true) {
           console.log("INDSID!")
-          if (text == '/start_soviet'){
+          if (text === '/start_soviet'){
             
             ctx.reply("Введите дату начала и время Совета в формате 2022-08-09T20:00:00:")
             user.state = "start_soviet"
             user.new_soviet = {}
             await saveUser(bot.instanceName, user);
 
-          } else if (user.state == "start_soviet") {
+          } else if (user.state === "start_soviet") {
             
             let d = new Date(text)
 
@@ -2210,7 +2210,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             
             await createGroupCall(bot, ctx.update.message.chat.id, time)
             
-          } else if (user.state == 'set_news_channel'){
+          } else if (user.state === 'set_news_channel'){
             
             let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
@@ -2218,7 +2218,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               return
             }
 
-            if (current_chat.ownerEosname != user.eosname) {
+            if (current_chat.ownerEosname !== user.eosname) {
               await ctx.reply('Только архитектор DAO может добавить новостной канал')
               return
             }
@@ -2227,7 +2227,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
 
               let res = await checkBotIsAdmin(bot, user, ctx, ctx.update.message.forward_from_chat.id)
-              if (res.status == 'ok') {
+              if (res.status === 'ok') {
                 if (!res.user_is_admin){
                   ctx.reply(`Ошибка! Вы не являетесь администратором канала`)
                   return
@@ -2240,7 +2240,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                 let res2 = await ctx.telegram.getChat(ctx.update.message.forward_from_chat.id)
                
-                if (res2.type == 'channel'){
+                if (res2.type === 'channel'){
                   await insertUnion(bot.instanceName, {
                     ownerId: user.id,
                     ownerEosname: user.eosname, 
@@ -2269,13 +2269,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
 
 
-          else if (text == '/new_cycle'){
+          else if (text === '/new_cycle'){
             ctx.reply("Введите дату начала цикла развития:")
             user.state = "start_cycle"
             user.new_cycle = {}
             await saveUser(bot.instanceName, user);
           
-          } else if (user.state == 'start_cycle'){
+          } else if (user.state === 'start_cycle'){
           
             ctx.reply(`Дата начала: ${text}`)
             user.state = "create_cycle"
@@ -2287,7 +2287,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           
           } 
 
-           else if (user.state == 'create_cycle'){
+           else if (user.state === 'create_cycle'){
             ctx.reply("Пожалуйста, подождите, мы создаём новый цикл.")
 
             user.state = ""
@@ -2305,10 +2305,10 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
               console.log("cant find current chat, skip")
 
-              if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL)
+              if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL)
                 console.log("should works", ctx.chat)
 
-              if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) {
+              if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) {
 
                 // const msg = await getMessage(bot.instanceName, ctx.chat.id, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
                 let target = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id)
@@ -2427,14 +2427,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         // }
       }
     } else {
-        if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
+        if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
           let union 
           try{
             union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
           } catch(e){}
 
           if (union)
-            if (union.id.toString() == bot.getEnv().GOALS_CHANNEL_ID)
+            if (union.id.toString() === bot.getEnv().GOALS_CHANNEL_ID)
               union = {
                 type: 'goalsChannel',
                 host: 'core',
@@ -2445,7 +2445,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
 
               const buttons = [];
-              if (union.type == 'goalsChannel' || 'projectChannel'){
+              if (union.type === 'goalsChannel' || 'projectChannel'){
                 let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
                 console.log("ИНСТРУКЦИЯ:Ж ", goal, ctx.update.message.sender_chat.id)
                 // console.log("forward fro: ", ctx.update.message)
@@ -2465,7 +2465,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                   await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id, ctx.message.chat.id, goal.channel_id)
                 }
-              } else if (union.type == 'reportsChannel'){
+              } else if (union.type === 'reportsChannel'){
                 buttons.push(Markup.button.callback('принять', 'vote'));
                 buttons.push(Markup.button.callback('отклонить', 'vote'));
                 const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
@@ -2482,9 +2482,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             }
           } else {
 
-                if (ctx.update.message && ctx.update.message.is_automatic_forward == true && ctx.update.message.sender_chat){
-                  if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
-                    if(ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+                if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
+                  if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
+                    if(ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                       user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
                       
                       if (user && !user.partners_chat_id){
