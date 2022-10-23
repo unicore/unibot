@@ -549,9 +549,7 @@ module.exports.init = async (botModel, bot) => {
         params,
       );
 
-      if (result.data.status === 'ok')
-      { ctx.reply(`address: ${result.data.address}`); }
-      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
+      if (result.data.status === 'ok') { ctx.reply(`address: ${result.data.address}`); } else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     } catch (e) {
       ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     }

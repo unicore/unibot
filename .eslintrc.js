@@ -21,7 +21,6 @@ module.exports = {
     'no-async-promise-executor': 'off',
     'prefer-template': 'off',
     'no-shadow': 'off',
-    'brace-style': 'off',
     'object-shorthand': 'off',
     'one-var': 'off',
     'array-callback-return': 'off',

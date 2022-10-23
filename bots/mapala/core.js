@@ -381,8 +381,7 @@ async function printWallet(bot, user, ctx) {
 
     buttons.push(Markup.button.callback('⬇️ вывести', 'withdraw'));
 
-    if (balances.length === 0)
-    { buttons.push(Markup.button.callback('🎫 купить билет', 'buyticket')); }
+    if (balances.length === 0) { buttons.push(Markup.button.callback('🎫 купить билет', 'buyticket')); }
     // else
     // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
 

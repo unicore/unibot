@@ -72,10 +72,7 @@ function getGoalMsg(goal) {
 async function disableButtons(bot, ctx, up) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
 
-  if (up)
-  { keyboard[0][0].text = 'ожидание'; }
-  else
-  { keyboard[0][1].text = 'ожидание'; }
+  if (up) { keyboard[0][0].text = 'ожидание'; } else { keyboard[0][1].text = 'ожидание'; }
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
   } catch (e) {
@@ -87,10 +84,7 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
   let report = await fetchReport(bot, hostname, reportId);
 
-  if (up)
-  { keyboard[0][0].text = `👍 (${report.voters.length})`; }
-  else
-  { keyboard[0][1].text = 'ожидание'; }
+  if (up) { keyboard[0][0].text = `👍 (${report.voters.length})`; } else { keyboard[0][1].text = 'ожидание'; }
 
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
@@ -100,8 +94,7 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 }
 
 async function constructGoalMessage(bot, hostname, goal, goalId) {
-  if (!goal && goalId)
-  { goal = await fetchGoal(bot, hostname, goalId); }
+  if (!goal && goalId) { goal = await fetchGoal(bot, hostname, goalId); }
 
   console.log('GOAL ON FETHC: ', goal, hostname, goalId);
   if (goal) {
@@ -126,24 +119,20 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
       coordinator = (user.username && user.username !== '') ? '@' + user.username : goal.benefactor;
     }
 
-    if (goal.benefactor !== '')
-    { text += `Координатор: ${goal.benefactor === '' ? 'не установлен' : coordinator}\n`; }
+    if (goal.benefactor !== '') { text += `Координатор: ${goal.benefactor === '' ? 'не установлен' : coordinator}\n`; }
 
     text += `Голоса: ${goal.positive_votes} POWER`;
 
     // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
-    if (parseFloat(goal.available) > 0)
-    { text += `\nСобрано: ${goal.available}`; }
-    if (parseFloat(goal.withdrawed) > 0)
-    { text += `\nПолучено: ${goal.withdrawed}`; }
+    if (parseFloat(goal.available) > 0) { text += `\nСобрано: ${goal.available}`; }
+    if (parseFloat(goal.withdrawed) > 0) { text += `\nПолучено: ${goal.withdrawed}`; }
 
     return text;
   } else return '';
 }
 
 async function constructTaskMessage(bot, hostname, task, taskId) {
-  if (!task && taskId)
-  { task = await fetchTask(bot, hostname, taskId); }
+  if (!task && taskId) { task = await fetchTask(bot, hostname, taskId); }
 
   let text = '';
   let level = task.priority === (0 || 1) ? '10 $/час' : (task.priority === 2 ? '20 $/час' : '40 $/час');
@@ -159,8 +148,7 @@ async function constructTaskMessage(bot, hostname, task, taskId) {
 }
 
 async function constructReportMessage(bot, hostname, report, reportId) {
-  if (!report && reportId)
-  { report = await fetchReport(bot, hostname, reportId); }
+  if (!report && reportId) { report = await fetchReport(bot, hostname, reportId); }
 
   if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
@@ -273,8 +261,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
   // await ctx.
   //
-  if (!skip)
-  { await ctx.editMessageReplyMarkup({ inline_keyboard: buttons }); }
+  if (!skip) { await ctx.editMessageReplyMarkup({ inline_keyboard: buttons }); }
 
   console.log(ctx.update.callback_query.message.reply_to_message);
   let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id;
@@ -582,8 +569,7 @@ async function editGoal(bot, ctx, user, goal) {
 async function createGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   let res;
-  if (!user.create_goal)
-  { user.create_goal = {}; }
+  if (!user.create_goal) { user.create_goal = {}; }
 
   try {
     res = await eos.transact({

@@ -254,8 +254,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   }
 
   let reply_to;
-  if (ctx.update.message.reply_to_message)
-  { reply_to = ctx.update.message.reply_to_message.message_id; }
+  if (ctx.update.message.reply_to_message) { reply_to = ctx.update.message.reply_to_message.message_id; }
 
   try {
     if (params.currentPool.expired_time === 'режим ожидания') {
@@ -354,10 +353,7 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
   });
   const messagePromises = results.map((id) => {
     const target = refBalances.find((el) => Number(el.id) === Number(id));
-    if (ctx)
-    { return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`); }
-    else
-    { return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` }); }
+    if (ctx) { return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`); } else { return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` }); }
   });
 
   await Promise.all(messagePromises);

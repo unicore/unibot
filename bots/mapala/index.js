@@ -587,9 +587,7 @@ module.exports.init = async (botModel, bot) => {
             } else {
               await ctx.replyWithHTML('Аккаунт получателя не существует. Проверьте имя аккаунта и повторите попытку.');
             }
-          }
-
-          else if (user.state === 'set_goal_title') {
+          } else if (user.state === 'set_goal_title') {
             user.create_goal.title = text;
             user.create_goal.description = '';
             user.create_goal.target = `${parseFloat(bot.getEnv().TARGET).toFixed(4)} ${bot.getEnv().SYMBOL}`;
@@ -611,9 +609,7 @@ module.exports.init = async (botModel, bot) => {
 
             // eslint-disable-next-line max-len
             await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-          }
-
-          else if (user.state === 'set_withdraw_amount') {
+          } else if (user.state === 'set_withdraw_amount') {
             const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
             let { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
@@ -632,9 +628,7 @@ module.exports.init = async (botModel, bot) => {
 
               ctx.reply('Введите адрес для получения USDT.TRC20: ');
             }
-          }
-
-          else if (user.state === 'set_withdraw_address') {
+          } else if (user.state === 'set_withdraw_address') {
             user.on_withdraw.address = text;
             await saveUser(bot.instanceName, user);
 
@@ -648,9 +642,7 @@ module.exports.init = async (botModel, bot) => {
             text2 += `\nАдрес: ${user.on_withdraw.address}`;
 
             ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }));
-          }
-
-          else if (user.state === 'set_deposit_amount') {
+          } else if (user.state === 'set_deposit_amount') {
             const { hostname } = user.deposit_action;
             const helix = await getHelixParams(bot, user.deposit_action.hostname);
 
@@ -690,9 +682,7 @@ module.exports.init = async (botModel, bot) => {
               ctx.reply(`Вы уверены что хотите произвести взнос в кассу ${user.deposit_action.hostname} на сумму ${user.deposit_action.quantity}?`, Markup.inlineKeyboard(buttons, { columns: 2 }));
               await saveUser(bot.instanceName, user);
             }
-          }
-
-          else if (user.state === 'transfer_amount') {
+          } else if (user.state === 'transfer_amount') {
             const amount = `${parseFloat(text).toFixed(4)} FLOWER`;
 
             const buttons = [];
@@ -758,8 +748,7 @@ module.exports.init = async (botModel, bot) => {
       if (result.data.status === 'ok') {
         await ctx.replyWithHTML('Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:');
         await ctx.reply(`${result.data.address}`);
-      }
-      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
+      } else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     } catch (e) {
       ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     }

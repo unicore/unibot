@@ -20,8 +20,7 @@ async function connect() {
 }
 
 async function createChat(bot, user, hostname, unionName, type, is_private) {
-  if (!is_private)
-  { is_private = false; }
+  if (!is_private) { is_private = false; }
 
   const client = await connect();
   // await client.sendMessage('me', { message: 'Hello!' });
