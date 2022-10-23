@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log('generate', ctx)
+  console.log('generate', ctx);
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -367,7 +367,7 @@ module.exports.init = async (botModel, bot) => {
 
     await ctx.reply('Добро пожаловать на игровую платформу развития человека от Института Коллективного Разума.\n\n');
 
-    await printQuests(ctx)
+    await printQuests(ctx);
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
@@ -564,22 +564,22 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     // await setBuyMenu(ctx)
-    printQuests(ctx)
+    printQuests(ctx);
     // ctx.reply('покупаю!')
   });
 
   async function printQuests(ctx) {
-    let text = 'ОСТРОВ ВЕРЫ 🏝\n\n'
+    let text = 'ОСТРОВ ВЕРЫ 🏝\n\n';
 
-    text += 'Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n'
-    text += '1. Покаяние и стыд\n'
-    text += '2. Доверие\n'
-    text += '3. Выбор\n'
-    text += '4. Милосердие\n'
-    text += '5. Что людям знать не дано\n'
-    text += '6. Любовь в людях\n'
-    text += '7. Вера и терпение\n'
-    text += '\nПосле прохождения семи зон, вы увидите, как просто устроен мир.'
+    text += 'Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n';
+    text += '1. Покаяние и стыд\n';
+    text += '2. Доверие\n';
+    text += '3. Выбор\n';
+    text += '4. Милосердие\n';
+    text += '5. Что людям знать не дано\n';
+    text += '6. Любовь в людях\n';
+    text += '7. Вера и терпение\n';
+    text += '\nПосле прохождения семи зон, вы увидите, как просто устроен мир.';
     const buttons = [];
 
     // buttons.push(Markup.button.callback('следующий [0]', `nextquest`));
@@ -587,13 +587,13 @@ module.exports.init = async (botModel, bot) => {
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
-  };
+  }
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const quest = ctx.match[1];
 
-    let text = ''
+    let text = '';
     // text = `Локация: кафе у моря\n\n`
     text += `Пришедший не откуда
 Идущий в никуда
@@ -665,20 +665,20 @@ module.exports.init = async (botModel, bot) => {
 Узнав как всё устроено
 Увидя белый свет.
 Всё сам поймёшь наверное
-А может быть и нет.`
+А может быть и нет.`;
 
-    await ctx.reply(text)
+    await ctx.reply(text);
 
-    text = ''
-    text = 'Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n '
+    text = '';
+    text = 'Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n ';
 
-    user.state = 'quest'
-    user.quest = 'faith_island'
+    user.state = 'quest';
+    user.quest = 'faith_island';
 
-    await saveUser(bot.instanceName, user)
+    await saveUser(bot.instanceName, user);
 
-    await ctx.replyWithHTML(text)
-  })
+    await ctx.replyWithHTML(text);
+  });
 
   bot.hears('Вступить', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1705,14 +1705,13 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, bot.getEnv().SIN_CHANNEL, text, id, 'question');
 
-            user.sins_count ? user.sins_count += 1 : user.sins_count = 1
+            user.sins_count ? user.sins_count += 1 : user.sins_count = 1;
 
             await saveUser(bot.instanceName, user);
 
             await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
-            if (user.sins_count >= 100)
-            { await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!') }
+            if (user.sins_count >= 100) { await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!'); }
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 

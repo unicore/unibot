@@ -253,9 +253,8 @@ async function printHelixWallet(bot, ctx, user, hostname) {
     else buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`));
   }
 
-  let reply_to
-  if (ctx.update.message.reply_to_message)
-  { reply_to = ctx.update.message.reply_to_message.message_id }
+  let reply_to;
+  if (ctx.update.message.reply_to_message) { reply_to = ctx.update.message.reply_to_message.message_id; }
 
   try {
     if (params.currentPool.expired_time === 'режим ожидания') {
@@ -264,14 +263,14 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-      let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
+      const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
     } else {
       await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
   } catch (e) {
     // eslint-disable-next-line max-len
     // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
+    const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
   }
 }
 
@@ -354,10 +353,7 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
   });
   const messagePromises = results.map((id) => {
     const target = refBalances.find((el) => Number(el.id) === Number(id));
-    if (ctx)
-    { return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`) }
-    else
-    { return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` }); }
+    if (ctx) { return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`); } else { return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` }); }
   });
 
   await Promise.all(messagePromises);
@@ -365,9 +361,9 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
 
 async function printHelixStat(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log('ON PRUNT', ctx.update)
+  console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -391,19 +387,19 @@ async function printHelixStat(bot, user, hostname, ctx) {
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log('estimateSysIncome', estimateSysIncome)
+    console.log('estimateSysIncome', estimateSysIncome);
 
-    let cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
+    const cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
 
     // console.log("royalty: ", royalty)
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000
-    let levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
+    const convert_rate = params.host.sale_shift / 10000;
+    const levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
 
     // text += '\n---------------------------------';
     text += `\n| Союз: ${params.host.username} | ${params.host.title}`;
@@ -449,22 +445,22 @@ async function printHelixStat(bot, user, hostname, ctx) {
     text += '\n---------------------------------';
     text += '\nсообщение будет удалено через 30 секунд';
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
-    text += '\nПоказать помощь: /help'
+    text += '\nПоказать помощь: /help';
     // eslint-disable-next-line max-len
-    await ctx.deleteMessage(d)
+    await ctx.deleteMessage(d);
 
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
-        ctx.deleteMessage(ctx.update.message.message_id)
-        ctx.deleteMessage(id)
+        ctx.deleteMessage(ctx.update.message.message_id);
+        ctx.deleteMessage(id);
       },
       30 * 1000,
     );
   } else {
-    ctx.reply('Аккаунт не найден')
-    ctx.deleteMessage(d)
+    ctx.reply('Аккаунт не найден');
+    ctx.deleteMessage(d);
   }
 }
 
@@ -496,23 +492,23 @@ async function printWallet(bot, user, ctx, hostname) {
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
     const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
-    let userPower
-    let io
-    let convert_rate
-    let params
-    let totalShares
-    let estimateSysIncome
-    let royalty
+    let userPower;
+    let io;
+    let convert_rate;
+    let params;
+    let totalShares;
+    let estimateSysIncome;
+    let royalty;
 
     if (hostname) {
       params = await getHelixParams(bot, hostname);
-      convert_rate = params.host.sale_shift / 10000
+      convert_rate = params.host.sale_shift / 10000;
       totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
       userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
-      io = await getUserIntelOwn(bot, hostname, user.eosname)
+      io = await getUserIntelOwn(bot, hostname, user.eosname);
       estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
 
-      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
+      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
     }
 
     // text += '\n---------------------------------';
@@ -541,24 +537,24 @@ async function printWallet(bot, user, ctx, hostname) {
     else {
       text += '\n\nсообщение будет удалено через 30 секунд';
 
-      let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+      const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
       setTimeout(
         () => {
-          ctx.deleteMessage(ctx.update.message.message_id)
-          ctx.deleteMessage(id)
+          ctx.deleteMessage(ctx.update.message.message_id);
+          ctx.deleteMessage(id);
         },
         30 * 1000,
-      )
+      );
     }
   }
 }
 
 async function printPublicWallet(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log('ON PRUNT', ctx.update)
+  console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -592,15 +588,15 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log('estimateSysIncome', estimateSysIncome)
-    let royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    console.log('royalty: ', royalty)
+    console.log('estimateSysIncome', estimateSysIncome);
+    const royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    console.log('royalty: ', royalty);
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000
+    const convert_rate = params.host.sale_shift / 10000;
 
-    let io = await getUserIntelOwn(bot, hostname, user.eosname)
+    const io = await getUserIntelOwn(bot, hostname, user.eosname);
 
     // text += '\n---------------------------------';
     text += `\n| Аккаунт: ${user.eosname}`;
@@ -623,20 +619,20 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     text += '\n\nсообщение будет удалено через 30 секунд.';
 
     // eslint-disable-next-line max-len
-    await ctx.deleteMessage(d)
+    await ctx.deleteMessage(d);
 
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
-        ctx.deleteMessage(ctx.update.message.message_id)
-        ctx.deleteMessage(id)
+        ctx.deleteMessage(ctx.update.message.message_id);
+        ctx.deleteMessage(id);
       },
       30 * 1000,
     );
   } else {
-    ctx.reply('Аккаунт не найден')
-    ctx.deleteMessage(d)
+    ctx.reply('Аккаунт не найден');
+    ctx.deleteMessage(d);
   }
 }
 
@@ -714,7 +710,7 @@ async function goalWithdraw(bot, ctx, user, goal) {
   }, {
     blocksBehind: 3,
     expireSeconds: 30,
-  })
+  });
 }
 
 async function internalWithdrawAction(bot, user, hostname, balanceId) {
@@ -763,11 +759,11 @@ async function retireAction(bot, user, amount, address) {
       blocksBehind: 3,
       expireSeconds: 30,
     }).then(async () => {
-      resolve()
+      resolve();
     }).catch(async (e) => {
-      reject(e)
+      reject(e);
     });
-  })
+  });
 }
 
 async function massWithdrawAction(bot, user, hostname, balances) {
@@ -787,7 +783,7 @@ async function massWithdrawAction(bot, user, hostname, balances) {
 async function getUserIntelOwn(bot, hostname, username) {
   const ios = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'intelown', username, username, 1);
 
-  return ios[0] || {total_reports: 0, approved_reports: 0}
+  return ios[0] || { total_reports: 0, approved_reports: 0 };
 }
 
 async function getHelixsList(bot) {
@@ -1234,18 +1230,18 @@ async function exitFromTail(bot, ctx, user, hostname) {
 }
 
 async function getWelcome() {
-  let text = ''
-  text += 'Любая цель - это проект, предложенный и утвержденный участниками союза.'
-  text += 'Для создания цели напишите ваш запрос с тегом #goal в этот чат.'
-  text += 'Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий'
-  text += 'Получайте фракции (POWER) '
+  let text = '';
+  text += 'Любая цель - это проект, предложенный и утвержденный участниками союза.';
+  text += 'Для создания цели напишите ваш запрос с тегом #goal в этот чат.';
+  text += 'Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий';
+  text += 'Получайте фракции (POWER) ';
 
-  return text
+  return text;
 }
 
 async function getGoalInstructions() {
-  let text = ''
-  text += 'Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.'
+  let text = '';
+  text += 'Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.';
   // text += `\n\n/donate - создать взнос в цель и получить возможность голосовать за цели (минимальный взнос 10 USDT)`
   // text += `\n/about - о союзе`
   // text += `\n/set_coordinator @username - установить координатора цели (доступно только архитектору)`
@@ -1253,7 +1249,7 @@ async function getGoalInstructions() {
   // text += `\nсообщение с тегом #task или кнопка "создать действие" - создаёт действие в рамках цели`
   // text += `\nсообщение с тегом #report как ответ на созданное действие, или кнопка "создать отчёт" - создаёт отчёт для опубликованного ранее действия.`
 
-  return text
+  return text;
 }
 
 async function addToTeam(bot, ctx, user, hostname, dac, title) {
@@ -1273,7 +1269,7 @@ async function addToTeam(bot, ctx, user, hostname, dac, title) {
         weight: 1,
         limit_type: '',
         income_limit: '0.0000 FLOWER',
-        title: title,
+        title,
         descriptor: '',
       },
     }],

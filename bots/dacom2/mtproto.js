@@ -1,57 +1,55 @@
 const path = require('path');
 
-const { TelegramClient, Api } = require('telegram')
-const { StringSession } = require('telegram/sessions')
-const {insertUnion, getProjectsCount} = require('./db')
+const { TelegramClient, Api } = require('telegram');
+const { StringSession } = require('telegram/sessions');
+const { insertUnion, getProjectsCount } = require('./db');
 
 const { createReadStream } = require('fs');
 const { TGCalls, Stream } = require('tgcalls-next');
 
 // KRASNOV
-const apiId = parseInt(process.env.API_ID)
-const apiHash = process.env.API_HASH
+const apiId = parseInt(process.env.API_ID);
+const apiHash = process.env.API_HASH;
 
-const stringSession = new StringSession(process.env.STRING_SESSION)
+const stringSession = new StringSession(process.env.STRING_SESSION);
 
 async function connect() {
-  const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 })
-  await client.connect()
-  return client
+  const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
+  await client.connect();
+  return client;
 }
 
 async function createChat(bot, user, hostname, unionName, type, is_private) {
-  if (!is_private)
-  { is_private = false }
+  if (!is_private) { is_private = false; }
 
-  const client = await connect()
+  const client = await connect();
   // await client.sendMessage('me', { message: 'Hello!' });
   // const request = new Api.messages.SendMessage({peer: "me", message: "hello"})
-  let result
-  let chatId
-  let channelId
-  let chatLink
-  let channelLink
-  let channelTitle
-  let chatTitle
-  let projectCount
+  let result;
+  let chatId;
+  let chatLink;
+  let channelLink;
+  let channelTitle;
+  let chatTitle;
+  let projectCount;
 
   if (type === 'union') {
-    channelTitle = `Канал союза ${unionName}`
-    chatTitle = `Союз ${unionName}`
+    channelTitle = `Канал союза ${unionName}`;
+    chatTitle = `Союз ${unionName}`;
   } else if (type === 'goals') {
-    channelTitle = `Канал целей союза ${unionName}`
-    chatTitle = `Обсуждение целей союза ${unionName}`
+    channelTitle = `Канал целей союза ${unionName}`;
+    chatTitle = `Обсуждение целей союза ${unionName}`;
   } else if (type === 'tasks') {
-    channelTitle = `Канал действий союза ${unionName}`
-    chatTitle = `Обсуждение действий союза ${unionName}`
+    channelTitle = `Канал действий союза ${unionName}`;
+    chatTitle = `Обсуждение действий союза ${unionName}`;
   } else if (type === 'reports') {
-    channelTitle = `Канал отчётов союза ${unionName}`
-    chatTitle = `Обсуждение отчётов союза ${unionName}`
+    channelTitle = `Канал отчётов союза ${unionName}`;
+    chatTitle = `Обсуждение отчётов союза ${unionName}`;
   } else if (type === 'project') {
-    projectCount = await getProjectsCount(bot.instanceName, user.id)
+    projectCount = await getProjectsCount(bot.instanceName, user.id);
     // todo get projects
-    channelTitle = `Проект #${projectCount + 1} ${unionName}`
-    chatTitle = `Обсуждение проекта #${projectCount + 1} ${unionName}`
+    channelTitle = `Проект #${projectCount + 1} ${unionName}`;
+    chatTitle = `Обсуждение проекта #${projectCount + 1} ${unionName}`;
   }
 
   result = await client.invoke(new Api.channels.CreateChannel({
@@ -62,7 +60,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     forImport: false,
   }));
 
-  channelId = parseInt((result.chats[0].id.value))
+  const channelId = parseInt((result.chats[0].id.value));
 
   result = await client.invoke(
     new Api.messages.CreateChat({
@@ -71,7 +69,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     }),
   );
 
-  chatId = parseInt((result.chats[0].id.value))
+  chatId = parseInt((result.chats[0].id.value));
 
   chatLink = await client.invoke(new Api.messages.ExportChatInvite({
     peer: chatId,
@@ -80,7 +78,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     title: 'Welcome',
   }));
 
-  chatLink = chatLink.link
+  chatLink = chatLink.link;
 
   channelLink = await client.invoke(new Api.messages.ExportChatInvite({
     peer: channelId,
@@ -89,13 +87,13 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     title: 'Welcome',
   }));
 
-  channelLink = channelLink.link
+  channelLink = channelLink.link;
 
-  console.log('CHAT ID: ', chatId)
-  chatId = await setDiscussionGroup(bot, parseInt(chatId), parseInt(channelId))
-  console.log('AFTE RCREATE DISCUSS')
+  console.log('CHAT ID: ', chatId);
+  chatId = await setDiscussionGroup(bot, parseInt(chatId), parseInt(channelId));
+  console.log('AFTE RCREATE DISCUSS');
 
-  let admin_result = await client.invoke(new Api.channels.EditAdmin({
+  const admin_result = await client.invoke(new Api.channels.EditAdmin({
     channel: chatId,
     userId: bot.getEnv().BOTNAME,
     isAdmin: true,
@@ -134,7 +132,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     rank: 'оператор',
   }));
 
-  console.log('ADMIN RESULT: ', admin_result)
+  console.log('ADMIN RESULT: ', admin_result);
 
   await insertUnion(bot.instanceName, {
     ownerId: user.id,
@@ -146,7 +144,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     link: chatLink,
     projectCount: projectCount + 1,
     is_private,
-  })
+  });
 
   await insertUnion(bot.instanceName, {
     ownerId: user.id,
@@ -158,37 +156,39 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     link: channelLink,
     projectCount: projectCount + 1,
     is_private,
-  })
-  console.log('GOALS CHANNEL: ', result)
+  });
+  console.log('GOALS CHANNEL: ', result);
 
-  return {chatId, channelId, chatLink, channelLink}
+  return {
+    chatId, channelId, chatLink, channelLink,
+  };
 }
 
 async function checkBotIsAdmin(bot, user, ctx, chatId) {
-  let res
+  let res;
 
   try {
-    res = await bot.telegram.getChatAdministrators(chatId)
+    res = await bot.telegram.getChatAdministrators(chatId);
   } catch (e) {
-    ctx.reply(`Ошибка! Бот ${bot.getEnv().BOTNAME} должен быть назначен администратором в новостном канале DAO. Для отмены установки новостного канала вызовите команду /cancel_set_news_channel`)
-    return {status: 'error', message: e.message}
+    ctx.reply(`Ошибка! Бот ${bot.getEnv().BOTNAME} должен быть назначен администратором в новостном канале DAO. Для отмены установки новостного канала вызовите команду /cancel_set_news_channel`);
+    return { status: 'error', message: e.message };
   }
 
-  let bot_is_admin = false
-  let user_is_admin = false
-  console.log('admins: ', res)
+  let bot_is_admin = false;
+  let user_is_admin = false;
+  console.log('admins: ', res);
 
-  res.map(u => {
+  res.map((u) => {
     if (u.user.username === bot.getEnv().BOTNAME) {
-      bot_is_admin = true
+      bot_is_admin = true;
     }
 
     if (u.user.id === user.id) {
-      user_is_admin = true
+      user_is_admin = true;
     }
-  })
+  });
 
-  return {bot_is_admin, user_is_admin, status: 'ok'}
+  return { bot_is_admin, user_is_admin, status: 'ok' };
 }
 
 async function MigrateChat(bot, chatId) {
@@ -198,18 +198,18 @@ async function MigrateChat(bot, chatId) {
 }
 
 async function setDiscussionGroup(bot, chatId, channelId) {
-  const client = await connect()
+  const client = await connect();
 
   const result = await client.invoke(new Api.messages.MigrateChat({
-    chatId: chatId,
+    chatId,
   }));
 
-  console.log('result on migrate:', result)
+  console.log('result on migrate:', result);
 
-  let migratedTo = parseInt(result.chats[0].migratedTo.channelId.value)
-  let accessHash = parseInt(result.chats[0].migratedTo.accessHash.value)
+  const migratedTo = parseInt(result.chats[0].migratedTo.channelId.value);
+  const accessHash = parseInt(result.chats[0].migratedTo.accessHash.value);
 
-  console.log('migratedTo:', migratedTo, 'accessHash:', accessHash)
+  console.log('migratedTo:', migratedTo, 'accessHash:', accessHash);
 
   await client.invoke(new Api.channels.TogglePreHistoryHidden({
     channel: `${migratedTo}`,
@@ -220,12 +220,12 @@ async function setDiscussionGroup(bot, chatId, channelId) {
   const result2 = await client.invoke(new Api.channels.SetDiscussionGroup({
     broadcast: `-100${channelId}`,
     group: migratedTo,
-    accessHash: accessHash,
+    accessHash,
   }));
 
-  console.log('result2', result2)
+  console.log('result2', result2);
 
-  return migratedTo
+  return migratedTo;
   // console.log('SET DISCUSSION: ', result)
 }
 
@@ -259,8 +259,8 @@ async function createGroupCall(bot, chatId, scheduleDate) {
 }
 
 async function exportChatLink(channelId, messageId) {
-  const client = await connect()
-  console.log('channelId: ', channelId, messageId)
+  const client = await connect();
+  console.log('channelId: ', channelId, messageId);
   const result = await client.invoke(new Api.messages.GetDiscussionMessage({
     peer: channelId,
     msgId: messageId,
@@ -286,20 +286,20 @@ async function exportChatLink(channelId, messageId) {
   //     msgId: messageId,
   // }));
 
-  console.log('exportChatLink: ', result)
-  return result
+  console.log('exportChatLink: ', result);
+  return result;
 }
 
 async function makeAdmin(bot, chatId, userId, ctx) {
-  const client = await connect()
+  const client = await connect();
 
-  let chat = await client.invoke(new Api.messages.GetFullChat({
+  const chat = await client.invoke(new Api.messages.GetFullChat({
     chatId: Math.abs(chatId),
   }));
 
-  let newAdmin = chat.users.find(el => parseInt(el.id.value) === userId)
-  console.log('newAdmin: ', newAdmin)
-  let result
+  const newAdmin = chat.users.find((el) => parseInt(el.id.value) === userId);
+  console.log('newAdmin: ', newAdmin);
+  let result;
 
   try {
     if (newAdmin) {
@@ -337,15 +337,15 @@ async function makeAdmin(bot, chatId, userId, ctx) {
       // }));
     }
   } catch (e) {
-    result = e
-    console.log('error: ', e)
+    result = e;
+    console.log('error: ', e);
   }
 
-  return result
+  return result;
 }
 
 async function makeChannelAdmin(bot, chatId, userId, ctx, channelId) {
-  const client = await connect()
+  const client = await connect();
 
   // console.log("chatId: ", chatId)
   // chatId = chatId.substr(4, chatId.length)

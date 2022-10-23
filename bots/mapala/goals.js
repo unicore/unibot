@@ -1,8 +1,8 @@
 const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
-const { saveUser, insertMessage, insertGoal} = require('./db');
-const {getHelixParams} = require('./core')
+const { saveUser, insertMessage, insertGoal } = require('./db');
+const { getHelixParams } = require('./core');
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
 
 async function getVotesCount(bot, hostname, username) {
@@ -12,7 +12,7 @@ async function getVotesCount(bot, hostname, username) {
 }
 
 async function fetchGoals(bot, hostname) {
-  console.log('hostname', hostname)
+  console.log('hostname', hostname);
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals');
   return goals.sort((a, b) => parseFloat(a.votes) - parseFloat(b.votes));
 }
@@ -152,7 +152,7 @@ async function burnNow(bot, ctx, user) {
 
 async function createGoal(bot, ctx, user) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  let goal = {
+  const goal = {
     creator: user.eosname,
     host: user.create_goal.hostname,
     parent_id: 0,
@@ -160,11 +160,11 @@ async function createGoal(bot, ctx, user) {
     description: user.create_goal.description,
     target: user.create_goal.target,
     meta: JSON.stringify({}),
-  }
+  };
 
   try {
     // console.log("goal",goal)
-    let res = await eos.transact({
+    const res = await eos.transact({
       actions: [{
         account: 'unicore',
         name: 'setgoal',
@@ -180,26 +180,26 @@ async function createGoal(bot, ctx, user) {
     });
 
     const cons = res.processed.action_traces[0].console;
-    console.log('CONSOLE: ', cons)
+    console.log('CONSOLE: ', cons);
 
     const [, goalId] = cons.split('GOAL_ID:');
-    console.log('GOALID: ', goalId)
+    console.log('GOALID: ', goalId);
 
     goal.id = goalId;
-    goal.channel_id = bot.getEnv().GOALS_CHANNEL_ID
+    goal.channel_id = bot.getEnv().GOALS_CHANNEL_ID;
 
-    await insertGoal(bot.instanceName, user, goal)
+    await insertGoal(bot.instanceName, user, goal);
 
     const buttons = [];
-    printGoalsMenu(bot, ctx, user, user.create_goal.hostname)
+    printGoalsMenu(bot, ctx, user, user.create_goal.hostname);
     // buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.create_goal.hostname} `));
     // ctx.editMessageText('Ваша цель успешно создана и добавлена в общий список.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-    let text = ''
-    text += `Кайфолог: ${user.eosname}\n`
-    text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`
+    let text = '';
+    text += `Кайфолог: ${user.eosname}\n`;
+    text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`;
 
-    let id = await sendMessageToUser(bot, {id : bot.getEnv().GOALS_CHANNEL_ID}, { text: text });
+    const id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().GOALS_CHANNEL_ID, text, id, 'MASTER');
 
@@ -207,21 +207,21 @@ async function createGoal(bot, ctx, user) {
     user.create_goal = {};
     await saveUser(bot.instanceName, user);
   } catch (e) {
-    console.log(goal)
+    console.log(goal);
     ctx.reply(e.message);
     console.error(e);
   }
 }
 
 async function printGoalsMenu(bot, ctx, user, hostname) {
-  console.log('hostname0: ', hostname)
+  console.log('hostname0: ', hostname);
   const goals = await fetchGoals(bot, hostname);
   const conditions = await fetchConditions(bot, hostname);
   // let upower = await fetchUPower(bot, hostname, user.eosname);
   const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
   console.log('goals', goals[0]);
-  let index = 1;
+  const index = 1;
   // eslint-disable-next-line no-restricted-syntax
   // for (const goal of goals) {
   //   const buttons = [];
@@ -258,13 +258,12 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const fillAmount = mingamount === 0 ? (mingpercent === 0 ? 'без ограничений' : `${mingpercent}% от суммы`) : `${parseFloat(mingamount / 10000).toFixed(4)} FLOWER`;
   let text = '';
 
-  let myGoal = goals.find(el => el.creator === user.eosname)
-  let k = 0
+  const myGoal = goals.find((el) => el.creator === user.eosname);
+  let k = 0;
 
-  let prevGoalsCount = goals.map(el => {
-    if (myGoal && el.id < myGoal.id)
-    { k++ }
-  })
+  const prevGoalsCount = goals.map((el) => {
+    if (myGoal && el.id < myGoal.id) { k++; }
+  });
 
   const buttons = [];
   // buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
@@ -279,7 +278,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 
   const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-  let totalPrevGoalsAmount = Math.floor(k * 300 / 150 * 4)
+  const totalPrevGoalsAmount = Math.floor(k * 300 / 150 * 4);
 
   // text += `\nСтоимость постановки цели: ${fillAmount}`;
   text += '\n---------------------------------';
@@ -287,11 +286,11 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   // text += `\nДоступ: ${userPower.power} POWER`;
   if (myGoal) {
     // text += `\nВаша цель 1 в очереди`
-    text += `\nДо начала накопления: ${totalPrevGoalsAmount} билетов`
-    text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`
+    text += `\nДо начала накопления: ${totalPrevGoalsAmount} билетов`;
+    text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`;
     // text += `\nвывод средств доступен сразу по`
   } else {
-    text += '\nЦель не установлена'
+    text += '\nЦель не установлена';
   }
 
   text += '\n---------------------------------';
