@@ -5,7 +5,7 @@ const { loadDB, getUserByEosName} = require('./db');
 const { fetchReport, fetchGoal } = require("./goals");
 
 async function sendMessageToUser(bot, user, message, extra) {
-  try{
+  try {
     let id = {};
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id, extra);
@@ -26,9 +26,9 @@ async function sendMessageToUser(bot, user, message, extra) {
       id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude, extra);
     }
 
-  return id.message_id;
+    return id.message_id;
   }
-  catch(e){
+  catch (e) {
     console.error(e)
   }
 }
@@ -68,7 +68,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId)
     report = await fetchReport(bot, hostname, reportId);
 
-  if (report){
+  if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
     console.log("total_shares: ", goal.second_circuit_votes, report.positive_votes, report.negative_votes)
@@ -123,19 +123,19 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     text += `Одобрен: ${report.approved === '1' ? "🟢" : "🟡"}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
 
-    if (report.approved){
+    if (report.approved) {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
-      bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes  ) * goal.total_power_on_distribution} POWER\n`
+      bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`
       bonus = parseFloat(bonus).toFixed(2) + " POWER"
     } else {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
       // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
-      if (report.positive_votes === 0){
+      if (report.positive_votes === 0) {
         bonus = parseFloat(0).toFixed(2) + " POWER"
       } else {
-        bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
+        bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
       }
     }
 

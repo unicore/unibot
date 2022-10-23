@@ -76,9 +76,9 @@ async function disableButtons(bot, ctx, up) {
     keyboard[0][0].text = "ожидание"
   else
     keyboard[0][1].text = "ожидание"
-  try{
+  try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
-  } catch(e){
+  } catch (e) {
     console.log("error on disable buttons: ", e.message)
   }
 }
@@ -92,19 +92,19 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   else
     keyboard[0][1].text = "ожидание"
 
-  try{
+  try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
-  } catch(e){
+  } catch (e) {
     console.log("error on enable buttons: ", e.message)
   }
 }
 
-async function constructGoalMessage(bot, hostname, goal, goalId){
+async function constructGoalMessage(bot, hostname, goal, goalId) {
   if (!goal && goalId)
     goal = await fetchGoal(bot, hostname, goalId);
 
   console.log("GOAL ON FETHC: ", goal, hostname, goalId)
-  if (goal){
+  if (goal) {
     console.log("GOAL MATCH2: ", goal.id)
 
     let host = await fetchHost(bot, hostname)
@@ -121,7 +121,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
     let coordinator = ""
 
-    if (goal.benefactor !== ""){
+    if (goal.benefactor !== "") {
       let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
       coordinator = (user.username && user.username !== "") ? '@' + user.username : goal.benefactor
     }
@@ -141,7 +141,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
   } else return ""
 }
 
-async function constructTaskMessage(bot, hostname, task, taskId){
+async function constructTaskMessage(bot, hostname, task, taskId) {
   if (!task && taskId)
     task = await fetchTask(bot, hostname, taskId);
 
@@ -162,7 +162,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId)
     report = await fetchReport(bot, hostname, reportId);
 
-  if (report){
+  if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
     console.log("total_shares: ", goal.second_circuit_votes, report.positive_votes, report.negative_votes)
@@ -217,19 +217,19 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     text += `Одобрен: ${report.approved === '1' ? "🟢" : "🟡"}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
 
-    if (report.approved){
+    if (report.approved) {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
-      bonus = `${(report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes  ) * goal.total_power_on_distribution} POWER\n`
+      bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`
       bonus = parseFloat(bonus).toFixed(2) + " POWER"
     } else {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
       // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
-      if (report.positive_votes === 0){
+      if (report.positive_votes === 0) {
         bonus = parseFloat(0).toFixed(2) + " POWER"
       } else {
-        bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
+        bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
       }
     }
 
@@ -284,11 +284,11 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 
   let new_text = await constructGoalMessage(bot, hostname, goal)
 
-  //get message from chat
+  // get message from chat
 
-  try{
+  try {
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
-  } catch(e){
+  } catch (e) {
     console.log("same message!")
   }
   // ctx.update.callback_query.message.reply_markup.inline_keyboard[0].map((el, index) => {
@@ -316,9 +316,9 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 
   console.log('1: ', chat_id)
   console.log('2: ', message_id)
-  try{
+  try {
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-  } catch(e){
+  } catch (e) {
     console.log("SAME MESSAG!")
   }
 }
@@ -326,43 +326,43 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
-    let data = {
-          host: hostname,
-          task_id: taskId,
-          priority: priority,
-        }
-    console.log(data)
+  let data = {
+    host: hostname,
+    task_id: taskId,
+    priority: priority,
+  }
+  console.log(data)
 
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'setpriority',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: data,
+  await eos.transact({
+    actions: [{
+      account: 'unicore',
+      name: 'setpriority',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
       }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
+      data: data,
+    }],
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
 
-   // await editGoalMsg(bot, ctx, user, hostname, goalId);
-   let text = await constructTaskMessage(bot, hostname, null, taskId)
-   console.log("TEXT:", text)
+  // await editGoalMsg(bot, ctx, user, hostname, goalId);
+  let text = await constructTaskMessage(bot, hostname, null, taskId)
+  console.log("TEXT:", text)
 
-   let message_id = ctx.update.message.reply_to_message.message_id
-   let chat_id = ctx.update.message.reply_to_message.chat.id
+  let message_id = ctx.update.message.reply_to_message.message_id
+  let chat_id = ctx.update.message.reply_to_message.chat.id
 
   const buttons = [];
 
   buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${taskId} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
   const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
 
-   try{
+  try {
     await bot.telegram.editMessageText(chat_id, message_id, null, text, request);
-  } catch(e){
+  } catch (e) {
     console.log("same message!", e)
   }
 }
@@ -370,77 +370,77 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'setbenefac',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          host: hostname,
-          goal_id: goalId,
-          benefactor: curator,
-        },
+  await eos.transact({
+    actions: [{
+      account: 'unicore',
+      name: 'setbenefac',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
       }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
+      data: {
+        host: hostname,
+        goal_id: goalId,
+        benefactor: curator,
+      },
+    }],
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
 
-   // await editGoalMsg(bot, ctx, user, hostname, goalId);
-   let text = await constructGoalMessage(bot, hostname, null, goalId)
-   console.log("TEXT:", text)
-   let message_id = ctx.update.message.reply_to_message.forward_from_message_id
-   let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id
+  // await editGoalMsg(bot, ctx, user, hostname, goalId);
+  let text = await constructGoalMessage(bot, hostname, null, goalId)
+  console.log("TEXT:", text)
+  let message_id = ctx.update.message.reply_to_message.forward_from_message_id
+  let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id
 
-   try{
+  try {
     await bot.telegram.editMessageText(chat_id, message_id, null, text);
-  } catch(e){
+  } catch (e) {
     console.log("same message!", e)
   }
 }
 
 async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-    console.log("on VOTE ACTION")
+  console.log("on VOTE ACTION")
   await disableButtons(bot, ctx, up)
 
   let host = await fetchHost(bot, hostname)
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
 
-  if (user.eosname === host.architect && report.approved === 0){
+  if (user.eosname === host.architect && report.approved === 0) {
     actions.push({
-        account: 'unicore',
-        name: 'approver',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          host: hostname,
-          report_id: reportId,
-          comment: "",
-        },
-      })
+      account: 'unicore',
+      name: 'approver',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
+      }],
+      data: {
+        host: hostname,
+        report_id: reportId,
+        comment: "",
+      },
+    })
   }
 
   actions.push({
-        account: 'unicore',
-        name: 'rvote',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          voter: user.eosname,
-          host: hostname,
-          report_id: reportId,
-          up: up,
-        },
-      })
+    account: 'unicore',
+    name: 'rvote',
+    authorization: [{
+      actor: user.eosname,
+      permission: 'active',
+    }],
+    data: {
+      voter: user.eosname,
+      host: hostname,
+      report_id: reportId,
+      up: up,
+    },
+  })
 
   try {
     await eos.transact({
@@ -456,7 +456,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
   } catch (e) {
-    console.log("on error: ", )
+    console.log("on error: ",)
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
     } else {
@@ -536,9 +536,9 @@ async function burnNow(bot, ctx, user) {
     const buttons = [];
 
     buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.burn.hostname} `));
-    try{
+    try {
       ctx.editMessageText('Сила голоса успешно пополнена.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-    } catch(e){
+    } catch (e) {
       console.log("same message!")
     }
     // eslint-disable-next-line no-param-reassign
@@ -555,13 +555,13 @@ async function editGoal(bot, ctx, user, goal) {
 
   let res
   let data = {
-        editor: user.eosname,
-        goal_id: goal.id,
-        host: goal.hostname,
-        title: goal.title,
-        description: goal.description,
-        meta: JSON.stringify(goal.meta || {}),
-      }
+    editor: user.eosname,
+    goal_id: goal.id,
+    host: goal.hostname,
+    title: goal.title,
+    description: goal.description,
+    meta: JSON.stringify(goal.meta || {}),
+  }
 
   return await eos.transact({
     actions: [{
@@ -577,7 +577,7 @@ async function editGoal(bot, ctx, user, goal) {
     blocksBehind: 3,
     expireSeconds: 30,
   });
- }
+}
 
 async function createGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);

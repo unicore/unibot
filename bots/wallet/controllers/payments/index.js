@@ -46,9 +46,9 @@ module.exports.payReciever = async (req, res) => {
   const icomeMenu = Markup.keyboard(mainButtons, { columns: 2 }).resize();
 
   await insertMessage(botName, user, 'operator', message);
-  
+
   let params = await getHelixParams(bot, bot.getEnv().CORE_HOST)
-  
+
   let cycle = params.host.current_cycle_num
   let pool = params.host.current_pool_num
 

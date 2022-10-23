@@ -488,9 +488,9 @@ module.exports.init = async (botModel, bot) => {
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
 
-   let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-   
-   console.log("\n\nTEST!\n\n")
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    console.log("\n\nTEST!\n\n")
 
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
@@ -510,7 +510,7 @@ module.exports.init = async (botModel, bot) => {
         console.log("\n\nTEST 4!\n\n")
       }
     }
-    
+
     const buttons = ["🎫 купить билет"];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
     return ctx.reply('Добро пожаловать в лото.\n\nКупив билет всего за 1 USD - вы гарантированно исполните свою мечту.\n\n', request);
@@ -537,22 +537,22 @@ module.exports.init = async (botModel, bot) => {
   });
 
   async function buyTicket(bot, user, ctx, currency) {
-    try{
+    try {
       let params = {
         username: user.eosname,
         currency: currency
       }
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`
-      
+
       const result = await axios.post(
         path,
         params
       );
-      
+
       if (result.data.status === 'ok')
         ctx.reply(`address: ${result.data.address}`)
       else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
-    } catch(e){
+    } catch (e) {
       ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
     }
   }
@@ -560,7 +560,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action(/buywith (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const currency = ctx.match[1];
-    
+
     user.order_action = {
       name: 'createorder',
       data: {

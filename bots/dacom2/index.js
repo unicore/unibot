@@ -261,13 +261,13 @@ const quizDefinition = [
   { message: 'Расскажите о себе и/или пришлите профиль в любой соцсети' },
 ];
 
-async function welcome(bot, ctx){
-    await pushEducation(bot, ctx, 0);
+async function welcome(bot, ctx) {
+  await pushEducation(bot, ctx, 0);
 };
 
 async function finishEducation(bot, ctx, id) {
   const icomeMenu = Markup
-      .keyboard(mainButtons, { columns: 2 }).resize();
+    .keyboard(mainButtons, { columns: 2 }).resize();
 
   let t = '';
   t += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
@@ -278,93 +278,93 @@ async function finishEducation(bot, ctx, id) {
   t += `\nКапитализация DAO: /stat,`
   t += "\nВаш кошелёк: /wallet,"
 
-  if (id){
+  if (id) {
     const id = await sendMessageToUser(bot, { id }, { text:t });
   } else {
     await ctx.replyWithHTML(t);
   }
-  //Ваша интеллектуальная собственность: /iam,\n
+  // Ваша интеллектуальная собственность: /iam,\n
 }
 
 async function pushEducation(bot, ctx, currentSlideIndex) {
-  try{
+  try {
     console.log("ctx: ", ctx)
 
-  const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
-  console.log("SLIDE : ", slide)
-  if (!slide) {
-    try {
+    const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
+    console.log("SLIDE : ", slide)
+    if (!slide) {
+      try {
       // await ctx.editMessageText('Ознакомление завершено');
-      await ctx.deleteMessage()
-    } catch (e) {
-      console.error(e);
-    }
+        await ctx.deleteMessage()
+      } catch (e) {
+        console.error(e);
+      }
 
-    await finishEducation(bot, ctx);
-  } else {
-    if (currentSlideIndex === 0) {
-      const incomeMenu = Markup
-        .removeKeyboard();
+      await finishEducation(bot, ctx);
+    } else {
+      if (currentSlideIndex === 0) {
+        const incomeMenu = Markup
+          .removeKeyboard();
 
       // await ctx.reply('Ознакомление запущено', incomeMenu, { reply_markup: { remove_keyboard: true } });
-    }
+      }
 
-    const buttons = [];
-    let id
-    try {
-      id = ctx.update.callback_query.message.chat.id
-    } catch(e){
-      id = ctx.update.message.chat.id
-    }
+      const buttons = [];
+      let id
+      try {
+        id = ctx.update.callback_query.message.chat.id
+      } catch (e) {
+        id = ctx.update.message.chat.id
+      }
 
-    let current_chat = await getUnion(bot.instanceName, (id).toString())
+      let current_chat = await getUnion(bot.instanceName, (id).toString())
 
-    if (currentSlideIndex + 1 === education.length){
+      if (currentSlideIndex + 1 === education.length) {
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
       // buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
 
-      if (!current_chat)
-        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
-    } else {
+        if (!current_chat)
+          buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
+      } else {
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
       // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
-      if (!current_chat)
-        buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
-    }
-
-    let text = '';
-    text += `Создать DAO.`// [${currentSlideIndex + 1} / ${education.length}]`
-
-    text += `\n\n${slide.text}`;
-
-    if (currentSlideIndex === 0 && slide.img !== "") {
-      if (slide.img.length > 0) {
-        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
-      } else {
-        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        if (!current_chat)
+          buttons.push(Markup.button.callback('Создать DAO 🚀', `startunion`));
       }
-    } else {
-      try{
-        await ctx.deleteMessage();
-      } catch(e){}
 
-      if (slide.img.length > 0) {
-        console.log("HERE3!")
-        await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+      let text = '';
+      text += `Создать DAO.`// [${currentSlideIndex + 1} / ${education.length}]`
+
+      text += `\n\n${slide.text}`;
+
+      if (currentSlideIndex === 0 && slide.img !== "") {
+        if (slide.img.length > 0) {
+          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+        } else {
+          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        }
       } else {
-        console.log("HERE4!")
-        await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        try {
+          await ctx.deleteMessage();
+        } catch (e) {}
+
+        if (slide.img.length > 0) {
+          console.log("HERE3!")
+          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+        } else {
+          console.log("HERE4!")
+          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        }
       }
     }
-  }
-} catch(e){
+  } catch (e) {
     console.log(e)
     ctx.reply(`error 2: ${e.message}`)
   }
@@ -426,7 +426,7 @@ async function nextQuiz(bot, user, ctx) {
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });//, clearMenu,
+      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -478,7 +478,7 @@ async function nextQuiz(bot, user, ctx) {
 
     let id3 = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
-    await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});//goalId: goal.goalId,
+    await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
 
     user.state = "chat"
     user.partners_channel_id = id3
@@ -593,7 +593,7 @@ module.exports.init = async (botModel, bot) => {
 
         await startQuiz(bot, ctx, user);
 
-        //TODO UNCOMMENT IT
+        // TODO UNCOMMENT IT
         // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
       }
     } else {
@@ -613,7 +613,7 @@ module.exports.init = async (botModel, bot) => {
       let t = 'Добро пожаловать.\n\n';
       await ctx.reply(t, clearMenu);
 
-      //TODO запуск WELCOME
+      // TODO запуск WELCOME
       // let res = await ctx.getChatAdministrators()
       // console.log(res)
 
@@ -621,7 +621,7 @@ module.exports.init = async (botModel, bot) => {
 
       // await welcome(bot, ctx)
 
-      //dont have any reactions on public chats
+      // dont have any reactions on public chats
     }
   });
 
@@ -643,9 +643,9 @@ module.exports.init = async (botModel, bot) => {
     // console.log("welcome")
     // welcome(bot, ctx)
 
-    //TODO set admin rights and publish next instructions
+    // TODO set admin rights and publish next instructions
     //
-    //TODO publish instrucitons
+    // TODO publish instrucitons
     //
     // console.log("NEW CHAT MEMBERS: ", ctx.message.new_chat_members)
   })
@@ -671,7 +671,7 @@ module.exports.init = async (botModel, bot) => {
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // if (ctx.update.message.chat.type === 'private') {
-      await printWallet(bot, user);
+    await printWallet(bot, user);
     // }
   });
 
@@ -680,7 +680,7 @@ module.exports.init = async (botModel, bot) => {
 
     const result = [];
 
-    if (message.caption_entities){
+    if (message.caption_entities) {
       entities = message.caption_entities;
       text = message.caption
     } else {
@@ -720,27 +720,27 @@ module.exports.init = async (botModel, bot) => {
     await pushEducation(bot, ctx, currentSlideIndex);
   });
 
-  bot.command('make_me_admin', async(ctx) => {
+  bot.command('make_me_admin', async (ctx) => {
     console.log("on start union", ctx)
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, "-1001598098546")
   })
 
-  bot.command('team', async(ctx) => {
+  bot.command('team', async (ctx) => {
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
     let dacs = await getDacs(bot, current_chat.host)
 
     let text = ''
     let k = 0
     let u
-    text+= `Команда ${current_chat.unionName}:\n`
+    text += `Команда ${current_chat.unionName}:\n`
 
     for (const dac of dacs) {
       k++
       u = await getUserByEosName(bot.instanceName, dac.dac)
-      text+= `${k}. ${'@' + u.username || u.eosname}\n`
-      text+= `\t\t\t роль: ${dac.role === '' ? 'не определена' : dac.role}\n`
+      text += `${k}. ${'@' + u.username || u.eosname}\n`
+      text += `\t\t\t роль: ${dac.role === '' ? 'не определена' : dac.role}\n`
     }
 
     await ctx.reply(text)
@@ -751,7 +751,7 @@ module.exports.init = async (botModel, bot) => {
 
     let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-    if (current_chat){
+    if (current_chat) {
       let projects = await getProjects(bot.instanceName)
       let text = ""
 
@@ -831,130 +831,130 @@ module.exports.init = async (botModel, bot) => {
     await startUnion(bot, ctx)
   })
 
-async function upgradeHost(eos, target_host, host, user) {
-        console.log("TARGET HOST: ", target_host, host)
+  async function upgradeHost(eos, target_host, host, user) {
+    console.log("TARGET HOST: ", target_host, host)
 
-        return eos.transact({
-          actions: [
-          {
-            account: "unicore",
-            name: 'upgrade',
-            authorization: [{
-              actor: target_host,
-              permission: 'active',
-            }],
-            data: host
-          },
-          {
-            account: "unicore",
-            name: 'setarch',
-            authorization: [{
-              actor: target_host,
-              permission: 'active',
-            }],
-            data: {
-              host: target_host,
-              architect: user.eosname,
-            }
-          },
-          ]
-        }, {
-          blocksBehind: 3,
-          expireSeconds: 30,
-        })
-}
+    return eos.transact({
+      actions: [
+        {
+          account: "unicore",
+          name: 'upgrade',
+          authorization: [{
+            actor: target_host,
+            permission: 'active',
+          }],
+          data: host
+        },
+        {
+          account: "unicore",
+          name: 'setarch',
+          authorization: [{
+            actor: target_host,
+            permission: 'active',
+          }],
+          data: {
+            host: target_host,
+            architect: user.eosname,
+          }
+        },
+      ]
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    })
+  }
 
-async function setParamsToHost(eos, target_host, host) {
-      return  eos.transact({
-          actions: [
-          {
-            account: "unicore",
-            name: 'setparams',
-            authorization: [{
-              actor: target_host,
-              permission: 'active',
-            }],
-            data: host
-          }]
-        }, {
-          blocksBehind: 3,
-          expireSeconds: 30,
-        })
-}
+  async function setParamsToHost(eos, target_host, host) {
+    return eos.transact({
+      actions: [
+        {
+          account: "unicore",
+          name: 'setparams',
+          authorization: [{
+            actor: target_host,
+            permission: 'active',
+          }],
+          data: host
+        }]
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    })
+  }
 
-async function startHost(eos, target_host, host) {
-        return eos.transact({
-          actions: [
-          {
-            account: "unicore",
-            name: 'start',
-            authorization: [{
-              actor: target_host,
-              permission: 'active',
-            }],
-            data: {
-              host: target_host,
-              chost: target_host
-            }
-          }]
-        }, {
-          blocksBehind: 3,
-          expireSeconds: 30,
-        })
-}
+  async function startHost(eos, target_host, host) {
+    return eos.transact({
+      actions: [
+        {
+          account: "unicore",
+          name: 'start',
+          authorization: [{
+            actor: target_host,
+            permission: 'active',
+          }],
+          data: {
+            host: target_host,
+            chost: target_host
+          }
+        }]
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    })
+  }
 
-async function setupHost(bot, ctx, eosname, wif, chat, user) {
-    try{
+  async function setupHost(bot, ctx, eosname, wif, chat, user) {
+    try {
       const eos = await bot.uni.getEosPassInstance(wif);
 
       let helix = {
-          host: eosname,
-          chost: eosname,
-          size_of_pool: 10000,
-          quants_precision: 1000000,
-          overlap: 20000,
-          profit_growth: 10000,
-          base_rate: 100,
-          loss_percent: 1000000,
-          compensator_percent: 0,
-          pool_limit: 20,
-          pool_timeout: 259200,
-          priority_seconds: 0,
+        host: eosname,
+        chost: eosname,
+        size_of_pool: 10000,
+        quants_precision: 1000000,
+        overlap: 20000,
+        profit_growth: 10000,
+        base_rate: 100,
+        loss_percent: 1000000,
+        compensator_percent: 0,
+        pool_limit: 20,
+        pool_timeout: 259200,
+        priority_seconds: 0,
 
-        }
+      }
 
       let host = {
-          username: eosname,
-          platform: eosname,
-          title: chat.title,
-          purpose: "",
-          total_shares: 0,
-          quote_amount: "0.0000 FLOWER",
-          root_token: "0.0000 FLOWER",
-          root_token_contract: "eosio.token",
-          consensus_percent: 0,
-          gtop: 0,
-          emission_percent: 0,
-          referral_percent: 250000,
-          dacs_percent: 250000,
-          cfund_percent: 250000,
-          hfund_percent: 250000,
-          quote_token_contract: "eosio.token",
-          voting_only_up: false,
-          levels: [1000000],
-          meta: JSON.stringify({})
-        }
+        username: eosname,
+        platform: eosname,
+        title: chat.title,
+        purpose: "",
+        total_shares: 0,
+        quote_amount: "0.0000 FLOWER",
+        root_token: "0.0000 FLOWER",
+        root_token_contract: "eosio.token",
+        consensus_percent: 0,
+        gtop: 0,
+        emission_percent: 0,
+        referral_percent: 250000,
+        dacs_percent: 250000,
+        cfund_percent: 250000,
+        hfund_percent: 250000,
+        quote_token_contract: "eosio.token",
+        voting_only_up: false,
+        levels: [1000000],
+        meta: JSON.stringify({})
+      }
 
       let upgrade_res = await upgradeHost(eos, eosname, host, user)
       let setparams_res = await setParamsToHost(eos, eosname, helix)
       let start_res = await startHost(eos, eosname, eosname)
-    } catch(e){
+    } catch (e) {
       ctx.reply(`ошибка при запуске союза, обратитесь в поддержку с сообщением: ${e.message}`)
       console.log(e)
     }
-}
+  }
 
-  async function startUnion(bot, ctx){
+  async function startUnion(bot, ctx) {
     let res = await ctx.getChatAdministrators()
     let bot_is_admin = false
 
@@ -962,7 +962,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       console.log("user.user.username", user.user.username)
       console.log("botname: ", bot.getEnv().BOTNAME)
 
-      if (user.user.username === bot.getEnv().BOTNAME){
+      if (user.user.username === bot.getEnv().BOTNAME) {
         bot_is_admin = true
       }
     })
@@ -972,7 +972,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     } else {
       let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-      if (current_chat){
+      if (current_chat) {
         await ctx.reply(`DAO уже активно в этом чате. Показать команды: /help`)
       } else {
         let user = await checkAccountForExist(bot, ctx, ctx.from)
@@ -991,7 +991,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
             host = await generateHost(bot, ctx, host);
 
-            if (host){
+            if (host) {
               await insertUnion(bot.instanceName, {
                 ownerId: user.id,
                 ownerEosname: user.eosname,
@@ -1009,7 +1009,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             } else {
               await ctx.reply(`Произошла ошибка при регистрации DAO, попробуйте повторить позже.`)
             }
-          } catch(e){
+          } catch (e) {
             ctx.reply(`Ошибка при регистрации DAO, обратитесь в поддержку с сообщением: ${e.message}`)
           }
         } else {
@@ -1019,7 +1019,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   }
 
-  async function checkAccountForExist(bot, ctx, from){
+  async function checkAccountForExist(bot, ctx, from) {
     let user = await getUser(bot.instanceName, from.id);
 
     try {
@@ -1033,14 +1033,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       } else {
         return user
       }
-    } catch(e){
+    } catch (e) {
       ctx.reply(`error: ${e.message}`)
       console.log(e)
       return
     }
   }
 
-  bot.action('startunion', async(ctx) => {
+  bot.action('startunion', async (ctx) => {
     // console.log("on start union", ctx)
     await startUnion(bot, ctx)
   })
@@ -1049,12 +1049,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     await finishEducation(bot, ctx);
   });
 
-  bot.command("stat", async(ctx) => {
+  bot.command("stat", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
@@ -1063,17 +1063,17 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.repy("Пользователь не зарегистрирован")
   })
 
-  bot.command("add_channel", async(ctx) => {
+  bot.command("add_channel", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
 
-    if (current_chat.ownerEosname !== user.eosname){
+    if (current_chat.ownerEosname !== user.eosname) {
       await ctx.reply(`Вы не создавали это DAO и не можете добавить к нему новостной канал.`)
       return
     }
@@ -1091,12 +1091,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   })
 
-  bot.command("cancel_set_news_channel", async(ctx) => {
+  bot.command("cancel_set_news_channel", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
@@ -1107,12 +1107,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     await ctx.reply('Добавление новостного канала отменено.')
   })
 
-  bot.command("iam", async(ctx) => {
+  bot.command("iam", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
@@ -1122,13 +1122,13 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.reply("Пользователь не зарегистрирован")
   })
 
-  bot.command("wallet", async(ctx) => {
+  bot.command("wallet", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
 
-    if (!current_chat){
+    if (!current_chat) {
       return ctx.reply(`Союз не найден`)
     }
 
@@ -1137,11 +1137,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.reply("Пользователь не зарегистрирован")
   })
 
-  bot.command("helix", async(ctx) => {
+  bot.command("helix", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
@@ -1150,33 +1150,33 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     else ctx.reply("Пользователь не зарегистрирован")
   })
 
-  bot.command("withdraw", async(ctx) => {
+  bot.command("withdraw", async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
 
-    if (ctx.update.message.reply_to_message){
+    if (ctx.update.message.reply_to_message) {
       const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
-      if (!goal){
+      if (!goal) {
         ctx.reply("Цель не найдена", {reply_to_message_id: ctx.update.message.message_id})
       } else {
-          try{
-            await goalWithdraw(bot, ctx, user, goal)
-            await editGoalMsg(bot, ctx, user, goal.host, goal.goal_id, true)
+        try {
+          await goalWithdraw(bot, ctx, user, goal)
+          await editGoalMsg(bot, ctx, user, goal.host, goal.goal_id, true)
 
-            await ctx.reply(`Вывод баланса в кошелёк координатора произведён успешно.`, {reply_to_message_id: ctx.update.message.message_id})
-          } catch(e){
-            await ctx.reply(`Ошибка: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
+          await ctx.reply(`Вывод баланса в кошелёк координатора произведён успешно.`, {reply_to_message_id: ctx.update.message.message_id})
+        } catch (e) {
+          await ctx.reply(`Ошибка: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
         }
       }
     }
   })
 
- bot.command("donate", async(ctx) => {
+  bot.command("donate", async (ctx) => {
     let msg_id = (await ctx.reply("Пожалуйста, подождите", {reply_to_message_id: ctx.update.message.message_id})).message_id
 
     await checkForExistBCAccount(bot, ctx);
@@ -1185,12 +1185,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     let goal
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
 
-    if (ctx.update.message.reply_to_message){
+    if (ctx.update.message.reply_to_message) {
       goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString())
     }
 
@@ -1202,7 +1202,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
     let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "unionChat")
 
-    if (exist){
+    if (exist) {
       let address
       if (user)
         address = await getAddress(bot, user, ctx, exist.host, exist.id, "USDT.TRC20", "donate", {goal_id: goal.goal_id});
@@ -1242,7 +1242,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   });
 
   async function getAddress(bot, user, ctx, host, unionchat, currency, type, meta) {
-    try{
+    try {
       let params = {
         username: user.eosname,
         currency: currency,
@@ -1270,17 +1270,17 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       else {
         ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ", {reply_to_message_id: ctx.update.message.message_id})
       }
-    } catch(e){
+    } catch (e) {
       console.log(e)
       ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ", {reply_to_message_id: ctx.update.message.message_id})
     }
   }
 
-  bot.command("set_priority", async(ctx) => {
+  bot.command("set_priority", async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
-    if (!current_chat){
+    if (!current_chat) {
       ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
       return
     }
@@ -1294,14 +1294,14 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', '')))
     })
 
-    //TODO get task from message
-    //if not task - return
+    // TODO get task from message
+    // if not task - return
     let task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id)
 
-    if (!task){
-        ctx.reply("Действие не найдено. Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.", {reply_to_message_id: ctx.update.message.message_id})
+    if (!task) {
+      ctx.reply("Действие не найдено. Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.", {reply_to_message_id: ctx.update.message.message_id})
     } else {
-     if (!priority){
+      if (!priority) {
         ctx.reply("Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.", {reply_to_message_id: ctx.update.message.message_id})
       } else {
         let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
@@ -1311,11 +1311,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             // await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
             await setTaskPriority(bot, ctx, user, current_chat.host, task.task_id, priority)
             await ctx.deleteMessage(ctx.update.message.message_id)
-            let tprior = (priority === 0 || priority === 1) ? "10 $/час" : ((priority === 2) ? "20 $/час" :"40 $/час")
+            let tprior = (priority === 0 || priority === 1) ? "10 $/час" : ((priority === 2) ? "20 $/час" : "40 $/час")
             await ctx.reply(`Координатор установил ставку действия: ${tprior}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
-          } catch(e){
+          } catch (e) {
             console.log(e)
-            await ctx.reply(`Ошибка: ${e.message}`,{reply_to_message_id: ctx.update.message.reply_to_message.message_id})
+            await ctx.reply(`Ошибка: ${e.message}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
           }
         } else {
 
@@ -1324,10 +1324,10 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   })
 
-  bot.command("set_coordinator", async(ctx) => {
+  bot.command("set_coordinator", async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    //TODO only architect can set coordinator!
+    // TODO only architect can set coordinator!
 
     let text = ctx.update.message.text
     let entities = ctx.update.message.entities
@@ -1338,7 +1338,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         curator = (text.substr(entity.offset + 1, entity.length).replace(' ', ''))
     })
 
-    if (curator === ""){
+    if (curator === "") {
       ctx.reply("Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     } else {
       let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
@@ -1352,9 +1352,9 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
           await ctx.deleteMessage(ctx.update.message.message_id)
           await ctx.reply(`Назначен новый координатор цели: @${curator}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
-        } catch(e){
+        } catch (e) {
           console.log(e)
-          await ctx.reply(`Ошибка: ${e.message}`,{reply_to_message_id: ctx.update.message.reply_to_message.message_id})
+          await ctx.reply(`Ошибка: ${e.message}`, {reply_to_message_id: ctx.update.message.reply_to_message.message_id})
         }
       } else {
 
@@ -1362,10 +1362,10 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
   })
 
-  bot.command("add_to_team", async(ctx) => {
+  bot.command("add_to_team", async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    //TODO only architect can set coordinator!
+    // TODO only architect can set coordinator!
 
     let text = ctx.update.message.text
     let entities = ctx.update.message.entities
@@ -1377,12 +1377,12 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     })
 
     text = text.replace('/add_to_team ', '')
-    text = text.replace('@'+dac, "")
+    text = text.replace('@' + dac, "")
 
     let role = text.replace(' ', '')
     console.log('text: ', role)
 
-    if (dac === ""){
+    if (dac === "") {
       ctx.reply("Для добавления члена команды отметьте пользователя /add_to_team @telegram_username", {reply_to_message_id: ctx.update.message.message_id})
     } else {
       let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString())
@@ -1395,7 +1395,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           console.log('ok')
           await ctx.deleteMessage(ctx.update.message.message_id)
           await ctx.reply(`Добавлен новый член команды: @${dac}`)
-        } catch(e){
+        } catch (e) {
           console.log(e)
           await ctx.reply(`Ошибка: ${e.message}`)
         }
@@ -1406,534 +1406,534 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   })
 
   bot.on('edited_message', async (ctx) => {
-   // if (ctx.update.edited_message.forward_from_chat){
-   //    let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
-   //    // console.log("current_chat: ", current_chat)
-   //    if (current_chat){
-   //      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.edited_message.forward_from_message_id, ctx.update.edited_message.sender_chat.id.toString())
-   //      if (goal) {
-   //        let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
-   //        if (trueGoal){
-   //          let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
-   //          if (editor){
-   //            try {
-   //              let text = ctx.update.edited_message.text
-   //              let index1 = text.indexOf("\n");
+    // if (ctx.update.edited_message.forward_from_chat){
+    //    let current_chat = await getUnion(bot.instanceName, (ctx.update.edited_message.forward_from_chat.id).toString())
+    //    // console.log("current_chat: ", current_chat)
+    //    if (current_chat){
+    //      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.edited_message.forward_from_message_id, ctx.update.edited_message.sender_chat.id.toString())
+    //      if (goal) {
+    //        let trueGoal = await fetchGoal(bot, goal.host, goal.goal_id)
+    //        if (trueGoal){
+    //          let editor = await getUserByEosName(bot.instanceName, trueGoal.creator)
+    //          if (editor){
+    //            try {
+    //              let text = ctx.update.edited_message.text
+    //              let index1 = text.indexOf("\n");
 
-   //              text = text.substr(index1 + 1, text.length)
-   //              let index2 = text.indexOf("\n\nОдобрена: ");
+    //              text = text.substr(index1 + 1, text.length)
+    //              let index2 = text.indexOf("\n\nОдобрена: ");
 
-   //              text = text.substr(0, index2)
+    //              text = text.substr(0, index2)
 
-   //              await editGoal(bot, ctx, editor, {
-   //                editor: trueGoal.creator,
-   //                id: trueGoal.id,
-   //                hostname: goal.host,
-   //                title: text,
-   //                description: "",
-   //                meta: {},
-   //              })
-   //              console.log("scucss edit: ", text)
+    //              await editGoal(bot, ctx, editor, {
+    //                editor: trueGoal.creator,
+    //                id: trueGoal.id,
+    //                hostname: goal.host,
+    //                title: text,
+    //                description: "",
+    //                meta: {},
+    //              })
+    //              console.log("scucss edit: ", text)
 
-   //            } catch(e){
-   //              console.log(e)
+    //            } catch(e){
+    //              console.log(e)
 
-   //            }
+    //            }
 
-   //          } else {
-   //            // console.log("no")
-   //          }
+    //          } else {
+    //            // console.log("no")
+    //          }
 
-   //        }
-   //      } else {
+    //        }
+    //      } else {
 
-   //        console.log("not find the goal")
-   //      }
-   //    } else {
-   //      console.log("not find the chat")
-   //    }
-   //  }
+    //        console.log("not find the goal")
+    //      }
+    //    } else {
+    //      console.log("not find the chat")
+    //    }
+    //  }
 
   });
 
-// bot.on('edited_channel_post', async (ctx) => {
-//     console.log('edited_channel_post')
-//     console.log(ctx)
+  // bot.on('edited_channel_post', async (ctx) => {
+  //     console.log('edited_channel_post')
+  //     console.log(ctx)
 
-//   });
-  async function checkText(user, ctx, tags, text){
+  //   });
+  async function checkText(user, ctx, tags, text) {
     for (const tag of tags) {
-              if (tag.tag === 'log') {
-                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+      if (tag.tag === 'log') {
+        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-                if (current_chat) {
-                  let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")
+        if (current_chat) {
+          let target = await getUnionByHostType(bot.instanceName, tag.id, "unionNews")
 
-                  if (target) {
-                    let dacs = await getDacs(bot, target.host)
+          if (target) {
+            let dacs = await getDacs(bot, target.host)
 
-                    let user_in_team = dacs.find(el => el.dac === user.eosname)
+            let user_in_team = dacs.find(el => el.dac === user.eosname)
 
-                    if (!user_in_team) {
-                      await ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
-                      return
-                    }
+            if (!user_in_team) {
+              await ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
+              return
+            }
 
-                    if (target && user_in_team){
-                      if (ctx.update.message.caption)
-                        await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
-                      else
-                        await sendMessageToUser(bot, {id: target.id}, { text });
+            if (target && user_in_team) {
+              if (ctx.update.message.caption)
+                await sendMessageToUser(bot, {id: target.id}, ctx.update.message, {caption: text});
+              else
+                await sendMessageToUser(bot, {id: target.id}, { text });
 
-                      await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
-                    }
-                  } else {
-                    let project = tags.find(el => el.tag === 'project')
+              await ctx.reply(`Сообщение отправлено`, {reply_to_message_id: ctx.update.message.message_id})
+            }
+          } else {
+            let project = tags.find(el => el.tag === 'project')
 
-                    if (project) {
-                      if (project.id) {
-                        let pr = await getProject(bot.instanceName, project.id)
+            if (project) {
+              if (project.id) {
+                let pr = await getProject(bot.instanceName, project.id)
 
-                        let goal = tags.find(el => el.tag === 'goal')
-                        if (goal) {
-                            let g = await getGoal(bot.instanceName, goal.id)
-                            if (g){
-                              if (ctx.update.message.caption)
-                                await sendMessageToUser(bot, {id: g.chat_id}, ctx.update.message, {caption: text, reply_to_message_id: g.chat_message_id});
-                              else
-                                await sendMessageToUser(bot, {id: g.chat_id}, { text }, {reply_to_message_id: g.chat_message_id});
+                let goal = tags.find(el => el.tag === 'goal')
+                if (goal) {
+                  let g = await getGoal(bot.instanceName, goal.id)
+                  if (g) {
+                    if (ctx.update.message.caption)
+                      await sendMessageToUser(bot, {id: g.chat_id}, ctx.update.message, {caption: text, reply_to_message_id: g.chat_message_id});
+                    else
+                      await sendMessageToUser(bot, {id: g.chat_id}, { text }, {reply_to_message_id: g.chat_message_id});
 
-                              await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
-                            }
-                        } else {
-                          if (ctx.update.message.caption)
-                            await sendMessageToUser(bot, {id: pr.id}, ctx.update.message, {caption: text});
-                          else
-                            await sendMessageToUser(bot, {id: pr.id}, { text });
-
-                          await ctx.reply(`Сообщение отправлено`,{reply_to_message_id: ctx.update.message.message_id})
-                        }
-                      } else {
-                        await ctx.reply(`Ошибка! Предоставьте идентификатор проекта.`)
-                      }
-
-                      //todo check project_tag
-                    }
+                    await ctx.reply(`Сообщение отправлено`, {reply_to_message_id: ctx.update.message.message_id})
                   }
+                } else {
+                  if (ctx.update.message.caption)
+                    await sendMessageToUser(bot, {id: pr.id}, ctx.update.message, {caption: text});
+                  else
+                    await sendMessageToUser(bot, {id: pr.id}, { text });
+
+                  await ctx.reply(`Сообщение отправлено`, {reply_to_message_id: ctx.update.message.message_id})
                 }
+              } else {
+                await ctx.reply(`Ошибка! Предоставьте идентификатор проекта.`)
               }
 
-              if (tag.tag === 'project'){
-                let gexist = tags.find(el => el.tag === 'goal')
-                let logexist = tags.find(el => el.tag === 'log')
+              // todo check project_tag
+            }
+          }
+        }
+      }
 
-                if (!gexist && !logexist) {
-                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+      if (tag.tag === 'project') {
+        let gexist = tags.find(el => el.tag === 'goal')
+        let logexist = tags.find(el => el.tag === 'log')
 
-                  if (!current_chat){
-                    ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
-                    return
-                  }
+        if (!gexist && !logexist) {
+          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-                  if (current_chat.ownerId !== user.id){
-                    await ctx.reply(`Только организатор союза может создавать проекты сейчас.`)
-                    return
-                  }
+          if (!current_chat) {
+            ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+            return
+          }
 
-                  if (text.length >= 100){
-                    await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
-                    return
-                  }
+          if (current_chat.ownerId !== user.id) {
+            await ctx.reply(`Только организатор союза может создавать проекты сейчас.`)
+            return
+          }
 
-                  const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
-                  let goalChatResult = await createChat(bot, user, current_chat.host, text, "project", user.is_private)
+          if (text.length >= 100) {
+            await ctx.reply(`Название проекта должно быть меньше 100 символов.`)
+            return
+          }
 
-                  let goal = {
-                    hostname: current_chat.host,
-                    title: text,
-                    description: "",
-                    target: "0.0000 FLOWER",
-                    parent_id: 0,
-                  }
+          const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал проекта." });
+          let goalChatResult = await createChat(bot, user, current_chat.host, text, "project", user.is_private)
 
-                  goal.goalId = await createGoal(bot, ctx, user, goal)
+          let goal = {
+            hostname: current_chat.host,
+            title: text,
+            description: "",
+            target: "0.0000 FLOWER",
+            parent_id: 0,
+          }
 
-                  await insertGoal(bot.instanceName, {
-                    host: current_chat.host,
-                    title: text,
-                    goal_id: goal.goalId,
-                    type: 'project',
-                    // channel_message_id: goalMessageId,
-                    channel_id: goalChatResult.channelId
-                  })
+          goal.goalId = await createGoal(bot, ctx, user, goal)
 
-                  await insertProject(bot.instanceName, {
-                    host: current_chat.host,
-                    channelLink: goalChatResult.channelLink,
-                    goal_id: goal.goalId
-                  })
+          await insertGoal(bot.instanceName, {
+            host: current_chat.host,
+            title: text,
+            goal_id: goal.goalId,
+            type: 'project',
+            // channel_message_id: goalMessageId,
+            channel_id: goalChatResult.channelId
+          })
 
-                  await ctx.deleteMessage(id);
+          await insertProject(bot.instanceName, {
+            host: current_chat.host,
+            channelLink: goalChatResult.channelLink,
+            goal_id: goal.goalId
+          })
 
-                  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-                  await sleep(3000)
+          await ctx.deleteMessage(id);
 
-                  await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
+          const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+          await sleep(3000)
+
+          await ctx.reply(`Проект создан: ${goalChatResult.channelLink}`, {reply_to_message_id: ctx.update.message.message_id})
+        } else {
+          console.log("NOT INSIDE!", tags.indexOf('goal') === -1)
+        }
+      } else if (tag.tag === 'report') {
+        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+        if (!current_chat) {
+          ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+          return
+        }
+
+        let is_fast_report = (tags.find(t => t.tag === 'goal') && tags.find(t => t.tag === 'task') && tags.find(t => t.tag === 'report'))
+        if (ctx.update.message.reply_to_message || tag.id || is_fast_report) {
+          try {
+            let task
+            let reply_to
+
+            let [duration, ...data] = text.split(',');
+
+            if (!is_fast_report) {
+              data = data.join(',').trim();
+              duration = duration.replace(/[^0-9]/g, '');
+              duration = Number(duration);
+
+              if ((!duration && duration !== 0) || !data)
+              {
+                await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
+                return
+              }
+            } else {
+              data = text
+              duration = 10
+            }
+
+            if (!is_fast_report) {
+              if (tag.id) {
+                task = await getTaskById(bot.instanceName, current_chat.host, tag.id)
+              } else {
+                task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id)
+              }
+            } else {
+              let task_tag = tags.find(t => t.tag === 'task')
+
+              task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id)
+            }
+
+            reply_to = task.chat_message_id
+
+            if (!task) {
+              ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие.`, {reply_to_message_id: ctx.update.message.message_id})
+            } else {
+              try {
+                console.log("CURRENT_CHAT: ", current_chat)
+
+                // let duration = 1 //час
+                let asset_per_hour = "0.0000 FLOWER"
+
+                let reportId = await createReport(bot, ctx, user, {
+                  host: current_chat.host,
+                  username: user.eosname,
+                  task_id: task.task_id,
+                  data: data,
+                  duration_secs: 60 * duration,
+                  asset_per_hour: asset_per_hour
+                })
+
+                await insertReport(bot.instanceName, {
+                  host: current_chat.host,
+                  username: user.eosname,
+                  data: text,
+                  report_id: reportId,
+                  task_id: task.task_id,
+                  goal_id: task.goal_id,
+                  goal_chat_message_id: ctx.update.message.message_id,
+                  // report_channel_message_id: reportMessageId
+                })
+
+                let new_text = await constructReportMessage(bot, current_chat.host, null, reportId)
+
+                const buttons = [];
+                buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
+
+                const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+                if (!is_fast_report) {
+                  await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
+                  await ctx.deleteMessage(ctx.update.message.message_id)
                 } else {
-                  console.log("NOT INSIDE!", tags.indexOf('goal') === -1)
-                }
-              } else if (tag.tag === 'report') {
-                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-
-                if (!current_chat) {
-                  ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
-                  return
+                  console.log(task)
+                  await ctx.reply("Отчёт принят и ожидает проверки", {reply_to_message_id: ctx.update.message.message_id})
+                  await sendMessageToUser(bot, {id: task.chat_id}, { text: new_text }, {reply_to_message_id: reply_to, ...request});
                 }
 
-                let is_fast_report = (tags.find(t => t.tag === 'goal') && tags.find(t => t.tag === 'task') && tags.find(t => t.tag === 'report'))
-                if (ctx.update.message.reply_to_message || tag.id || is_fast_report){
-                  try {
-                    let task
-                    let reply_to
-
-                    let [duration, ...data] = text.split(',');
-
-                    if (!is_fast_report){
-                      data = data.join(',').trim();
-                      duration = duration.replace(/[^0-9]/g, '');
-                      duration = Number(duration);
-
-                      if ((!duration && duration !== 0) || !data)
-                      {
-                        await ctx.reply("Неверный формат отчёта! Инструкция: ", {reply_to_message_id: ctx.update.message.message_id})
-                        return
-                      }
-                    } else {
-                      data = text
-                      duration = 10
-                    }
-
-                    if (!is_fast_report){
-                      if (tag.id) {
-                        task = await getTaskById(bot.instanceName, current_chat.host, tag.id)
-                      } else {
-                        task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id)
-                      }
-                    } else {
-                      let task_tag = tags.find(t => t.tag === 'task')
-
-                      task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id)
-                    }
-
-                    reply_to = task.chat_message_id
-
-                    if (!task){
-                      ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие.`, {reply_to_message_id: ctx.update.message.message_id})
-                    } else {
-                      try{
-                         console.log("CURRENT_CHAT: ", current_chat)
-
-                          // let duration = 1 //час
-                          let asset_per_hour = "0.0000 FLOWER"
-
-                          let reportId = await createReport(bot, ctx, user, {
-                            host: current_chat.host,
-                            username: user.eosname,
-                            task_id: task.task_id,
-                            data: data,
-                            duration_secs: 60 * duration,
-                            asset_per_hour: asset_per_hour
-                          })
-
-                          await insertReport(bot.instanceName, {
-                            host: current_chat.host,
-                            username: user.eosname,
-                            data: text,
-                            report_id: reportId,
-                            task_id: task.task_id,
-                            goal_id: task.goal_id,
-                            goal_chat_message_id: ctx.update.message.message_id,
-                            // report_channel_message_id: reportMessageId
-                          })
-
-                          let new_text = await constructReportMessage(bot, current_chat.host, null, reportId)
-
-                          const buttons = [];
-                          buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
-
-                          const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-                          if (!is_fast_report) {
-                            await ctx.reply(new_text, {reply_to_message_id: reply_to, ...request})
-                            await ctx.deleteMessage(ctx.update.message.message_id)
-                          } else {
-                            console.log(task)
-                            await ctx.reply("Отчёт принят и ожидает проверки", {reply_to_message_id: ctx.update.message.message_id})
-                            await sendMessageToUser(bot, {id: task.chat_id}, { text: new_text }, {reply_to_message_id: reply_to, ...request});
-                          }
-
-                          // await sendMessageToUser(bot, {id: current_chat.id}, { text });
-
-                          // let goal
-                          // try{
-                          //   goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
-                          // } catch(e) {return}
-
-                          // if (goal){
-                          //   await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
-                          // }
-                      } catch(e) {
-                        console.error(e)
-                        if (e.message === 'assertion failure with message: Task is not regular, but report is exist')
-                          ctx.reply(`У вас уже есть отчёт по этому действию. `, {reply_to_message_id: ctx.update.message.message_id})
-                        else
-                          ctx.reply(`Ошибка при создании отчёта. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
-                      }
-                    }
-                  } catch(e) {
-                    ctx.reply(e.message)
-                  }
-                } else {
-                  let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-
-                  // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
-
-                  ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
-                }
-              } else if (tag.tag === 'task'){
-                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                if (!current_chat){
-                  ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
-                  return
-                }
-
-                // buttons.push(Markup.button.callback('голосовать', ' vote'));
-
-                // buttons.push(Markup.button.callback('😁', 'vote'));
-                // buttons.push(Markup.button.callback('👍', 'vote'));
-                // buttons.push(Markup.button.callback('🔥', 'vote'));
-
-                // const request = Markup.inlineKeyboard(buttons, { columns: 3 }).resize()
-                console.log("ON TASK")
-                let task_id
-                if (ctx.update.message.reply_to_message){
-                  // let checkl = await exportChatLink(ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
-                  // console.log("CHECK!", checkl, ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
-                  // console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.reply_to_message.forward_from_message_id)
-
-                  try{
-                    // await ctx.deleteMessage(ctx.update.message.message_id);
-                  } catch(e){}
-
-                  // (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
-
-                  try {
-                    // const msg = await getMessage(bot.instanceName, )
-                    console.log("ctx.update.message.reply_to_message.message_id: ",ctx.update.message)
-                    let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString())
-                    console.log("GOAL:", goal)
-                    let task = {
-                      host: current_chat.host,
-                      creator: user.eosname,
-                      permlink: "",
-                      goal_id: goal.goal_id, //TODO!
-                      priority: 1,
-                      title: text,
-                      data: "предоставьте отчёт",
-                      requested: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
-                      is_public: true,
-                      doer: "",
-                      for_each: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
-                      with_badge: false,
-                      duration: 0,
-                      badge_id: 0,
-                      is_batch: false,
-                      parent_batch_id: 0,
-                      is_regular: false,
-                      calendar: [],
-                      start_at: "2022-01-01T00:00:00",
-                      expired_at: "2022-01-01T00:00:00",
-                      meta: ""
-
-                    }
-                    task_id = await createTask(bot, ctx, user, task)
-                    task.id = task_id
-                    // text += '\nсоздатель: ' + user.eosname
-                    // text += `\nдеятель: -`
-                    // const buttons = [];
-
-                     const buttons = [];
-
-                    buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${task_id} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
-                    const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-                    // console.log("before C")
-                    let task_text = await constructTaskMessage(bot, current_chat.host, task)
-
-                    let chat_message_id = (await ctx.reply(task_text, {reply_to_message_id: ctx.update.message.message_id, ...request})).message_id //
-
-                    await sendMessageToBrothers(bot, user, goal, task_text, "task", request)
-
-                    await insertTask(bot.instanceName, {
-                      host: current_chat.host,
-                      task_id,
-                      goal_id: goal.goal_id,
-                      title: text,
-                      chat_id: ctx.update.message.chat.id,
-                      goal_message_id: ctx.update.message.reply_to_message.message_id,
-                      chat_message_id: chat_message_id,
-                    })
-
-                    await ctx.deleteMessage(ctx.update.message.message_id)
-
-                    //TODO insert task
-                    await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', {chatId: ctx.update.message.chat.id, task_id: task_id, goal_id: goal.goal_id});//goalId: goal.goalId,
-                  } catch(e) {
-                    ctx.reply(e.message,{reply_to_message_id: ctx.update.message.message_id})
-                  }
-
-                  // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                  // console.log("CURRENT_CHAT: ", current_chat)
-
-                  // if (current_chat){
-                  //   let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "tasksChannel")
-
-                  //   if (!exist){
-                  //     exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
-
-                  //     if (exist){
-                  //       const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
-                  //       let tasksChatResult = await createChat(bot, user, exist.unionName, "tasks")
-                  //       await ctx.deleteMessage(id);
-                  //       const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
-                  //       exist = {id : "-100" + tasksChatResult.channelId}
-                  //     }
-
-                  //   }
-
-                  //   // if (!exist) {
-                  //   //   // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
-                  //   //   let tasksChatResult = await createChat(bot, user, current_chat.unionName, "tasks")
-
-                  //   //   // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
-                  //   //   exist = {id : "-100" + tasksChatResult.channelId}
-                  //   // }
-                  //   if (exist){
-                  //     const taskMessageId = await sendMessageToUser(bot, {id: exist.id}, { text });
-                  //     await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId,
-                  //   }
-
-                  // }
-                } else {
-                  // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-                  if(!tags.find(t => t.tag === 'report')) {
-                    // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                    let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
-
-                    ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
-                  }
-                }
-              } else if (tag.tag === 'goal') {
-                let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
-
-                if (!current_chat)
-                  return
-
-                let dacs = await getDacs(bot, current_chat.host)
-                let user_in_team = dacs.find(el => el.dac === user.eosname)
-
-                let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
-
-                if (exist.type !== "unionChat"){
-                  await ctx.reply("Ошибка! Постановка целей доступна только в главном чате союза.", {reply_to_message_id: ctx.message.message_id})
-                  return
-                }
-
-               let project = tags.find(el => el.tag === 'project')
-
-                if (!project){
-                  ctx.reply('Ошибка! Любая цель должна принадлежать к проекту. Форма создания цели: text #project_<number> #goal')
-                  return
-                }
-
-                if (!tags.find(t => t.tag === 'report') && !tags.find(t => t.tag === 'task') && !tags.find(t => t.tag === 'log')) {
-                  if (!user_in_team) {
-                    await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
-                    return
-                  }
-
-                  let text_goal = text
-
-                  const buttons = [];
-
-                  buttons.push(Markup.button.callback('голосовать', 'vote'));
-
-                  const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-
-                  let t
-                  let text_to_channel
-
-                  if (project.id) {
-                    let pr
-                    let projectChannelId
-
-                    pr = await getProject(bot.instanceName, project.id)
-
-                    if (pr) {
-                      projectChannelId = pr.id
-
-                      let msg
-                      let hostname = pr.host
-
-                      let goal = {
-                        hostname: hostname,
-                        title: text,
-                        description: "",
-                        target: "0.0000 FLOWER",
-                        parent_id: 0,
-                      }
-
-                      console.log("goal: ", goal)
-
-                      goal.goalId = await createGoal(bot, ctx, user, goal)
-
-                      if (!goal.goalId){
-                        ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
-                        return
-                      }
-
-                      t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
-                      text_to_channel = t
-                      t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
-                      await ctx.reply(`Добавляем цель в проект`)
-
-                      const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
-
-                      await insertGoal(bot.instanceName, {
-                        host: goal.hostname,
-                        title: text,
-                        goal_id: goal.goalId,
-                        channel_message_id: projectMessageId,
-                        channel_id: projectChannelId
-                      })
-                    } else {
-                      await ctx.reply(`Проект не найден`)
-                    }
-                  } else {
-                    await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
-                  }
-
-                  if (t)
-                    await ctx.reply(t) //, , {reply_to_message_id : ctx.update.message.message_id}
-                }
+                // await sendMessageToUser(bot, {id: current_chat.id}, { text });
+
+                // let goal
+                // try{
+                //   goal = await getGoal(bot.instanceName, task.goal_id, current_chat.id)
+                // } catch(e) {return}
+
+                // if (goal){
+                //   await sendMessageToBrothers(bot, user, goal, new_text, "report", request)
+                // }
+              } catch (e) {
+                console.error(e)
+                if (e.message === 'assertion failure with message: Task is not regular, but report is exist')
+                  ctx.reply(`У вас уже есть отчёт по этому действию. `, {reply_to_message_id: ctx.update.message.message_id})
+                else
+                  ctx.reply(`Ошибка при создании отчёта. Сообщение: ${e.message}`, {reply_to_message_id: ctx.update.message.message_id})
               }
             }
+          } catch (e) {
+            ctx.reply(e.message)
+          }
+        } else {
+          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+          // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+          let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
+
+          ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
+        }
+      } else if (tag.tag === 'task') {
+        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+        if (!current_chat) {
+          ctx.reply(`Чат не является DAO. Для запуска нажмите кнопку: /start`)
+          return
+        }
+
+        // buttons.push(Markup.button.callback('голосовать', ' vote'));
+
+        // buttons.push(Markup.button.callback('😁', 'vote'));
+        // buttons.push(Markup.button.callback('👍', 'vote'));
+        // buttons.push(Markup.button.callback('🔥', 'vote'));
+
+        // const request = Markup.inlineKeyboard(buttons, { columns: 3 }).resize()
+        console.log("ON TASK")
+        let task_id
+        if (ctx.update.message.reply_to_message) {
+          // let checkl = await exportChatLink(ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+          // console.log("CHECK!", checkl, ctx.update.message.reply_to_message.forward_from_chat.id, ctx.update.message.message_id)
+          // console.log("ctx.update.message.forward_from_message_id: ", ctx.update.message.reply_to_message.forward_from_message_id)
+
+          try {
+            // await ctx.deleteMessage(ctx.update.message.message_id);
+          } catch (e) {}
+
+          // (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
+
+          try {
+            // const msg = await getMessage(bot.instanceName, )
+            console.log("ctx.update.message.reply_to_message.message_id: ", ctx.update.message)
+            let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString())
+            console.log("GOAL:", goal)
+            let task = {
+              host: current_chat.host,
+              creator: user.eosname,
+              permlink: "",
+              goal_id: goal.goal_id, // TODO!
+              priority: 1,
+              title: text,
+              data: "предоставьте отчёт",
+              requested: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
+              is_public: true,
+              doer: "",
+              for_each: parseFloat(0).toFixed(4) + " " + bot.getEnv().SYMBOL,
+              with_badge: false,
+              duration: 0,
+              badge_id: 0,
+              is_batch: false,
+              parent_batch_id: 0,
+              is_regular: false,
+              calendar: [],
+              start_at: "2022-01-01T00:00:00",
+              expired_at: "2022-01-01T00:00:00",
+              meta: ""
+
+            }
+            task_id = await createTask(bot, ctx, user, task)
+            task.id = task_id
+            // text += '\nсоздатель: ' + user.eosname
+            // text += `\nдеятель: -`
+            // const buttons = [];
+
+            const buttons = [];
+
+            buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${task_id} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
+            const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+            // console.log("before C")
+            let task_text = await constructTaskMessage(bot, current_chat.host, task)
+
+            let chat_message_id = (await ctx.reply(task_text, {reply_to_message_id: ctx.update.message.message_id, ...request})).message_id //
+
+            await sendMessageToBrothers(bot, user, goal, task_text, "task", request)
+
+            await insertTask(bot.instanceName, {
+              host: current_chat.host,
+              task_id,
+              goal_id: goal.goal_id,
+              title: text,
+              chat_id: ctx.update.message.chat.id,
+              goal_message_id: ctx.update.message.reply_to_message.message_id,
+              chat_message_id: chat_message_id,
+            })
+
+            await ctx.deleteMessage(ctx.update.message.message_id)
+
+            // TODO insert task
+            await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', {chatId: ctx.update.message.chat.id, task_id: task_id, goal_id: goal.goal_id});// goalId: goal.goalId,
+          } catch (e) {
+            ctx.reply(e.message, {reply_to_message_id: ctx.update.message.message_id})
+          }
+
+          // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+          // console.log("CURRENT_CHAT: ", current_chat)
+
+          // if (current_chat){
+          //   let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "tasksChannel")
+
+          //   if (!exist){
+          //     exist = await getUnionByType(bot.instanceName, user.eosname, "unionChannel")
+
+          //     if (exist){
+          //       const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+          //       let tasksChatResult = await createChat(bot, user, exist.unionName, "tasks")
+          //       await ctx.deleteMessage(id);
+          //       const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+          //       exist = {id : "-100" + tasksChatResult.channelId}
+          //     }
+
+          //   }
+
+          //   // if (!exist) {
+          //   //   // const id = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: "Пожалуйста, подождите, мы создаём канал для действий союза" });
+          //   //   let tasksChatResult = await createChat(bot, user, current_chat.unionName, "tasks")
+
+          //   //   // const id2 = await sendMessageToUser(bot, {id: ctx.chat.id}, { text: `Канал действий создан: ${tasksChatResult.channelLink}` });
+          //   //   exist = {id : "-100" + tasksChatResult.channelId}
+          //   // }
+          //   if (exist){
+          //     const taskMessageId = await sendMessageToUser(bot, {id: exist.id}, { text });
+          //     await insertMessage(bot.instanceName, user, user.id, text, taskMessageId, 'task', {chatId: exist.id});//goalId: goal.goalId,
+          //   }
+
+          // }
+        } else {
+          // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+          if (!tags.find(t => t.tag === 'report')) {
+            // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+            let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
+
+            ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
+          }
+        }
+      } else if (tag.tag === 'goal') {
+        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+
+        if (!current_chat)
+          return
+
+        let dacs = await getDacs(bot, current_chat.host)
+        let user_in_team = dacs.find(el => el.dac === user.eosname)
+
+        let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString())
+
+        if (exist.type !== "unionChat") {
+          await ctx.reply("Ошибка! Постановка целей доступна только в главном чате союза.", {reply_to_message_id: ctx.message.message_id})
+          return
+        }
+
+        let project = tags.find(el => el.tag === 'project')
+
+        if (!project) {
+          ctx.reply('Ошибка! Любая цель должна принадлежать к проекту. Форма создания цели: text #project_<number> #goal')
+          return
+        }
+
+        if (!tags.find(t => t.tag === 'report') && !tags.find(t => t.tag === 'task') && !tags.find(t => t.tag === 'log')) {
+          if (!user_in_team) {
+            await ctx.reply(`Только члены команды обладают возможностью постановки целей в этом DAO`)
+            return
+          }
+
+          let text_goal = text
+
+          const buttons = [];
+
+          buttons.push(Markup.button.callback('голосовать', 'vote'));
+
+          const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+
+          let t
+          let text_to_channel
+
+          if (project.id) {
+            let pr
+            let projectChannelId
+
+            pr = await getProject(bot.instanceName, project.id)
+
+            if (pr) {
+              projectChannelId = pr.id
+
+              let msg
+              let hostname = pr.host
+
+              let goal = {
+                hostname: hostname,
+                title: text,
+                description: "",
+                target: "0.0000 FLOWER",
+                parent_id: 0,
+              }
+
+              console.log("goal: ", goal)
+
+              goal.goalId = await createGoal(bot, ctx, user, goal)
+
+              if (!goal.goalId) {
+                ctx.reply("Произошла ошибка при создании цели", {reply_to_message_id : ctx.update.message.message_id})
+                return
+              }
+
+              t = await constructGoalMessage(bot, goal.hostname, null, goal.goalId)
+              text_to_channel = t
+              t += `\n${project.id ? `\n\nКанал проекта: ${pr.link}` : ''}`
+              await ctx.reply(`Добавляем цель в проект`)
+
+              const projectMessageId = await sendMessageToUser(bot, { id:  projectChannelId}, { text: text_to_channel });
+
+              await insertGoal(bot.instanceName, {
+                host: goal.hostname,
+                title: text,
+                goal_id: goal.goalId,
+                channel_message_id: projectMessageId,
+                channel_id: projectChannelId
+              })
+            } else {
+              await ctx.reply(`Проект не найден`)
+            }
+          } else {
+            await ctx.reply(`Невозможно добавить цель в проект без идентификатора.`)
+          }
+
+          if (t)
+            await ctx.reply(t) // , , {reply_to_message_id : ctx.update.message.message_id}
+        }
+      }
+    }
   }
 
   bot.on('channel_post', async (ctx) => {
 
   })
 
-  async function sendMessageToBrothers(bot, user, goal, text, type, menu){
+  async function sendMessageToBrothers(bot, user, goal, text, type, menu) {
 
   }
 
@@ -1952,11 +1952,11 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       text = cutTags(bot, text, tags);
     }
 
-    if (!user && ctx.update.message.from.is_bot === false && ctx.update.message.from.id !== 777000){
-        user = ctx.update.message.from;
+    if (!user && ctx.update.message.from.is_bot === false && ctx.update.message.from.id !== 777000) {
+      user = ctx.update.message.from;
 
-        user.eosname = await generateAccount(bot, ctx, false, user.ref);
-        await saveUser(bot.instanceName, user)
+      user.eosname = await generateAccount(bot, ctx, false, user.ref);
+      await saveUser(bot.instanceName, user)
     }
 
     if (user && user.id !== 777000) {
@@ -2029,7 +2029,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         } else if (user.state === 'start_cycle') {
           ctx.reply(`Дата начала: ${text}`)
           user.state = "create_cycle"
-          //TODO text -> DATE
+          // TODO text -> DATE
           user.new_cycle.start_date = text
 
           await saveUser(bot.instanceName, user);
@@ -2045,7 +2045,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           await checkText(user, ctx, tags, text)
         } else {
           console.log("on ELSE")
-          if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
+          if (ctx.update.message.reply_to_message) { // Если это ответ на чье-то сообщение
             let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
             console.log("cant find current chat, skip")
 
@@ -2069,8 +2069,8 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
             }
           }
         }
-      } else {//Если это диалог пользователя с ботом
-        //проверяем не квиз ли
+      } else { // Если это диалог пользователя с ботом
+        // проверяем не квиз ли
 
         const quiz = await getQuiz(bot.instanceName, user.id);
         let { text } = ctx.update.message;
@@ -2085,66 +2085,66 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-          if (user.state === 'set_news_channel'){
+          if (user.state === 'set_news_channel') {
             ctx.reply('Ожидаю сообщения')
           }
 
           else if (user.state === 'chat' || user.state === '') {
-            try{
+            try {
               let text2 = `Партнёр пишет: ${text}`
               const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, {reply_to_message_id : user.partners_chat_id});
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
               await saveUser(bot.instanceName, user);
-            } catch(e) {
+            } catch (e) {
 
             }
             //
           }
           else if (user.state === 'set_withdraw_amount') {
-              let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
+            let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-              if (!current_chat) {
-                await ctx.reply(`Союз не найден`)
-                return
-              }
-
-              const helix = await getHelixParams(bot, current_chat.host);
-
-              let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
-              const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
-
-              if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-
-              else if (parseFloat(min) > parseFloat(amount)){
-                ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-              } else {
-                user.state = "set_withdraw_address"
-                user.on_withdraw = {
-                  amount
-                }
-                await saveUser(bot.instanceName, user);
-
-                ctx.reply("Введите адрес для получения USDT.TRC20: ")
-              }
+            if (!current_chat) {
+              await ctx.reply(`Союз не найден`)
+              return
             }
 
-            else if (user.state === 'set_withdraw_address') {
-              user.on_withdraw.address = text
+            const helix = await getHelixParams(bot, current_chat.host);
+
+            let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+            const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
+
+            if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+
+            else if (parseFloat(min) > parseFloat(amount)) {
+              ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
+            } else {
+              user.state = "set_withdraw_address"
+              user.on_withdraw = {
+                amount
+              }
               await saveUser(bot.instanceName, user);
 
-              const buttons = [];
-
-              buttons.push(Markup.button.callback('Да', 'withdrawaction'));
-              buttons.push(Markup.button.callback('Отмена', `backto wallet `));
-
-              let text2 = "Подтверждение! Вы уверены, что хотите поставить средства на вывод?"
-              text2 += `\n\nСумма: ${user.on_withdraw.amount}`
-              text2 += `\nАдрес: ${user.on_withdraw.address}`
-
-              ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
+              ctx.reply("Введите адрес для получения USDT.TRC20: ")
             }
+          }
+
+          else if (user.state === 'set_withdraw_address') {
+            user.on_withdraw.address = text
+            await saveUser(bot.instanceName, user);
+
+            const buttons = [];
+
+            buttons.push(Markup.button.callback('Да', 'withdrawaction'));
+            buttons.push(Markup.button.callback('Отмена', `backto wallet `));
+
+            let text2 = "Подтверждение! Вы уверены, что хотите поставить средства на вывод?"
+            text2 += `\n\nСумма: ${user.on_withdraw.amount}`
+            text2 += `\nАдрес: ${user.on_withdraw.address}`
+
+            ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
+          }
         }
         // else {
         //   console.log("message2")
@@ -2152,75 +2152,75 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
         // }
       }
     } else {
-        if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
-          let union
-          try{
-            union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
-          } catch(e){}
+      if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
+        let union
+        try {
+          union = await getUnion(bot.instanceName, ctx.update.message.forward_from_chat.id.toString())
+        } catch (e) {}
 
-          if (union)
-            if (union.id.toString() === bot.getEnv().GOALS_CHANNEL_ID)
-              union = {
-                type: 'goalsChannel',
-                host: 'core',
-                id: bot.getEnv().GOALS_CHANNEL_ID
-              }
-
-          if (union){ //если словили пересылку из прикрепленного канала
-            // eslint-disable-next-line no-constant-condition
-            if(true){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-              const buttons = [];
-              if (union.type === 'goalsChannel' || union.type === 'projectChannel'){
-                let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
-                console.log("ИНСТРУКЦИЯ:Ж ", goal, ctx.update.message.sender_chat.id)
-                // console.log("forward fro: ", ctx.update.message)
-
-                let goalid = goal ? goal.goal_id : null
-
-                if (goalid) {
-                  buttons.push(Markup.button.callback('👍', `upvote ${union.host} ${goalid}`));
-                  buttons.push(Markup.button.callback('👎', `downvote ${union.host} ${goalid}`));
-                  buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} ЗАМЕНИТЕ_НА_ТЕКСТ_ДЕЙСТВИЯ`));
-
-                  const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
-                  let instructions = await getGoalInstructions();
-                  let iid = (await ctx.reply(instructions, {reply_to_message_id : ctx.message.message_id, ...request})).message_id
-
-                  await insertMessage(bot.instanceName, {id: "bot"}, "goalInstruction", text, iid, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
-
-                  await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id, ctx.message.chat.id, goal.channel_id)
-                }
-              } else if (union.type === 'reportsChannel'){
-                buttons.push(Markup.button.callback('принять', 'vote'));
-                buttons.push(Markup.button.callback('отклонить', 'vote'));
-                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
-                ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})
-                await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, {"report_chat_message_id":ctx.message.message_id})
-              } else {
-
-              }
-
-              await insertMessage(bot.instanceName, {id: "bot"}, "bot", text, ctx.message.message_id, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
+        if (union)
+          if (union.id.toString() === bot.getEnv().GOALS_CHANNEL_ID)
+            union = {
+              type: 'goalsChannel',
+              host: 'core',
+              id: bot.getEnv().GOALS_CHANNEL_ID
             }
-          } else {
-                if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat){
-                  if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL){ //если словили пересылку из прикрепленного канала
-                    if(ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL){ //то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-                      user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
-                      if (user && !user.partners_chat_id){
-                        // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-                        user.partners_chat_id = ctx.update.message.message_id
-                        await saveUser(bot.instanceName, user);
-                      }
-                    }
-                  }
-                }
+        if (union) { // если словили пересылку из прикрепленного канала
+          // eslint-disable-next-line no-constant-condition
+          if (true) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+            const buttons = [];
+            if (union.type === 'goalsChannel' || union.type === 'projectChannel') {
+              let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
+              console.log("ИНСТРУКЦИЯ:Ж ", goal, ctx.update.message.sender_chat.id)
+              // console.log("forward fro: ", ctx.update.message)
+
+              let goalid = goal ? goal.goal_id : null
+
+              if (goalid) {
+                buttons.push(Markup.button.callback('👍', `upvote ${union.host} ${goalid}`));
+                buttons.push(Markup.button.callback('👎', `downvote ${union.host} ${goalid}`));
+                buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} ЗАМЕНИТЕ_НА_ТЕКСТ_ДЕЙСТВИЯ`));
+
+                const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+                let instructions = await getGoalInstructions();
+                let iid = (await ctx.reply(instructions, {reply_to_message_id : ctx.message.message_id, ...request})).message_id
+
+                await insertMessage(bot.instanceName, {id: "bot"}, "goalInstruction", text, iid, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
+
+                await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id, ctx.message.chat.id, goal.channel_id)
+              }
+            } else if (union.type === 'reportsChannel') {
+              buttons.push(Markup.button.callback('принять', 'vote'));
+              buttons.push(Markup.button.callback('отклонить', 'vote'));
+              const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+              ctx.reply("Выберите действие: ", {reply_to_message_id : ctx.message.message_id, ...request})
+              await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, {"report_chat_message_id":ctx.message.message_id})
+            } else {
+
+            }
+
+            await insertMessage(bot.instanceName, {id: "bot"}, "bot", text, ctx.message.message_id, 'autoforward', {forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id});
           }
-        } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
+        } else {
+          if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
+            if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
+              if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+                user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
-     }
-   }
+                if (user && !user.partners_chat_id) {
+                  // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+                  user.partners_chat_id = ctx.update.message.message_id
+                  await saveUser(bot.instanceName, user);
+                }
+              }
+            }
+          }
+        }
+      } else { // Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
+
+      }
+    }
   });
 
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
@@ -2251,19 +2251,19 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
 
-    //MASSWITHDRAWACTION
+    // MASSWITHDRAWACTION
     massWithdrawAction(bot, user, bot.getEnv().CORE_HOST, balances.all).then(res => {
-      //TODO make a burn from user with address in memo
+      // TODO make a burn from user with address in memo
       retireAction(bot, user, user.on_withdraw.amount, user.on_withdraw.address).then(async () => {
-        ctx.deleteMessage(); //delete buttons
+        ctx.deleteMessage(); // delete buttons
 
         const buttons = [];
         buttons.push(Markup.button.callback('подтвердить оплату', `confirmwithdraw ${withdraw_id}`));
 
-        //TO CLIENT
+        // TO CLIENT
         await sendMessageToUser(bot, user, { text: `Заявка на вывод создана на сумму ${user.on_withdraw.amount}. Перевод будет выполнен на адрес:\n${user.on_withdraw.address}` });
 
-        //TO ADMIN
+        // TO ADMIN
 
         let admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME)
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
@@ -2276,7 +2276,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
       })
     }).catch(e => {
       console.error(e)
-        ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`)
+      ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`)
     })
 
     //
