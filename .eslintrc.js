@@ -39,7 +39,6 @@ module.exports = {
     'no-nested-ternary': 'off',
     'no-useless-return': 'off',
     'consistent-return': 'off',
-    'one-var-declaration-per-line': 'off',
     'no-return-await': 'off',
     'class-methods-use-this': 'off',
     camelcase: 'off',

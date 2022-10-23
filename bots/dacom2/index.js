@@ -676,7 +676,8 @@ module.exports.init = async (botModel, bot) => {
   });
 
   function getHashtags(message) {
-    let text, entities;
+    let text,
+      entities;
 
     const result = [];
 
