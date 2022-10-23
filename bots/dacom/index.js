@@ -413,7 +413,6 @@ async function nextQuiz(bot, user, ctx) {
 
     await saveQuiz(bot.instanceName, user, quiz);
   } else {
-    
     const menu = Markup // , "цели", "действия"
       .keyboard(['🪙 кошелёк', '🌀 касса', '🙋‍♂️ задать вопрос', '🆕 создать предложение', '📒 открыть журнал'], { columns: 2 }).resize();
 

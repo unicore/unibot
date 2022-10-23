@@ -164,7 +164,6 @@ const quizDefinition = [
 ];
 
 async function catchRequest(bot, user, ctx, text){
-
     const reply = 'Благодарим за запрос! С каждым новым запросом гибридный интеллект Коллективного Разума - мудреет.\n\nЕсли хотите дополнить свой запрос, просто напишите сообщение здесь. Вы получите ответ в ближайшее время.';
     const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); //, '🪙 кошелёк'
         
@@ -184,7 +183,6 @@ async function catchRequest(bot, user, ctx, text){
     await saveUser(bot.instanceName, user)  
     
     await insertRequest(bot.instanceName, user, id, text)
-    
 }
 
 module.exports.init = async (botModel, bot) => {
@@ -257,9 +255,7 @@ module.exports.init = async (botModel, bot) => {
           user.ref = ref
 
           await saveUser(bot.instanceName, user);
-
         } else {
-
           user.request_chat_id = null
           user.request_channel_id = null
         }
@@ -276,18 +272,14 @@ module.exports.init = async (botModel, bot) => {
         buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
         
         await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-
       }
     } else {
-
       const clearMenu = Markup.removeKeyboard(); 
       await ctx.reply("я здесь!", clearMenu, { reply_markup: { remove_keyboard: true } })
-      
     }
   });
 
   async function addRequestAction(bot, user, ctx){
-    
     ctx.reply("Введите текст запроса:")
     user.state = 'newrequest'
     await saveUser(bot.instanceName, user);
@@ -304,15 +296,13 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
-    } 
-
+    }
   });
 
   bot.hears('🆕 cоздать запрос', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
       
     await addRequestAction(bot, user, ctx)
-    
   });
 
   bot.hears('🏁 закрыть запрос', async (ctx) => {
@@ -327,7 +317,6 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
 
     ctx.reply("Ваш запрос закрыт. Вы всегда можете создать новый.", menu)
-
   });
 
   bot.on('message', async (ctx) => {
@@ -335,14 +324,12 @@ module.exports.init = async (botModel, bot) => {
     // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
-
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
         
         // console.log('tyL: ', ctx.update.message.reply_to_message);
         
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
-
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
           
           if (msg && msg.message_id) {
@@ -351,7 +338,6 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
-
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
         }
@@ -360,13 +346,11 @@ module.exports.init = async (botModel, bot) => {
         let { text } = ctx.update.message;
 
         if (user.state) {
-
           //SEND FROM USER IN BOT TO PUB CHANNEL
           // console.log("\n\non here2")
           if (user.state === 'newrequest'){
             // console.log("HERE 1")
             await catchRequest(bot, user, ctx, text)
-
           } else if (user.state === 'chat') {
             // console.log("user: ", user)
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
@@ -390,7 +374,6 @@ module.exports.init = async (botModel, bot) => {
             buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
             
             // await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-
           }
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -407,13 +390,10 @@ module.exports.init = async (botModel, bot) => {
                 user.request_chat_id = ctx.update.message.message_id
                 await saveUser(bot.instanceName, user);  
               }
-              
             }
           }
-        } else { 
-
+        } else {
           if (ctx.update.message.chat.type === 'private') {//Если надо обновить меню пользователя после миграции
-        
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
             
             await ctx.reply("Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.", request)
@@ -433,7 +413,6 @@ module.exports.init = async (botModel, bot) => {
   bot.action('createrequest', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     await addRequestAction(bot, user, ctx)
-
   });
 
   bot.action('mypartners', async (ctx) => {

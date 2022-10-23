@@ -381,7 +381,6 @@ async function startQuiz(bot, ctx, user) {
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   return ctx.reply('Меня зовут @DACombot, я робот и ваш проводник в мир сообществ Коллективного Разума.\n\nПожалуйста, поделитесь своим контактом для продолжения знакомства.', request);
-
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -515,7 +514,6 @@ module.exports.init = async (botModel, bot) => {
     const buttons = ["🎫 купить билет"];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
     return ctx.reply('Добро пожаловать в лото.\n\nКупив билет всего за 1 USD - вы гарантированно исполните свою мечту.\n\n', request);
-
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
@@ -540,7 +538,6 @@ module.exports.init = async (botModel, bot) => {
 
   async function buyTicket(bot, user, ctx, currency) {
     try{
-
       let params = {
         username: user.eosname,
         currency: currency
@@ -555,11 +552,9 @@ module.exports.init = async (botModel, bot) => {
       if (result.data.status === 'ok')
         ctx.reply(`address: ${result.data.address}`)
       else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
-
     } catch(e){
       ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
     }
-    
   }
 
   bot.action(/buywith (\w+)/gi, async (ctx) => {

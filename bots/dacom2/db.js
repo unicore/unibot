@@ -578,7 +578,6 @@ async function insertProject(suffix, project){
     const collection = db.collection(`dacomProjects_${suffix}`);
 
     let res = await collection.insertOne(project);
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -592,7 +591,6 @@ async function getProjectsCount(suffix) {
     let tickets = await collection.find({type: 'projectChannel'}).toArray();
 
     return tickets.length
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -606,7 +604,6 @@ async function getProjects(suffix) {
     let projects = await collection.find({type: 'projectChannel', is_private: false}).toArray();
 
     return projects
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -620,7 +617,6 @@ async function getMyProjects(suffix, host) {
     let projects = await collection.find({type: 'projectChannel', host}).toArray();
 
     return projects
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -628,14 +624,12 @@ async function getMyProjects(suffix, host) {
 
 async function getProject(suffix, number) {
   try {
-
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
     let project = await collection.findOne({type: 'projectChannel', projectCount: Number(number)})
 
     return project
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -666,7 +660,6 @@ async function updateWithdraw(suffix, withdraw_id, status) {
       } },
       { upsert: false },
     );
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -678,7 +671,6 @@ async function getWithdraw(suffix, withdraw_id) {
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     return await collection.findOne({ "_id":  mongoose.Types.ObjectId(withdraw_id)});
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -692,7 +684,6 @@ async function getTickets(suffix, user) {
     let tickets = await collection.find({eosname: user.eosname}).toArray();
 
     return tickets
-
   } catch (e) {
     console.log('error: ', e.message);
   }

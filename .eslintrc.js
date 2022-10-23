@@ -12,7 +12,6 @@ module.exports = {
     'no-console': 'off',
     'linebreak-style': ['error', 'unix'],
     'no-restricted-syntax': 'off',
-    'padded-blocks': 'off',
     'eol-last': 'off',
     quotes: 'off',
     'global-require': 'off',

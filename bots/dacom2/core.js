@@ -265,7 +265,6 @@ async function printHelixWallet(bot, ctx, user, hostname) {
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
       let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
-
     } else {
       await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
@@ -273,7 +272,6 @@ async function printHelixWallet(bot, ctx, user, hostname) {
     // eslint-disable-next-line max-len
     // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
-
   }
 }
 
@@ -515,7 +513,6 @@ async function printWallet(bot, user, ctx, hostname) {
       estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
 
       royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-
     }
 
     // text += '\n---------------------------------';
@@ -748,7 +745,6 @@ async function internalWithdrawAction(bot, user, hostname, balanceId) {
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   return new Promise(async (resolve, reject) => {
-
     eos.transact({
       actions: [{
         account: 'eosio.token',
@@ -771,7 +767,6 @@ async function retireAction(bot, user, amount, address) {
     }).catch(async (e) => {
       reject(e)
     });
-
   })
 }
 
@@ -1286,7 +1281,6 @@ async function addToTeam(bot, ctx, user, hostname, dac, title) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-
 }
 
 module.exports = {

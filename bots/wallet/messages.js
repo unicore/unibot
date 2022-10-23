@@ -5,7 +5,6 @@ const { loadDB } = require('./db');
 
 async function sendMessageToUser(bot, user, message, extra) {
   try{
-
     let id = {};
     console.log("MESSAGE ON CREATE: ", id)
 
@@ -26,7 +25,6 @@ async function sendMessageToUser(bot, user, message, extra) {
     }
     
     return id.message_id;
-
   } catch(e){
     console.error("ERROR ON SEND MESSAGE: ", e)
   }

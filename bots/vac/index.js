@@ -183,7 +183,6 @@ async function startQuiz(bot, ctx, user) {
   buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
 
   return ctx.reply('Институт Коллективного Разума готов принять вашу заявку на сотрудничество. У нас к вам будет всего несколько вопросов. После ответа на них, вы будете приглашены к деятельности лабораторий Института за вознаграждение.\n\nПожалуйста, поделитесь контактом для продолжения. 🌐', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -254,7 +253,6 @@ async function nextQuiz(bot, user, ctx) {
     }
 
     await saveUser(bot.instanceName, user)
-
   }
 }
 
@@ -328,9 +326,7 @@ module.exports.init = async (botModel, bot) => {
           user.ref = ref
 
           await saveUser(bot.instanceName, user);
-
         } else {
-
           user.resume_chat_id = null
           user.resume_channel_id = null
         }
@@ -370,7 +366,6 @@ module.exports.init = async (botModel, bot) => {
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
     }
-
   });
 
   bot.on('message', async (ctx) => {
@@ -378,14 +373,12 @@ module.exports.init = async (botModel, bot) => {
     // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
-
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
 
         // console.log('need find reply: ', ctx.update.message.reply_to_message);
 
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
-
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
 
           if (msg && msg.message_id) {
@@ -393,9 +386,7 @@ module.exports.init = async (botModel, bot) => {
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
-
           }
-
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
         }
@@ -416,7 +407,6 @@ module.exports.init = async (botModel, bot) => {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-
           //SEND FROM USER IN BOT TO PUB CHANNEL
           // console.log("\n\non here2")
           if (user.state === 'chat') {
@@ -444,7 +434,6 @@ module.exports.init = async (botModel, bot) => {
                 user.resume_chat_id = ctx.update.message.message_id
                 await saveUser(bot.instanceName, user);
               }
-
             }
           }
         } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя

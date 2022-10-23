@@ -355,7 +355,6 @@ async function withdrawAllUserRefBalances(bot, user) {
 }
 
 async function cantBuyTicket(ctx, bot, user) {
-
   const params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
   ctx.reply(`Покупка билетов станет доступа через: ${10} секунд`)
@@ -429,7 +428,6 @@ async function printWallet(bot, user, ctx) {
   }
 
   // await printTickets(bot, user, ctx);
-
 }
 
 async function transferAction(bot, user, amount, ctx) {
@@ -479,7 +477,6 @@ async function transferAction(bot, user, amount, ctx) {
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   return new Promise(async (resolve, reject) => {
-
     eos.transact({
       actions: [{
         account: 'eosio.token',
@@ -502,7 +499,6 @@ async function retireAction(bot, user, amount, address) {
     }).catch(async (e) => {
       reject(e)
     });
-
   })
 }
 

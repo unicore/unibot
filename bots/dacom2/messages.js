@@ -6,7 +6,6 @@ const { fetchReport, fetchGoal } = require("./goals");
 
 async function sendMessageToUser(bot, user, message, extra) {
   try{
-
     let id = {};
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id, extra);
@@ -96,7 +95,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
           // text + `В проекте: ${prData.data.base.repo.full_name}\n`;
           text += `📁 файлов затронуто: ${prData.data.changed_files}\n`;
           text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
-
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
@@ -115,7 +113,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
             // text += `В проекте: ${repoData.data.full_name}\n`;
             text += `📁 файлов затронуто: ${commitData.data.files.length}\n`;
             text += `\tстроки: +${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
-
           }
         }
       } catch (e) {
@@ -140,7 +137,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       } else {
         bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
       }
-
     }
 
     text += `Подарок: ${report.requested} + ${bonus}\n`
@@ -150,9 +146,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     // text += `Постановщик: ${report.creator}\n`
     // text += `Координатор: ${report.benefactor}\n`
     return text
-
   } else return null
-
 }
 
 module.exports = {
