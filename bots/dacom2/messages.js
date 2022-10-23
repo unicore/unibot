@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 const { Markup } = require('telegraf');
 const { mainButtons } = require('./utils/bot');
-const { loadDB, getUserByEosName} = require('./db');
+const { loadDB, getUserByEosName } = require('./db');
 const { fetchReport, fetchGoal } = require('./goals');
 
 async function sendMessageToUser(bot, user, message, extra) {
@@ -29,7 +29,7 @@ async function sendMessageToUser(bot, user, message, extra) {
     return id.message_id;
   }
   catch (e) {
-    console.error(e)
+    console.error(e);
   }
 }
 
@@ -71,15 +71,15 @@ async function constructReportMessage(bot, hostname, report, reportId) {
   if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
-    console.log('total_shares: ', goal.second_circuit_votes, report.positive_votes, report.negative_votes)
-    let text = ''
-    let bonus
-    let votes
+    console.log('total_shares: ', goal.second_circuit_votes, report.positive_votes, report.negative_votes);
+    let text = '';
+    let bonus;
+    let votes;
 
-    let user = await getUserByEosName(bot.instanceName, report.username)
-    let from = (user.username && user.username !== '') ? '@' + user.username : report.username
-    text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
-    text += `${report.data}\n\n`
+    let user = await getUserByEosName(bot.instanceName, report.username);
+    let from = (user.username && user.username !== '') ? '@' + user.username : report.username;
+    text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`;
+    text += `${report.data}\n\n`;
 
     if (bot.octokit) {
       try {
@@ -120,33 +120,33 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       }
     }
 
-    text += `Одобрен: ${report.approved === '1' ? '🟢' : '🟡'}\n`
-    text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
+    text += `Одобрен: ${report.approved === '1' ? '🟢' : '🟡'}\n`;
+    text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`;
 
     if (report.approved) {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
-      bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`
-      bonus = parseFloat(bonus).toFixed(2) + ' POWER'
+      bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`;
+      bonus = parseFloat(bonus).toFixed(2) + ' POWER';
     } else {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
       // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
       if (report.positive_votes === 0) {
-        bonus = parseFloat(0).toFixed(2) + ' POWER'
+        bonus = parseFloat(0).toFixed(2) + ' POWER';
       } else {
-        bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
+        bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2)} POWER\n`;
       }
     }
 
-    text += `Подарок: ${report.requested} + ${bonus}\n`
+    text += `Подарок: ${report.requested} + ${bonus}\n`;
 
     // text += `Бонус:
 
     // text += `Постановщик: ${report.creator}\n`
     // text += `Координатор: ${report.benefactor}\n`
-    return text
-  } else return null
+    return text;
+  } else return null;
 }
 
 module.exports = {

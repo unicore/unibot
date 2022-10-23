@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log('generate', ctx)
+  console.log('generate', ctx);
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -490,13 +490,13 @@ module.exports.init = async (botModel, bot) => {
 
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    console.log('\n\nTEST!\n\n')
+    console.log('\n\nTEST!\n\n');
 
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
-      console.log('\n\nTEST 2!\n\n')
+      console.log('\n\nTEST 2!\n\n');
       if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
-        console.log('\n\nTEST 3!\n\n')
+        console.log('\n\nTEST 3!\n\n');
         user = ctx.update.message.from;
         user.app = bot.getEnv().APP;
 
@@ -507,7 +507,7 @@ module.exports.init = async (botModel, bot) => {
         await ctx.deleteMessage(msg2.message_id);
         await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
       } else {
-        console.log('\n\nTEST 4!\n\n')
+        console.log('\n\nTEST 4!\n\n');
       }
     }
 
@@ -541,8 +541,8 @@ module.exports.init = async (botModel, bot) => {
       let params = {
         username: user.eosname,
         currency: currency,
-      }
-      let path = `${bot.getEnv().PAY_GATEWAY}/generate`
+      };
+      let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 
       const result = await axios.post(
         path,
@@ -550,10 +550,10 @@ module.exports.init = async (botModel, bot) => {
       );
 
       if (result.data.status === 'ok')
-      { ctx.reply(`address: ${result.data.address}`) }
-      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
+      { ctx.reply(`address: ${result.data.address}`); }
+      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     } catch (e) {
-      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
+      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     }
   }
 
@@ -586,9 +586,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🎫 купить билет', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    console.log('купить билет')
+    console.log('купить билет');
     // await setBuyMenu(ctx)
-    buyTicket(bot, user, ctx, 'USDT.TRC20')
+    buyTicket(bot, user, ctx, 'USDT.TRC20');
     // ctx.reply('покупаю!')
   });
 

@@ -223,22 +223,22 @@ async function nextQuiz(bot, user, ctx) {
     await sendMessageToUser(bot, user, { text: t });
 
     // send message to Channel
-    let text = `${quiz.answers[1].answer}, `
-    text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`
-    text += `${quiz.answers[2].answer}`
+    let text = `${quiz.answers[1].answer}, `;
+    text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`;
+    text += `${quiz.answers[2].answer}`;
 
-    let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
-    user.state = 'chat'
-    user.resume_channel_id = id
+    user.state = 'chat';
+    user.resume_channel_id = id;
 
     if (!user.eosname) {
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
     }
 
-    await saveUser(bot.instanceName, user)
+    await saveUser(bot.instanceName, user);
   }
 }
 
@@ -309,15 +309,15 @@ module.exports.init = async (botModel, bot) => {
         if (!user) {
           user = ctx.update.message.from;
           user.app = bot.getEnv().APP;
-          user.ref = ref
+          user.ref = ref;
 
           await saveUser(bot.instanceName, user);
         } else {
-          user.resume_chat_id = null
-          user.resume_channel_id = null
+          user.resume_chat_id = null;
+          user.resume_channel_id = null;
         }
 
-        await saveUser(bot.instanceName, user)
+        await saveUser(bot.instanceName, user);
 
         await startQuiz(bot, ctx, user);
       }
@@ -399,7 +399,7 @@ module.exports.init = async (botModel, bot) => {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
 
             try {
-              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
+              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.resume_chat_id });
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -417,11 +417,11 @@ module.exports.init = async (botModel, bot) => {
       if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
         if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
           if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
 
             if (user && !user.resume_chat_id) {
               // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-              user.resume_chat_id = ctx.update.message.message_id
+              user.resume_chat_id = ctx.update.message.message_id;
               await saveUser(bot.instanceName, user);
             }
           }

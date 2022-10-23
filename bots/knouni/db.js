@@ -361,7 +361,7 @@ async function closeRequest(suffix, message_id) {
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
       { message_id: message_id },
-      { $set: {closed: true} },
+      { $set: { closed: true } },
       { upsert: false },
     );
   } catch (e) {

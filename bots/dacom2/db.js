@@ -421,7 +421,7 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
 
     await collection.updateOne(
       { channel_message_id, channel_id },
-      { $set: {'chat_message_id': chat_message_id, 'chat_id': chat_id.toString()} },
+      { $set: { 'chat_message_id': chat_message_id, 'chat_id': chat_id.toString() } },
       { upsert: false },
     );
   } catch (e) {
@@ -456,7 +456,7 @@ async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id
       channel_message_id,
       channel_id,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -471,7 +471,7 @@ async function getGoal(suffix, goal_id) {
     let res = await collection.findOne({
       goal_id,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -487,7 +487,7 @@ async function getAllHeadGoalsMessages(suffix, goal_id) {
       goal_id: goal_id.toString(),
     }).toArray();
 
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -503,7 +503,7 @@ async function getTaskByChatMessage(suffix, host, chat_message_id) {
       host,
       chat_message_id,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -519,7 +519,7 @@ async function getTaskById(suffix, host, task_id) {
       host,
       task_id,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -530,11 +530,11 @@ async function getUnion(suffix, chatId) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
-    console.log('GET UNION: ', chatId)
+    console.log('GET UNION: ', chatId);
     let res = await collection.findOne({
       id: chatId,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -550,7 +550,7 @@ async function getUnionByType(suffix, ownerEosname, type) {
       ownerEosname,
       type,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -566,7 +566,7 @@ async function getUnionByHostType(suffix, host, type) {
       host,
       type,
     });
-    return res
+    return res;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -588,9 +588,9 @@ async function getProjectsCount(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let tickets = await collection.find({type: 'projectChannel'}).toArray();
+    let tickets = await collection.find({ type: 'projectChannel' }).toArray();
 
-    return tickets.length
+    return tickets.length;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -601,9 +601,9 @@ async function getProjects(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel', is_private: false}).toArray();
+    let projects = await collection.find({ type: 'projectChannel', is_private: false }).toArray();
 
-    return projects
+    return projects;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -614,9 +614,9 @@ async function getMyProjects(suffix, host) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel', host}).toArray();
+    let projects = await collection.find({ type: 'projectChannel', host }).toArray();
 
-    return projects
+    return projects;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -627,9 +627,9 @@ async function getProject(suffix, number) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let project = await collection.findOne({type: 'projectChannel', projectCount: Number(number)})
+    let project = await collection.findOne({ type: 'projectChannel', projectCount: Number(number) });
 
-    return project
+    return project;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -641,8 +641,8 @@ async function insertWithdraw(suffix, user, withdraw) {
     const collection = db.collection(`dacomWithdraws_${suffix}`);
 
     let res = await collection.insertOne(withdraw);
-    console.log('INSERT RES', res)
-    return res.insertedId
+    console.log('INSERT RES', res);
+    return res.insertedId;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -655,9 +655,11 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
       { '_id': mongoose.Types.ObjectId(withdraw_id) },
-      { $set: {
-        status,
-      } },
+      {
+        $set: {
+          status,
+        },
+      },
       { upsert: false },
     );
   } catch (e) {
@@ -670,7 +672,7 @@ async function getWithdraw(suffix, withdraw_id) {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    return await collection.findOne({ '_id':  mongoose.Types.ObjectId(withdraw_id)});
+    return await collection.findOne({ '_id': mongoose.Types.ObjectId(withdraw_id) });
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -681,9 +683,9 @@ async function getTickets(suffix, user) {
     const db = await loadDB();
     const collection = db.collection(`dacomTickets_${suffix}`);
 
-    let tickets = await collection.find({eosname: user.eosname}).toArray();
+    let tickets = await collection.find({ eosname: user.eosname }).toArray();
 
-    return tickets
+    return tickets;
   } catch (e) {
     console.log('error: ', e.message);
   }

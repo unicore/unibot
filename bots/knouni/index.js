@@ -169,20 +169,20 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
 
-  let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+  let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
-  user.state = 'chat'
-  user.request_channel_id = id
+  user.state = 'chat';
+  user.request_channel_id = id;
 
   if (!user.eosname) {
     user.eosname = await generateAccount(bot, ctx, false, user.ref);
   }
 
-  await saveUser(bot.instanceName, user)
+  await saveUser(bot.instanceName, user);
 
-  await insertRequest(bot.instanceName, user, id, text)
+  await insertRequest(bot.instanceName, user, id, text);
 }
 
 module.exports.init = async (botModel, bot) => {
@@ -252,19 +252,19 @@ module.exports.init = async (botModel, bot) => {
         if (!user) {
           user = ctx.update.message.from;
           user.app = bot.getEnv().APP;
-          user.ref = ref
+          user.ref = ref;
 
           await saveUser(bot.instanceName, user);
         } else {
-          user.request_chat_id = null
-          user.request_channel_id = null
+          user.request_chat_id = null;
+          user.request_channel_id = null;
         }
 
-        await saveUser(bot.instanceName, user)
+        await saveUser(bot.instanceName, user);
 
         const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-        await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
+        await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request);
 
         const buttons = [];
         buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -275,13 +275,13 @@ module.exports.init = async (botModel, bot) => {
       }
     } else {
       const clearMenu = Markup.removeKeyboard();
-      await ctx.reply('я здесь!', clearMenu, { reply_markup: { remove_keyboard: true } })
+      await ctx.reply('я здесь!', clearMenu, { reply_markup: { remove_keyboard: true } });
     }
   });
 
   async function addRequestAction(bot, user, ctx) {
-    ctx.reply('Введите текст запроса:')
-    user.state = 'newrequest'
+    ctx.reply('Введите текст запроса:');
+    user.state = 'newrequest';
     await saveUser(bot.instanceName, user);
   }
 
@@ -302,21 +302,21 @@ module.exports.init = async (botModel, bot) => {
   bot.hears('🆕 cоздать запрос', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    await addRequestAction(bot, user, ctx)
+    await addRequestAction(bot, user, ctx);
   });
 
   bot.hears('🏁 закрыть запрос', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    await closeRequest(bot.instanceName, user.request_channel_id)
+    await closeRequest(bot.instanceName, user.request_channel_id);
 
     const menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 2 }).resize();
 
-    user.state = null
+    user.state = null;
 
     await saveUser(bot.instanceName, user);
 
-    ctx.reply('Ваш запрос закрыт. Вы всегда можете создать новый.', menu)
+    ctx.reply('Ваш запрос закрыт. Вы всегда можете создать новый.', menu);
   });
 
   bot.on('message', async (ctx) => {
@@ -350,12 +350,12 @@ module.exports.init = async (botModel, bot) => {
           // console.log("\n\non here2")
           if (user.state === 'newrequest') {
             // console.log("HERE 1")
-            await catchRequest(bot, user, ctx, text)
+            await catchRequest(bot, user, ctx, text);
           } else if (user.state === 'chat') {
             // console.log("user: ", user)
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
 
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.request_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -366,7 +366,7 @@ module.exports.init = async (botModel, bot) => {
             // console.log("HERE 3")
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-            await ctx.reply('Коллективный Разум решает запросы любой сложности и неопределенности за счёт синергии малых групп людей. Оставьте свой запрос и получите ответ от Коллективного Разума.', request)
+            await ctx.reply('Коллективный Разум решает запросы любой сложности и неопределенности за счёт синергии малых групп людей. Оставьте свой запрос и получите ответ от Коллективного Разума.', request);
 
             const buttons = [];
             buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -383,11 +383,11 @@ module.exports.init = async (botModel, bot) => {
       if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
         if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
           if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
 
             if (user && !user.request_chat_id) {
               // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-              user.request_chat_id = ctx.update.message.message_id
+              user.request_chat_id = ctx.update.message.message_id;
               await saveUser(bot.instanceName, user);
             }
           }
@@ -396,7 +396,7 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.chat.type === 'private') { // Если надо обновить меню пользователя после миграции
           const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-          await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
+          await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request);
 
           const buttons = [];
           buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -412,7 +412,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action('createrequest', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    await addRequestAction(bot, user, ctx)
+    await addRequestAction(bot, user, ctx);
   });
 
   bot.action('mypartners', async (ctx) => {
