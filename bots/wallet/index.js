@@ -98,7 +98,7 @@ const { parseTokenString } = require('./utils/tokens');
 async function generateAccount(bot, ctx, isAdminUser, ref) {
   return new Promise(async (resolve, reject) => {
 
-  
+
 
   const user = ctx.update.message.from;
   const generatedAccount = await generateUniAccount();
@@ -141,8 +141,8 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
       await saveUser(bot.instanceName, user);
       console.error(message);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже перезапустить робота командой /start.', Markup.removeKeyboard());
-      reject({eosname: user.eosname, status: "error", message: e.message})
-      
+      reject({eosname: user.eosname, status: "error", message: 'axios error'})
+
     }
   } catch (e) {
     await saveUser(bot.instanceName, user);
@@ -190,12 +190,12 @@ async function startQuiz(bot, ctx, user) {
   };
 
   await saveQuiz(bot.instanceName, user, q);
-  
+
   // const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
-  
+
   // const buttons = [];
   // buttons.push(Markup.button.url('🏫 узнать подробнее об Институте', 'https://intellect.run'));
-  
+
   // return ctx.reply('');
   //Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
 
@@ -206,29 +206,29 @@ async function catchRequest(bot, user, ctx, text){
 
     const reply = 'Ваш рецепт принят! Мы благодарим вас за расширение базы знаний.';
     // const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); //, '🪙 кошелёк'
-        
+
     await sendMessageToUser(bot, user, { text: reply });
 
     let id = await sendMessageToUser(bot, {id : bot.getEnv().STUDENTS_CHANNEL_ID}, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENTS');
-    
+
     user.state = "chat"
     user.request_channel_id = id
 
     if (!user.eosname) {
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
-    } 
-  
-    await saveUser(bot.instanceName, user)  
-    
+    }
+
+    await saveUser(bot.instanceName, user)
+
     await insertRequest(bot.instanceName, user, id, text)
-    
+
 }
 
 
   async function addRequestAction(bot, user, ctx){
-    
+
     ctx.reply("Введите текст рецепта:")
     user.state = 'newrequest'
     await saveUser(bot.instanceName, user);
@@ -263,7 +263,7 @@ async function nextQuiz(bot, user, ctx) {
 
       const clearMenu = Markup.removeKeyboard();
       let message = q.message + ' <i>Введите ответ текстом:</i>'
-      
+
       await ctx.replyWithHTML(message, clearMenu, { reply_markup: { remove_keyboard: true } });
     }
 
@@ -272,13 +272,13 @@ async function nextQuiz(bot, user, ctx) {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
     const {mainButtons} = require('./utils/bot')
-    
+
     const menu = Markup // , "цели", "действия"
       .keyboard(mainButtons, { columns: 2 }).resize();
 
     user.state = ""
-    await saveUser(bot.instanceName, user)  
-    
+    await saveUser(bot.instanceName, user)
+
     const t = 'Ваша анкета принята!';
 
 
@@ -289,7 +289,7 @@ async function nextQuiz(bot, user, ctx) {
     // text += `+${quiz.answers[0].answer.phone_number || quiz.answers[0].answer}, @${user.username}\n`
     let text = ''
 
-    k = 0
+    let k = 0
 
     for (const answer of quiz.answers) {
       if (k > 0){
@@ -298,11 +298,11 @@ async function nextQuiz(bot, user, ctx) {
       }
       k++
     }
-  
+
     let id = await sendMessageToUser(bot, {id : bot.getEnv().STUDENTS_CHANNEL_ID}, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENT');
-    
+
     await insertStudent(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
@@ -311,17 +311,17 @@ async function nextQuiz(bot, user, ctx) {
       channel_id: bot.getEnv().STUDENTS_CHANNEL_ID
     })
 
-    
+
     if (!user.eosname) {
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
-    } 
-    
+    }
+
     user.state = ""
     user.resume_channel_id = id
     user.is_student = true
-    await saveUser(bot.instanceName, user)  
-    
-    
+    await saveUser(bot.instanceName, user)
+
+
   }
 }
 
@@ -381,10 +381,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.start(async (ctx) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
-    
+
     const clearMenu = Markup.removeKeyboard();
     let r = await ctx.reply("Пожалуйста, подождите...", clearMenu, { reply_markup: { remove_keyboard: true } });
-    
+
     await ctx.deleteMessage(r.message_id);
 
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
@@ -411,7 +411,7 @@ module.exports.init = async (botModel, bot) => {
           const account = await bot.uni.readApi.getAccount(user.eosname).catch((err) => {
             re_register = true
           });
-          
+
           if (re_register === true){
             user.eosname = (await generateAccount(bot, ctx, false, ref)).eosname;
             await saveUser(bot.instanceName, user);
@@ -423,7 +423,7 @@ module.exports.init = async (botModel, bot) => {
         const buttons = [];
 
         // buttons.push(Markup.button.callback('🆕 продолжить', `nextwelcome1`));
-        
+
         user.del_msg = (await ctx.replyWithHTML('<b>Добро пожаловать в UNIWALL! </b>\n\nЗдесь можно совершить вклад в развитие Цифрового Кооператива и получить ценные подарки. ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; //\n🛶🚁🎢🎡🌄🌅🏑🏏🏸🏒🥋🤿🏹🪁⛳️🥅🪃🥌⛸🏂🪂🤸‍♂️🤺🚵‍♂️🎯\n\n
         await saveUser(bot.instanceName, user);
         await printWallet(bot, user);
@@ -456,7 +456,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
 
     buttons.push(Markup.button.url('задать вопрос ➡️', 'https://t.me/knouni_bot'));
-            
+
     ctx.reply('Для создания запроса в обратную связь, пожалуйста, воспользуйтесь роботом: @knouni_bot', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
@@ -465,10 +465,10 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
 
     buttons.push(Markup.button.callback('создать отзыв ◀️', `feedback`));
-    
+
 
     buttons.push(Markup.button.url('просмотреть отзывы ➡️', bot.getEnv().TESTIMONIAL_CHANNEL));
-            
+
     ctx.reply('Академия Кайфа бережно хранит отзывы своих кайфуш:', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
@@ -477,7 +477,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
 
     buttons.push(Markup.button.url('просмотреть события ➡️', bot.getEnv().EVENTS_CHANNEL));
-            
+
     ctx.reply('События кайфадемиков и кайфологов проходят по всему миру:', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
@@ -490,7 +490,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🧙🏻‍♂️ кайфология', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     const buttons = [];
     let text = ""
     text += "<b>Статусы в Академии Кайфа:</b>"
@@ -501,7 +501,7 @@ module.exports.init = async (botModel, bot) => {
 
     buttons.push(Markup.button.callback('заявить 🙋‍♂️', "startquiz"));
     buttons.push(Markup.button.url('канал кайфуш ➡️', bot.getEnv().STUDENTS_CHANNEL));
-            
+
     user.del_msg = (ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user)
   });
@@ -515,7 +515,7 @@ module.exports.init = async (botModel, bot) => {
     }
 
     await checkForExistBCAccount(bot, ctx);
-    
+
     await printHelixWallet(bot, ctx, user, bot.getEnv().CORE_HOST);
 
   });
@@ -531,23 +531,23 @@ module.exports.init = async (botModel, bot) => {
 
  bot.hears('💝 кайфовый канал', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     ctx.reply("Ссылка: ")
-    
+
   });
 
  bot.hears('💭 чат кайфологов', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     ctx.reply("Ссылка: ")
-    
+
   });
 
 
  bot.hears('🆕 добавить рецепт', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     await addRequestAction(bot, user, ctx)
-    
+
   });
 
 
@@ -557,7 +557,7 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
-    } 
+    }
 
   });
 
@@ -565,7 +565,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🎯 цели', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     await printGoalsMenu(bot, ctx, user, bot.getEnv().CORE_HOST);
 
   });
@@ -576,36 +576,36 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       // await printTickets(bot, user, ctx);
-    } 
+    }
 
   });
 
 
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
 
     if (user) {
 
 
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
-        
+
         // console.log('need find reply: ', ctx.update.message.reply_to_message);
-        
+
         if (ctx.update.message.reply_to_message) { //Если это ответ на чье-то сообщение
 
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
-          
+
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
             const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
 
-            
+
           }
-        
+
 
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -625,7 +625,7 @@ module.exports.init = async (botModel, bot) => {
           const t = 'Оплата пропущена.';
 
           await sendMessageToUser(bot, user, { text: t }, menu);
-          
+
         } else if (quiz && !quiz.is_finish) {
           quiz.answers.map((el, index) => {
             if (index === quiz.current_quiz) {
@@ -650,14 +650,14 @@ module.exports.init = async (botModel, bot) => {
               } else {
                 await ctx.replyWithHTML('Аккаунт получателя не существует. Проверьте имя аккаунта и повторите попытку.');
               }
-            } 
+            }
 
 
             else if (user.state === 'set_goal_title') {
               user.create_goal.title = text;
               user.create_goal.description = "";
               user.create_goal.target = `${parseFloat(bot.getEnv().TARGET).toFixed(4)} ${bot.getEnv().SYMBOL}`;
-              
+
               saveUser(bot.instanceName, user);
 
               const buttons = [];
@@ -675,23 +675,23 @@ module.exports.init = async (botModel, bot) => {
 
               // eslint-disable-next-line max-len
               await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-            
-            } 
 
-            
+            }
+
+
             else if (user.state === 'set_withdraw_amount') {
               const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
               let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
               const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
-              
+
 
               if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-              
+
               else if (parseFloat(min) > parseFloat(amount)){
-                
+
                 ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-              
+
               } else {
 
                 user.state = "set_withdraw_address"
@@ -705,7 +705,7 @@ module.exports.init = async (botModel, bot) => {
               }
 
 
-            } 
+            }
 
             else if (user.state === 'set_withdraw_address') {
               user.on_withdraw.address = text
@@ -723,7 +723,7 @@ module.exports.init = async (botModel, bot) => {
               ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
 
 
-            } 
+            }
 
             else if (user.state === 'set_deposit_amount') {
               const { hostname } = user.deposit_action;
@@ -796,7 +796,7 @@ module.exports.init = async (botModel, bot) => {
             await saveUser(bot.instanceName, user);
 
             // ctx.reply('Сообщение отправлено');
-          } 
+          }
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
         }
@@ -810,9 +810,9 @@ module.exports.init = async (botModel, bot) => {
               if (user && !user.resume_chat_id){
                 // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
                 user.resume_chat_id = ctx.update.message.message_id
-                await saveUser(bot.instanceName, user);  
+                await saveUser(bot.instanceName, user);
               }
-              
+
             }
           }
         } else { //Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
@@ -829,12 +829,12 @@ module.exports.init = async (botModel, bot) => {
         currency: currency
       }
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`
-      
+
       const result = await axios.post(
         path,
         params
       );
-      
+
       if (result.data.status === 'ok'){
         await ctx.replyWithHTML(`Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:`)
         await ctx.reply(`${result.data.address}`)
@@ -844,7 +844,7 @@ module.exports.init = async (botModel, bot) => {
     } catch(e){
       ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
     }
-    
+
   }
 
 
@@ -893,7 +893,7 @@ module.exports.init = async (botModel, bot) => {
     })
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
-    
+
 
     //MASSWITHDRAWACTION
     massWithdrawAction(bot, user, bot.getEnv().CORE_HOST, balances.all).then(res => {
@@ -904,26 +904,26 @@ module.exports.init = async (botModel, bot) => {
 
         const buttons = [];
         buttons.push(Markup.button.callback('подтвердить оплату', `confirmwithdraw ${withdraw_id}`));
-        
+
         //TO CLIENT
         await sendMessageToUser(bot, user, { text: `Заявка на вывод создана на сумму ${user.on_withdraw.amount}. Перевод будет выполнен на адрес:\n${user.on_withdraw.address}` });
 
         //TO ADMIN
-        
+
         let admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME)
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
         await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-        
+
         await updateWithdraw(bot.instanceName, withdraw_id, "waiting")
-        
+
       }).catch(e => {
         console.error(e)
-        ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`)      
-      }) 
+        ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`)
+      })
     }).catch(e => {
       console.error(e)
-        ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`)      
+        ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`)
     })
 
     //
@@ -932,7 +932,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action('nextwelcome1', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     const buttons = [];
 
     await ctx.deleteMessage(user.del_msg);
@@ -941,20 +941,20 @@ module.exports.init = async (botModel, bot) => {
     const menu = Markup // , "цели", "действия"
       .keyboard(mainButtons, { columns: 2 }).resize();
 
-    user.del_msg = (await ctx.reply('Каждый NFT-токен предоставляет обладателю пожизненную долю от финансового оборота Цифрового Кооператива.', menu)).message_id; 
+    user.del_msg = (await ctx.reply('Каждый NFT-токен предоставляет обладателю пожизненную долю от финансового оборота Цифрового Кооператива.', menu)).message_id;
     await saveUser(bot.instanceName, user);
   });
 
 
   bot.action('nextwelcome2', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
     // buttons.push(Markup.button.callback('➡️ начать знакомство', `startquiz`));
-  
-    // user.del_msg = (await ctx.reply('Каждый NFT-токен предоставляет обладателю пожизненную долю от финансового оборота Цифрового Кооператива.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+
+    // user.del_msg = (await ctx.reply('Каждый NFT-токен предоставляет обладателю пожизненную долю от финансового оборота Цифрового Кооператива.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
     await printWallet(bot, user);
     // const buttons = [];
@@ -966,13 +966,13 @@ module.exports.init = async (botModel, bot) => {
 
 // bot.action('nextwelcome3', async (ctx) => {
 //     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
 //     const buttons = [];
 //     await ctx.deleteMessage(user.del_msg);
 
 //     buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome4`));
-  
-//     user.del_msg = (await ctx.reply('Совершая вклад в развитие Цифрового Кооператива, вы создаёте платформу ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+
+//     user.del_msg = (await ctx.reply('Совершая вклад в развитие Цифрового Кооператива, вы создаёте платформу ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
 //     await saveUser(bot.instanceName, user);
 
 //   });
@@ -980,13 +980,13 @@ module.exports.init = async (botModel, bot) => {
 
 bot.action('nextwelcome4', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
     buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome5`));
-  
-    user.del_msg = (await ctx.reply('', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+
+    user.del_msg = (await ctx.reply('', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
 
 });
@@ -994,13 +994,13 @@ bot.action('nextwelcome4', async (ctx) => {
 
 bot.action('nextwelcome5', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
     buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome6`));
-  
-    user.del_msg = (await ctx.reply('На приоритет и скорость осуществления вашей кайфовой цели влияет количество фракций и количество проданных сетью билетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+
+    user.del_msg = (await ctx.reply('На приоритет и скорость осуществления вашей кайфовой цели влияет количество фракций и количество проданных сетью билетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
 
 });
@@ -1009,13 +1009,13 @@ bot.action('nextwelcome5', async (ctx) => {
 
 bot.action('nextwelcome6', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
     buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
-  
-    user.del_msg = (await ctx.reply('Таким образом, участники осуществляют свои кайфовые цели здесь, пока покупают билеты Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; 
+
+    user.del_msg = (await ctx.reply('Таким образом, участники осуществляют свои кайфовые цели здесь, пока покупают билеты Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
 
 });
@@ -1025,7 +1025,7 @@ bot.action('nextwelcome6', async (ctx) => {
 
     const nextId = parseInt(ctx.match[1], 10);
     console.log("nextId", nextId)
-    await printTickets(bot, user, ctx, nextId);
+    // await printTickets(bot, user, ctx, nextId);
   });
 
   bot.action('buyticket', async (ctx) => {
@@ -1050,9 +1050,9 @@ bot.action('nextwelcome6', async (ctx) => {
   bot.action('cantbuyticket', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     // await ctx.deleteMessage();
-    
-    await cantBuyTicket(bot, user)
-    
+
+    await cantBuyTicket(ctx, bot, user)
+
     // console.log("купить билет")
     // await setBuyMenu(ctx)
     // buyTicket(bot, user, ctx, "USDT.TRC20")
@@ -1155,8 +1155,8 @@ bot.action('nextwelcome5', async (ctx) => {
     await ctx.deleteMessage();
 
     buttons.push(Markup.button.callback('🆕 продолжить 3', `nextwelcome4`));
-  
-    await ctx.reply('Чтобы ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize()); 
+
+    await ctx.reply('Чтобы ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
   });
 
@@ -1218,14 +1218,14 @@ bot.action('nextwelcome5', async (ctx) => {
 //     await setSellMenu(bot, ctx, user);
 //   }
 // }
-  
+
   async function getMaxWithdrawAmount(bot, user, ctx) {
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
-    
+
     const min = `${(2 / parseFloat(1)).toFixed(0)} ${bot.getEnv().SYMBOL}`;
     const max = `${(((parseFloat(balances.totalBalances) + parseFloat(liquidBal)) * parseFloat(1)) / parseFloat(1)).toFixed(4)} ${bot.getEnv().SYMBOL}`;
-    
+
     return {min, max}
 
   }
@@ -1235,7 +1235,7 @@ bot.action('nextwelcome5', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const to = ctx.match[1];
     const hostname = ctx.match[2];
-    
+
     user.state = ""
 
     await saveUser(bot.instanceName, user);
@@ -1257,7 +1257,7 @@ bot.action('nextwelcome5', async (ctx) => {
     // showBuySellMenu(bot, user, ctx);
     // console.log("helixBalances: ", balances)
     let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
-    
+
     if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
     else {
       ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, на вашем балансе: ${max}. `); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
@@ -1267,10 +1267,10 @@ bot.action('nextwelcome5', async (ctx) => {
     //   ctx.reply('Ошибка! У вас нет USDT для вывода. ')
     // } else {
 
-      // ctx.reply(`Введите ваш адрес USDT в сети TRC20:`)  
+      // ctx.reply(`Введите ваш адрес USDT в сети TRC20:`)
     // }
-     
-     
+
+
 
     // await printTickets(bot, user, ctx, nextId);
   });
@@ -1278,7 +1278,7 @@ bot.action('nextwelcome5', async (ctx) => {
 
   bot.action('gethelp', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+
     // const min = `${(2 / parseFloat(1)).toFixed(0)} USDT`;
     // const max = `${((parseFloat(liquidBal) * parseFloat(1)) / parseFloat(1)).toFixed(0)} USDT`;
 

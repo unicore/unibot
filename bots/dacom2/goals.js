@@ -88,7 +88,7 @@ async function disableButtons(bot, ctx, up) {
 
 async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
-  report = await fetchReport(bot, hostname, reportId);
+  let report = await fetchReport(bot, hostname, reportId);
 
   if (up)
     keyboard[0][0].text = `👍 (${report.voters.length})`
@@ -106,7 +106,7 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 async function constructGoalMessage(bot, hostname, goal, goalId){
   if (!goal && goalId)
     goal = await fetchGoal(bot, hostname, goalId);
-  
+
   console.log("GOAL ON FETHC: ", goal, hostname, goalId)
   if (goal){
     console.log("GOAL MATCH2: ", goal.id)
@@ -133,7 +133,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
     if (goal.benefactor !== "")
       text += `Координатор: ${goal.benefactor === "" ? 'не установлен' : coordinator}\n`
-    
+
     text += `Голоса: ${goal.positive_votes} POWER`
 
     // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
@@ -144,7 +144,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
     return text
   } else return ""
-  
+
 }
 
 
@@ -182,7 +182,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let from = (user.username && user.username !== "") ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
-    
+
 
     if (bot.octokit) {
       try {
@@ -198,7 +198,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
           // text + `В проекте: ${prData.data.base.repo.full_name}\n`;
           text += `📁 файлов затронуто: ${prData.data.changed_files}\n`;
           text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
-          
+
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
@@ -217,7 +217,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
             // text += `В проекте: ${repoData.data.full_name}\n`;
             text += `📁 файлов затронуто: ${commitData.data.files.length}\n`;
             text += `\tстроки: +${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
-            
+
           }
         }
       } catch (e) {
@@ -402,7 +402,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 
 
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
-  
+
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
 
@@ -448,7 +448,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let host = await fetchHost(bot, hostname)
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
-  
+
   if (user.eosname === host.architect && report.approved === 0){
     actions.push({
         account: 'unicore',
@@ -490,7 +490,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
 
     await editReportMsg(bot, ctx, user, hostname, reportId)
     let report = await fetchReport(bot, hostname, reportId);
-  
+
     return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
 
@@ -740,5 +740,6 @@ module.exports = {
   setTaskPriority,
   editGoalMsg,
   editGoal,
-  fetchGoal
+  fetchGoal,
+  fetchReport,
 };

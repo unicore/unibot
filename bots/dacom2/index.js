@@ -282,6 +282,32 @@ async function welcome(bot, ctx){
 };
 
 
+async function finishEducation(bot, ctx, id) {
+
+  const icomeMenu = Markup
+      .keyboard(mainButtons, { columns: 2 }).resize();
+
+  let t = '';
+  t += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
+
+  t += `\nПоказать это сообщение: /help,`
+  // t += `\nСоздать проект: напишите сообщение с тегом #project`
+  // t += `\nСовершить взнос: /donate,`
+  t += `\nКапитализация DAO: /stat,`
+  t += "\nВаш кошелёк: /wallet,"
+
+  if (id){
+
+    const id = await sendMessageToUser(bot, { id }, { text:t });
+
+  } else {
+    await ctx.replyWithHTML(t);
+  }
+  //Ваша интеллектуальная собственность: /iam,\n
+
+
+}
+
 async function pushEducation(bot, ctx, currentSlideIndex) {
   try{
 
@@ -297,7 +323,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       console.error(e);
     }
 
-    await finishEducation(ctx);
+    await finishEducation(bot, ctx);
   } else {
     if (currentSlideIndex === 0) {
       const incomeMenu = Markup
@@ -474,7 +500,7 @@ async function nextQuiz(bot, user, ctx) {
     // const t = 'Войдите в ваше DAO и получите инструкции:';
     // ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
 
-    k = 0
+    let k = 0
     let text = ``
 
     // +${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}, //phone
@@ -755,32 +781,6 @@ module.exports.init = async (botModel, bot) => {
     return newText.trim();
   }
 
-async function finishEducation(ctx, id) {
-
-    const icomeMenu = Markup
-    .keyboard(mainButtons, { columns: 2 }).resize();
-
-    let t = '';
-    t += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
-
-    t += `\nПоказать это сообщение: /help,`
-    // t += `\nСоздать проект: напишите сообщение с тегом #project`
-    // t += `\nСовершить взнос: /donate,`
-    t += `\nКапитализация DAO: /stat,`
-    t += "\nВаш кошелёк: /wallet,"
-
-    if (id){
-
-      const id = await sendMessageToUser(bot, { id }, { text:t });
-
-    } else {
-      await ctx.replyWithHTML(t);
-    }
-    //Ваша интеллектуальная собственность: /iam,\n
-
-
-}
-
   bot.action(/pusheducation (\w+)/gi, async (ctx) => {
     const currentSlideIndex = Number(ctx.match[1]);
     await pushEducation(bot, ctx, currentSlideIndex);
@@ -869,7 +869,7 @@ async function finishEducation(ctx, id) {
 
 
   bot.command('make_new_projects_private', async (ctx) => {
-    // finishEducation(ctx)
+    // finishEducation(bot, ctx)
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     user.is_private = true
 
@@ -879,7 +879,7 @@ async function finishEducation(ctx, id) {
 
 
   bot.command('make_new_projects_public', async (ctx) => {
-    // finishEducation(ctx)
+    // finishEducation(bot, ctx)
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     user.is_private = false
 
@@ -889,17 +889,17 @@ async function finishEducation(ctx, id) {
 
 
   bot.command('create_dao', async (ctx) => {
-    // finishEducation(ctx)
+    // finishEducation(bot, ctx)
     await pushEducation(bot, ctx, 0);
   });
 
   bot.command('welcome', async (ctx) => {
-    finishEducation(ctx)
+    finishEducation(bot, ctx)
     // await pushEducation(bot, ctx, 0);
   });
 
   bot.command('help', async (ctx) => {
-    finishEducation(ctx)
+    finishEducation(bot, ctx)
     // await pushEducation(bot, ctx, 0);
   });
 
@@ -1102,7 +1102,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
               await setupHost(bot, ctx, host.eosname, host.wif, chat, user)
 
               await ctx.reply(`DAO успешно создано в этом чате.`)
-              await finishEducation(ctx)
+              await finishEducation(bot, ctx)
             } else {
               await ctx.reply(`Произошла ошибка при регистрации DAO, попробуйте повторить позже.`)
             }
@@ -1152,7 +1152,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
   })
 
   bot.action('finisheducation', async (ctx) => {
-    await finishEducation(ctx);
+    await finishEducation(bot, ctx);
   });
 
   bot.command("stat", async(ctx) => {
@@ -1278,7 +1278,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
     }
 
     if (ctx.update.message.reply_to_message){
-      goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
+      const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.sender_chat.id.toString())
       if (!goal){
 
         ctx.reply("Цель не найдена", {reply_to_message_id: ctx.update.message.message_id})
@@ -1630,7 +1630,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
                     let dacs = await getDacs(bot, target.host)
 
-                    user_in_team = dacs.find(el => el.dac === user.eosname)
+                    let user_in_team = dacs.find(el => el.dac === user.eosname)
 
                     if (!user_in_team) {
                       await ctx.reply(`Только член команды может публиковать сообщения в новостном канале этого DAO`)
@@ -1903,8 +1903,8 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 } else {
                   let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
 
-                  // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                  exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
+                  // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
+                  let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
 
                   ctx.reply(`Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
                 }
@@ -2045,7 +2045,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
 
 
                     // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-                    exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
+                    let exist = await getUnionByHostType(bot.instanceName, current_chat.host, "goalsChannel")
 
                     ctx.reply(`Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.`, {reply_to_message_id: ctx.update.message.message_id})
                   }
@@ -2364,7 +2364,7 @@ async function setupHost(bot, ctx, eosname, wif, chat, user) {
                 return
               }
 
-              const helix = await getHelixParams(bot, exist.host);
+              const helix = await getHelixParams(bot, current_chat.host);
 
               let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
               const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;

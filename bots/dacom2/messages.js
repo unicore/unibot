@@ -1,7 +1,8 @@
 /* eslint-disable no-await-in-loop */
 const { Markup } = require('telegraf');
 const { mainButtons } = require('./utils/bot');
-const { loadDB } = require('./db');
+const { loadDB, getUserByEosName} = require('./db');
+const { fetchReport, fetchGoal } = require("./goals");
 
 async function sendMessageToUser(bot, user, message, extra) {
   try{
@@ -14,7 +15,7 @@ async function sendMessageToUser(bot, user, message, extra) {
     if ('audio' in message) id = await bot.telegram.sendAudio(user.id, message.audio.file_id, extra);
     if ('video_note' in message) id = await bot.telegram.sendVideoNote(user.id, message.video_note.file_id, extra);
     if ('document' in message) id = await bot.telegram.sendDocument(user.id, message.document.file_id, extra);
-    
+
     if ('video' in message) id = await bot.telegram.sendVideo(user.id, message.video.file_id, extra);
     if ('doc' in message) {
       // eslint-disable-next-line max-len
@@ -83,7 +84,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let from = (user.username && user.username !== "") ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
-    
+
 
     if (bot.octokit) {
       try {
@@ -99,7 +100,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
           // text + `В проекте: ${prData.data.base.repo.full_name}\n`;
           text += `📁 файлов затронуто: ${prData.data.changed_files}\n`;
           text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
-          
+
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
@@ -118,7 +119,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
             // text += `В проекте: ${repoData.data.full_name}\n`;
             text += `📁 файлов затронуто: ${commitData.data.files.length}\n`;
             text += `\tстроки: +${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
-            
+
           }
         }
       } catch (e) {
