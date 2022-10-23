@@ -231,7 +231,7 @@ async function nextQuiz(bot, user, ctx) {
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
-    user.state = "chat"
+    user.state = 'chat'
     user.resume_channel_id = id
 
     if (!user.eosname) {

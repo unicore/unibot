@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log("generate", ctx)
+  console.log('generate', ctx)
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -129,7 +129,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
     }
   } catch (e) {
-    console.log("error: ", e.message)
+    console.log('error: ', e.message)
 
     await saveUser(bot.instanceName, user);
     return user.eosname;
@@ -505,7 +505,7 @@ module.exports.init = async (botModel, bot) => {
       await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
     }
 
-    const buttons = ["🎫 спонсировать"];
+    const buttons = ['🎫 спонсировать'];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
 
     return ctx.reply('Добро пожаловать в комнату спонсоров Института Коллективного Разума.\n\n', request);
@@ -546,9 +546,9 @@ module.exports.init = async (botModel, bot) => {
 
       if (result.data.status === 'ok')
         ctx.reply(`address: ${result.data.address}`)
-      else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
+      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     } catch (e) {
-      ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
+      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     }
   }
 
@@ -581,9 +581,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🎫 спонсировать', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    console.log("купить билет")
+    console.log('купить билет')
     // await setBuyMenu(ctx)
-    buyTicket(bot, user, ctx, "USDT.TRC20")
+    buyTicket(bot, user, ctx, 'USDT.TRC20')
     // ctx.reply('покупаю!')
   });
 

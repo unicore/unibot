@@ -20,7 +20,7 @@ async function sendMessageToUser(bot, user, message, extra) {
     // eslint-disable-next-line max-len
     id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude);
   }
-  console.log("send message to user: ", id)
+  console.log('send message to user: ', id)
   return id.message_id;
 }
 

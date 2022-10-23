@@ -62,7 +62,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
   let totalWhiteBalances = '0.0000 FLOWER';
   let totalBlackBalances = '0.0000 FLOWER';
   let totalBalances = '0.0000 FLOWER';
-  let totalPurchaseAmount = "0.0000 FLOWER"
+  let totalPurchaseAmount = '0.0000 FLOWER'
 
   const priorityBalances = [];
   const winBalances = [];
@@ -379,14 +379,14 @@ async function printWallet(bot, user, ctx) {
     // let tickets = await getTickets(bot.instanceName, user)
     // let currentTicket = tickets[0]
 
-    buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
+    buttons.push(Markup.button.callback('⬇️ вывести', 'withdraw'));
 
     if (balances.length === 0)
-      buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
+      buttons.push(Markup.button.callback('🎫 купить билет', 'buyticket'));
     // else
       // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
 
-    buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
+    buttons.push(Markup.button.callback('🔁 обновить', 'refreshwallet'));
 
     const refStat = await getRefStat(bot, user.eosname, bot.getEnv().SYMBOL);
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
@@ -480,7 +480,7 @@ async function retireAction(bot, user, amount, address) {
     eos.transact({
       actions: [{
         account: 'eosio.token',
-        name: "retire",
+        name: 'retire',
         authorization: [{
           actor: user.eosname,
           permission: 'active',
@@ -560,7 +560,7 @@ async function getHelixsList(bot) {
 async function depositAction(bot, ctx, user) {
   const helix = await getHelixParams(bot, user.deposit_action.hostname);
   try {
-    console.log("deposit: ", user.eosname)
+    console.log('deposit: ', user.eosname)
     const eos = await bot.uni.getEosPassInstance(user.wif);
 
     const data = await eos.transact({
@@ -650,7 +650,7 @@ async function internalRefreshAction(bot, balance, username) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-    console.log("success update bal", balance.id)
+    console.log('success update bal', balance.id)
   } catch (e) {
     console.log('ERROR ON REFRESH BALANCE: ', e.message);
     return e.message;

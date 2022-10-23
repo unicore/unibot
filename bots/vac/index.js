@@ -245,7 +245,7 @@ async function nextQuiz(bot, user, ctx) {
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
-    user.state = "chat"
+    user.state = 'chat'
     user.resume_channel_id = id
 
     if (!user.eosname) {
@@ -411,7 +411,7 @@ module.exports.init = async (botModel, bot) => {
           // console.log("\n\non here2")
           if (user.state === 'chat') {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text || "" }, {reply_to_message_id : user.resume_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text || '' }, {reply_to_message_id : user.resume_chat_id});
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 

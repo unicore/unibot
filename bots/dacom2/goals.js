@@ -20,9 +20,9 @@ async function fetchHost(bot, hostname) {
   return hosts[0]
 }
 async function fetchGoal(bot, hostname, goalId) {
-  console.log("fetchGoal: ", hostname, goalId)
+  console.log('fetchGoal: ', hostname, goalId)
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals', goalId, goalId, 1);
-  console.log("result: ", goals)
+  console.log('result: ', goals)
   return goals[0]
 }
 
@@ -73,13 +73,13 @@ async function disableButtons(bot, ctx, up) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
 
   if (up)
-    keyboard[0][0].text = "ожидание"
+    keyboard[0][0].text = 'ожидание'
   else
-    keyboard[0][1].text = "ожидание"
+    keyboard[0][1].text = 'ожидание'
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
   } catch (e) {
-    console.log("error on disable buttons: ", e.message)
+    console.log('error on disable buttons: ', e.message)
   }
 }
 
@@ -90,12 +90,12 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   if (up)
     keyboard[0][0].text = `👍 (${report.voters.length})`
   else
-    keyboard[0][1].text = "ожидание"
+    keyboard[0][1].text = 'ожидание'
 
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
   } catch (e) {
-    console.log("error on enable buttons: ", e.message)
+    console.log('error on enable buttons: ', e.message)
   }
 }
 
@@ -103,31 +103,31 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
   if (!goal && goalId)
     goal = await fetchGoal(bot, hostname, goalId);
 
-  console.log("GOAL ON FETHC: ", goal, hostname, goalId)
+  console.log('GOAL ON FETHC: ', goal, hostname, goalId)
   if (goal) {
-    console.log("GOAL MATCH2: ", goal.id)
+    console.log('GOAL MATCH2: ', goal.id)
 
     let host = await fetchHost(bot, hostname)
     let total_shares = host.total_shares
-    console.log("total_shares: ", total_shares, goal.positive_votes, goal.negative_votes)
+    console.log('total_shares: ', total_shares, goal.positive_votes, goal.negative_votes)
     let user = await getUserByEosName(bot.instanceName, goal.creator)
-    let from = (user.username && user.username !== "") ? '@' + user.username : goal.creator
+    let from = (user.username && user.username !== '') ? '@' + user.username : goal.creator
 
-    let text = ""
+    let text = ''
     text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`
     text += `${goal.title}\n\n`
-    text += `Статус: ${goal.status !== 'waiting' ? "🟢" : "🟡"}\n`
+    text += `Статус: ${goal.status !== 'waiting' ? '🟢' : '🟡'}\n`
     // text += `Постановщик: ${goal.creator}\n`
 
-    let coordinator = ""
+    let coordinator = ''
 
-    if (goal.benefactor !== "") {
+    if (goal.benefactor !== '') {
       let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
-      coordinator = (user.username && user.username !== "") ? '@' + user.username : goal.benefactor
+      coordinator = (user.username && user.username !== '') ? '@' + user.username : goal.benefactor
     }
 
-    if (goal.benefactor !== "")
-      text += `Координатор: ${goal.benefactor === "" ? 'не установлен' : coordinator}\n`
+    if (goal.benefactor !== '')
+      text += `Координатор: ${goal.benefactor === '' ? 'не установлен' : coordinator}\n`
 
     text += `Голоса: ${goal.positive_votes} POWER`
 
@@ -138,18 +138,18 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
       text += `\nПолучено: ${goal.withdrawed}`
 
     return text
-  } else return ""
+  } else return ''
 }
 
 async function constructTaskMessage(bot, hostname, task, taskId) {
   if (!task && taskId)
     task = await fetchTask(bot, hostname, taskId);
 
-  let text = ""
-  let level = task.priority === (0 || 1) ? "10 $/час" : (task.priority === 2 ? "20 $/час" : "40 $/час")
+  let text = ''
+  let level = task.priority === (0 || 1) ? '10 $/час' : (task.priority === 2 ? '20 $/час' : '40 $/час')
 
   let user = await getUserByEosName(bot.instanceName, task.creator)
-  let from = (user.username && user.username !== "") ? '@' + user.username : task.creator
+  let from = (user.username && user.username !== '') ? '@' + user.username : task.creator
 
   text += `🏳️ #ДЕЙСТВИЕ_${task.id} от ${from}: \n`
   text += `${task.title}\n\n`
@@ -165,13 +165,13 @@ async function constructReportMessage(bot, hostname, report, reportId) {
   if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
-    console.log("total_shares: ", goal.second_circuit_votes, report.positive_votes, report.negative_votes)
-    let text = ""
+    console.log('total_shares: ', goal.second_circuit_votes, report.positive_votes, report.negative_votes)
+    let text = ''
     let bonus
     let votes
 
     let user = await getUserByEosName(bot.instanceName, report.username)
-    let from = (user.username && user.username !== "") ? '@' + user.username : report.username
+    let from = (user.username && user.username !== '') ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
 
@@ -214,20 +214,20 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       }
     }
 
-    text += `Одобрен: ${report.approved === '1' ? "🟢" : "🟡"}\n`
+    text += `Одобрен: ${report.approved === '1' ? '🟢' : '🟡'}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
 
     if (report.approved) {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
       // text += `Голоса: ${}%\n`
       bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`
-      bonus = parseFloat(bonus).toFixed(2) + " POWER"
+      bonus = parseFloat(bonus).toFixed(2) + ' POWER'
     } else {
       // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
       // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
       if (report.positive_votes === 0) {
-        bonus = parseFloat(0).toFixed(2) + " POWER"
+        bonus = parseFloat(0).toFixed(2) + ' POWER'
       } else {
         bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
       }
@@ -245,7 +245,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
 
 async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   const goal = await fetchGoal(bot, hostname, goalId);
-  console.log("GOAL MATCH: ", goal.id, goalId)
+  console.log('GOAL MATCH: ', goal.id, goalId)
 
   let buttons = [];
   buttons.push(Markup.button.callback(`👍 (${goal.positive_votes} POWER)`, `upvote ${hostname} ${goalId}`));
@@ -280,7 +280,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id
   let chat_id = ctx.update.callback_query.message.reply_to_message.forward_from_chat.id
 
-  console.log("message: ", message_id, chat_id)
+  console.log('message: ', message_id, chat_id)
 
   let new_text = await constructGoalMessage(bot, hostname, goal)
 
@@ -289,7 +289,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text);
   } catch (e) {
-    console.log("same message!")
+    console.log('same message!')
   }
   // ctx.update.callback_query.message.reply_markup.inline_keyboard[0].map((el, index) => {
   //   console.log("index", index, el)
@@ -319,7 +319,7 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   } catch (e) {
-    console.log("SAME MESSAG!")
+    console.log('SAME MESSAG!')
   }
 }
 
@@ -350,7 +350,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 
   // await editGoalMsg(bot, ctx, user, hostname, goalId);
   let text = await constructTaskMessage(bot, hostname, null, taskId)
-  console.log("TEXT:", text)
+  console.log('TEXT:', text)
 
   let message_id = ctx.update.message.reply_to_message.message_id
   let chat_id = ctx.update.message.reply_to_message.chat.id
@@ -363,7 +363,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, text, request);
   } catch (e) {
-    console.log("same message!", e)
+    console.log('same message!', e)
   }
 }
 
@@ -391,20 +391,20 @@ async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
 
   // await editGoalMsg(bot, ctx, user, hostname, goalId);
   let text = await constructGoalMessage(bot, hostname, null, goalId)
-  console.log("TEXT:", text)
+  console.log('TEXT:', text)
   let message_id = ctx.update.message.reply_to_message.forward_from_message_id
   let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id
 
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, text);
   } catch (e) {
-    console.log("same message!", e)
+    console.log('same message!', e)
   }
 }
 
 async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  console.log("on VOTE ACTION")
+  console.log('on VOTE ACTION')
   await disableButtons(bot, ctx, up)
 
   let host = await fetchHost(bot, hostname)
@@ -422,7 +422,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
       data: {
         host: hostname,
         report_id: reportId,
-        comment: "",
+        comment: '',
       },
     })
   }
@@ -456,7 +456,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
   } catch (e) {
-    console.log("on error: ",)
+    console.log('on error: ',)
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
     } else {
@@ -474,7 +474,7 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
 
   await disableButtons(bot, ctx, up)
 
-  console.log("on VOTE ACTION")
+  console.log('on VOTE ACTION')
   try {
     await eos.transact({
       actions: [{
@@ -539,7 +539,7 @@ async function burnNow(bot, ctx, user) {
     try {
       ctx.editMessageText('Сила голоса успешно пополнена.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     } catch (e) {
-      console.log("same message!")
+      console.log('same message!')
     }
     // eslint-disable-next-line no-param-reassign
     user.burn = {};
@@ -600,7 +600,7 @@ async function createGoal(bot, ctx, user, goal) {
           parent_id: goal.parent_id || 0,
           title: goal.title,
           description: goal.description,
-          target: goal.target || user.create_goal.target || parseFloat(0).toFixed(4) + " FLOWER",
+          target: goal.target || user.create_goal.target || parseFloat(0).toFixed(4) + ' FLOWER',
           meta: JSON.stringify(goal.meta || {}),
         },
       }],
@@ -610,10 +610,10 @@ async function createGoal(bot, ctx, user, goal) {
     });
 
     const cons = res.processed.action_traces[0].console;
-    console.log("CONSOLE: ", cons)
+    console.log('CONSOLE: ', cons)
 
     const [, goalId] = cons.split('GOAL_ID:');
-    console.log("GOALID: ", goalId)
+    console.log('GOALID: ', goalId)
     // operatorOrder.id = orderId;
 
     const buttons = [];
@@ -623,7 +623,7 @@ async function createGoal(bot, ctx, user, goal) {
 
     // eslint-disable-next-line no-param-reassign
     user.create_goal = {};
-    console.log("GOAL CREATED!")
+    console.log('GOAL CREATED!')
     await saveUser(bot.instanceName, user);
     return goalId
   } catch (e) {

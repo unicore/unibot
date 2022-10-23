@@ -173,7 +173,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
-  user.state = "chat"
+  user.state = 'chat'
   user.request_channel_id = id
 
   if (!user.eosname) {
@@ -264,7 +264,7 @@ module.exports.init = async (botModel, bot) => {
 
         const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-        await ctx.reply("Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.", request)
+        await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
 
         const buttons = [];
         buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -275,12 +275,12 @@ module.exports.init = async (botModel, bot) => {
       }
     } else {
       const clearMenu = Markup.removeKeyboard();
-      await ctx.reply("я здесь!", clearMenu, { reply_markup: { remove_keyboard: true } })
+      await ctx.reply('я здесь!', clearMenu, { reply_markup: { remove_keyboard: true } })
     }
   });
 
   async function addRequestAction(bot, user, ctx) {
-    ctx.reply("Введите текст запроса:")
+    ctx.reply('Введите текст запроса:')
     user.state = 'newrequest'
     await saveUser(bot.instanceName, user);
   }
@@ -316,7 +316,7 @@ module.exports.init = async (botModel, bot) => {
 
     await saveUser(bot.instanceName, user);
 
-    ctx.reply("Ваш запрос закрыт. Вы всегда можете создать новый.", menu)
+    ctx.reply('Ваш запрос закрыт. Вы всегда можете создать новый.', menu)
   });
 
   bot.on('message', async (ctx) => {
@@ -366,7 +366,7 @@ module.exports.init = async (botModel, bot) => {
             // console.log("HERE 3")
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-            await ctx.reply("Коллективный Разум решает запросы любой сложности и неопределенности за счёт синергии малых групп людей. Оставьте свой запрос и получите ответ от Коллективного Разума.", request)
+            await ctx.reply('Коллективный Разум решает запросы любой сложности и неопределенности за счёт синергии малых групп людей. Оставьте свой запрос и получите ответ от Коллективного Разума.', request)
 
             const buttons = [];
             buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -396,7 +396,7 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.chat.type === 'private') { // Если надо обновить меню пользователя после миграции
           const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-          await ctx.reply("Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.", request)
+          await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
 
           const buttons = [];
           buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
