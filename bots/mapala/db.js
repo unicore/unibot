@@ -392,7 +392,7 @@ async function insertWithdraw(suffix, user, withdraw) {
     const collection = db.collection(`dacomWithdraws_${suffix}`);
 
     let res = await collection.insertOne(withdraw);
-    console.log("INSERT RES", res)
+    console.log('INSERT RES', res)
     return res.insertedId
   } catch (e) {
     console.log('error: ', e.message);
@@ -405,7 +405,7 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
-      { "_id": mongoose.Types.ObjectId(withdraw_id) },
+      { '_id': mongoose.Types.ObjectId(withdraw_id) },
       { $set: {
         status
       } },
@@ -421,7 +421,7 @@ async function getWithdraw(suffix, withdraw_id) {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    return await collection.findOne({ "_id":  mongoose.Types.ObjectId(withdraw_id)});
+    return await collection.findOne({ '_id':  mongoose.Types.ObjectId(withdraw_id)});
   } catch (e) {
     console.log('error: ', e.message);
   }

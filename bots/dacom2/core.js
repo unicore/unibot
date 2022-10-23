@@ -365,9 +365,9 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
 
 async function printHelixStat(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log("ON PRUNT", ctx.update)
+  console.log('ON PRUNT', ctx.update)
 
-  let d = (await ctx.reply("Пожалуйста, подождите. Идёт расчёт капитализации.")).message_id
+  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -385,13 +385,13 @@ async function printHelixStat(bot, user, hostname, ctx) {
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log("estimateSysIncome", estimateSysIncome)
+    console.log('estimateSysIncome', estimateSysIncome)
 
     let cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
     let hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
@@ -447,9 +447,9 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n| Память: ${ram}`;
 
     text += '\n---------------------------------';
-    text += `\nсообщение будет удалено через 30 секунд`;
+    text += '\nсообщение будет удалено через 30 секунд';
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
-    text += `\nПоказать помощь: /help`
+    text += '\nПоказать помощь: /help'
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
 
@@ -463,7 +463,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
       30 * 1000,
     );
   } else {
-    ctx.reply("Аккаунт не найден")
+    ctx.reply('Аккаунт не найден')
     ctx.deleteMessage(d)
   }
 }
@@ -495,7 +495,7 @@ async function printWallet(bot, user, ctx, hostname) {
 
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
     let userPower
     let io
     let convert_rate
@@ -539,7 +539,7 @@ async function printWallet(bot, user, ctx, hostname) {
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else {
-      text += `\n\nсообщение будет удалено через 30 секунд`;
+      text += '\n\nсообщение будет удалено через 30 секунд';
 
       let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
 
@@ -556,9 +556,9 @@ async function printWallet(bot, user, ctx, hostname) {
 
 async function printPublicWallet(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log("ON PRUNT", ctx.update)
+  console.log('ON PRUNT', ctx.update)
 
-  let d = (await ctx.reply("Пожалуйста, подождите. Идёт расчёт роялти.")).message_id
+  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -584,7 +584,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
 
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
@@ -592,9 +592,9 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log("estimateSysIncome", estimateSysIncome)
+    console.log('estimateSysIncome', estimateSysIncome)
     let royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    console.log("royalty: ", royalty)
+    console.log('royalty: ', royalty)
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
@@ -620,7 +620,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     text += '\n---------------------------------';
     text += `\nСсылка для приглашений: ${link}\n`; //
-    text += `\n\nсообщение будет удалено через 30 секунд.`;
+    text += '\n\nсообщение будет удалено через 30 секунд.';
 
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
@@ -635,7 +635,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
       30 * 1000,
     );
   } else {
-    ctx.reply("Аккаунт не найден")
+    ctx.reply('Аккаунт не найден')
     ctx.deleteMessage(d)
   }
 }
@@ -748,7 +748,7 @@ async function retireAction(bot, user, amount, address) {
     eos.transact({
       actions: [{
         account: 'eosio.token',
-        name: "retire",
+        name: 'retire',
         authorization: [{
           actor: user.eosname,
           permission: 'active',
@@ -1235,17 +1235,17 @@ async function exitFromTail(bot, ctx, user, hostname) {
 
 async function getWelcome() {
   let text = ''
-  text += `Любая цель - это проект, предложенный и утвержденный участниками союза.`
-  text += `Для создания цели напишите ваш запрос с тегом #goal в этот чат.`
-  text += `Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий`
-  text += `Получайте фракции (POWER) `
+  text += 'Любая цель - это проект, предложенный и утвержденный участниками союза.'
+  text += 'Для создания цели напишите ваш запрос с тегом #goal в этот чат.'
+  text += 'Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий'
+  text += 'Получайте фракции (POWER) '
 
   return text
 }
 
 async function getGoalInstructions() {
-  let text = ""
-  text += `Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.`
+  let text = ''
+  text += 'Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.'
   // text += `\n\n/donate - создать взнос в цель и получить возможность голосовать за цели (минимальный взнос 10 USDT)`
   // text += `\n/about - о союзе`
   // text += `\n/set_coordinator @username - установить координатора цели (доступно только архитектору)`
@@ -1271,10 +1271,10 @@ async function addToTeam(bot, ctx, user, hostname, dac, title) {
         username: dac,
         host: hostname,
         weight: 1,
-        limit_type: "",
-        income_limit: "0.0000 FLOWER",
+        limit_type: '',
+        income_limit: '0.0000 FLOWER',
         title: title,
-        descriptor: ""
+        descriptor: ''
       },
     }],
   }, {

@@ -4,8 +4,8 @@ const { TelegramClient, Api } = require('telegram')
 const { StringSession } = require('telegram/sessions')
 const {insertUnion, getProjectsCount} = require('./db')
 
-const { createReadStream } = require("fs");
-const { TGCalls, Stream } = require("tgcalls-next");
+const { createReadStream } = require('fs');
+const { TGCalls, Stream } = require('tgcalls-next');
 
 // KRASNOV
 const apiId = parseInt(process.env.API_ID)
@@ -66,7 +66,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
 
   result = await client.invoke(
     new Api.messages.CreateChat({
-      users: ["me", bot.getEnv().BOTNAME],
+      users: ['me', bot.getEnv().BOTNAME],
       title: chatTitle,
     })
   );
@@ -91,9 +91,9 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
 
   channelLink = channelLink.link
 
-  console.log("CHAT ID: ", chatId)
+  console.log('CHAT ID: ', chatId)
   chatId = await setDiscussionGroup(bot, parseInt(chatId), parseInt(channelId))
-  console.log("AFTE RCREATE DISCUSS")
+  console.log('AFTE RCREATE DISCUSS')
 
   let admin_result = await client.invoke(new Api.channels.EditAdmin({
     channel: chatId,
@@ -134,7 +134,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     rank: 'оператор'
   }));
 
-  console.log("ADMIN RESULT: ", admin_result)
+  console.log('ADMIN RESULT: ', admin_result)
 
   await insertUnion(bot.instanceName, {
     ownerId: user.id,
@@ -153,7 +153,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     ownerEosname: user.eosname,
     host: hostname,
     id: '-100' + channelId,
-    type: type + "Channel",
+    type: type + 'Channel',
     unionName,
     link: channelLink,
     projectCount: projectCount + 1,
@@ -176,7 +176,7 @@ async function checkBotIsAdmin(bot, user, ctx, chatId) {
 
   let bot_is_admin = false
   let user_is_admin = false
-  console.log("admins: ", res)
+  console.log('admins: ', res)
 
   res.map(u => {
     if (u.user.username === bot.getEnv().BOTNAME) {
@@ -204,12 +204,12 @@ async function setDiscussionGroup(bot, chatId, channelId) {
     chatId: chatId
   }));
 
-  console.log("result on migrate:", result)
+  console.log('result on migrate:', result)
 
   let migratedTo = parseInt(result.chats[0].migratedTo.channelId.value)
   let accessHash = parseInt(result.chats[0].migratedTo.accessHash.value)
 
-  console.log("migratedTo:", migratedTo, "accessHash:", accessHash)
+  console.log('migratedTo:', migratedTo, 'accessHash:', accessHash)
 
   await client.invoke(new Api.channels.TogglePreHistoryHidden({
     channel: `${migratedTo}`,
@@ -223,7 +223,7 @@ async function setDiscussionGroup(bot, chatId, channelId) {
     accessHash: accessHash
   }));
 
-  console.log("result2", result2)
+  console.log('result2', result2)
 
   return migratedTo
   // console.log('SET DISCUSSION: ', result)
@@ -260,7 +260,7 @@ async function createGroupCall(bot, chatId, scheduleDate) {
 
 async function exportChatLink(channelId, messageId) {
   const client = await connect()
-  console.log("channelId: ", channelId, messageId)
+  console.log('channelId: ', channelId, messageId)
   const result = await client.invoke(new Api.messages.GetDiscussionMessage({
     peer: channelId,
     msgId: messageId
@@ -286,7 +286,7 @@ async function exportChatLink(channelId, messageId) {
   //     msgId: messageId,
   // }));
 
-  console.log("exportChatLink: ", result)
+  console.log('exportChatLink: ', result)
   return result
 }
 
@@ -338,7 +338,7 @@ async function makeAdmin(bot, chatId, userId, ctx) {
     }
   } catch (e) {
     result = e
-    console.log("error: ", e)
+    console.log('error: ', e)
   }
 
   return result

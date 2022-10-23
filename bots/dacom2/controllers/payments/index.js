@@ -45,16 +45,16 @@ module.exports.payReciever = async (req, res) => {
     };
   }
 
-  if (type === "donate" && !meta) {
+  if (type === 'donate' && !meta) {
     res.code(401);
     return {
       ok: false,
-      message: "metadata for donate type is not accepted"
+      message: 'metadata for donate type is not accepted'
     }
   }
 
   const user = await getUserByEosName(botName, eosname);
-  let sender = (user.username && user.username !== "") ? '@' + user.username : user.eosname
+  let sender = (user.username && user.username !== '') ? '@' + user.username : user.eosname
   let message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`
 
   await insertMessage(botName, {id: chat.union_chat_id}, 'operator', message);
@@ -67,15 +67,15 @@ module.exports.payReciever = async (req, res) => {
 
   await sendMessageToUser(bot, {id: chat.reply_to_message_chat_id}, { text: message2 }, {reply_to_message_id: chat.reply_to_message_id});
 
-  let goal = await getGoalByChatMessage(bot.instanceName, "core", chat.goal_message_id)
+  let goal = await getGoalByChatMessage(bot.instanceName, 'core', chat.goal_message_id)
 
-  if (type === "donate") {
+  if (type === 'donate') {
     let text = await constructGoalMessage(bot, hostname, null, meta.goal_id)
 
     try {
       await bot.telegram.editMessageText(chat.goal_channel_id, chat.goal_message_id, null, text);
     } catch (e) {
-      console.log("same message!", e)
+      console.log('same message!', e)
     }
     // await editGoalMsg(bot, ctx, user, hostname, meta.goal_id, true)
   }

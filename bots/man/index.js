@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log("generate", ctx)
+  console.log('generate', ctx)
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -569,17 +569,17 @@ module.exports.init = async (botModel, bot) => {
   });
 
   async function printQuests(ctx) {
-    let text = "ОСТРОВ ВЕРЫ 🏝\n\n"
+    let text = 'ОСТРОВ ВЕРЫ 🏝\n\n'
 
-    text += `Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n`
-    text += `1. Покаяние и стыд\n`
-    text += `2. Доверие\n`
-    text += `3. Выбор\n`
-    text += `4. Милосердие\n`
-    text += `5. Что людям знать не дано\n`
-    text += `6. Любовь в людях\n`
-    text += `7. Вера и терпение\n`
-    text += `\nПосле прохождения семи зон, вы увидите, как просто устроен мир.`
+    text += 'Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n'
+    text += '1. Покаяние и стыд\n'
+    text += '2. Доверие\n'
+    text += '3. Выбор\n'
+    text += '4. Милосердие\n'
+    text += '5. Что людям знать не дано\n'
+    text += '6. Любовь в людях\n'
+    text += '7. Вера и терпение\n'
+    text += '\nПосле прохождения семи зон, вы увидите, как просто устроен мир.'
     const buttons = [];
 
     // buttons.push(Markup.button.callback('следующий [0]', `nextquest`));
@@ -593,7 +593,7 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const quest = ctx.match[1];
 
-    let text = ""
+    let text = ''
     // text = `Локация: кафе у моря\n\n`
     text += `Пришедший не откуда
 Идущий в никуда
@@ -669,11 +669,11 @@ module.exports.init = async (botModel, bot) => {
 
     await ctx.reply(text)
 
-    text = ""
-    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n `
+    text = ''
+    text = 'Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n '
 
-    user.state = "quest"
-    user.quest = "faith_island"
+    user.state = 'quest'
+    user.quest = 'faith_island'
 
     await saveUser(bot.instanceName, user)
 
@@ -1700,7 +1700,7 @@ module.exports.init = async (botModel, bot) => {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-          if (user.state === "quest") {
+          if (user.state === 'quest') {
             const id = await sendMessageToUser(bot, { id: bot.getEnv().SIN_CHANNEL }, { text });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().SIN_CHANNEL, text, id, 'question');
@@ -1712,7 +1712,7 @@ module.exports.init = async (botModel, bot) => {
             await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
             if (user.sins_count >= 100)
-              await ctx.reply("Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!")
+              await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!')
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 

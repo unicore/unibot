@@ -7,11 +7,11 @@ async function notify(bot, source, hostname, what, meta) {
 
   // if (current_chat){
 
-  console.log("on notify")
+  console.log('on notify')
   if (what === 'acceptReport') {
-    console.log("on notify2")
+    console.log('on notify2')
     let to = await getUserByEosName(bot.instanceName, meta.username)
-    console.log("on notify3", to, meta)
+    console.log('on notify3', to, meta)
     let msg = await constructReportMessage(bot, hostname, meta)
 
     if (to) {

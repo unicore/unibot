@@ -2,7 +2,7 @@ const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
 const { saveUser, insertMessage, insertGoal} = require('./db');
-const {getHelixParams} = require("./core")
+const {getHelixParams} = require('./core')
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
 
 async function getVotesCount(bot, hostname, username) {
@@ -12,7 +12,7 @@ async function getVotesCount(bot, hostname, username) {
 }
 
 async function fetchGoals(bot, hostname) {
-  console.log("hostname", hostname)
+  console.log('hostname', hostname)
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals');
   return goals.sort((a, b) => parseFloat(a.votes) - parseFloat(b.votes));
 }
@@ -180,10 +180,10 @@ async function createGoal(bot, ctx, user) {
     });
 
     const cons = res.processed.action_traces[0].console;
-    console.log("CONSOLE: ", cons)
+    console.log('CONSOLE: ', cons)
 
     const [, goalId] = cons.split('GOAL_ID:');
-    console.log("GOALID: ", goalId)
+    console.log('GOALID: ', goalId)
 
     goal.id = goalId;
     goal.channel_id = bot.getEnv().GOALS_CHANNEL_ID
@@ -195,7 +195,7 @@ async function createGoal(bot, ctx, user) {
     // buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.create_goal.hostname} `));
     // ctx.editMessageText('Ваша цель успешно создана и добавлена в общий список.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-    let text = ``
+    let text = ''
     text += `Кайфолог: ${user.eosname}\n`
     text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`
 
@@ -214,7 +214,7 @@ async function createGoal(bot, ctx, user) {
 }
 
 async function printGoalsMenu(bot, ctx, user, hostname) {
-  console.log("hostname0: ", hostname)
+  console.log('hostname0: ', hostname)
   const goals = await fetchGoals(bot, hostname);
   const conditions = await fetchConditions(bot, hostname);
   // let upower = await fetchUPower(bot, hostname, user.eosname);
@@ -291,7 +291,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
     text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`
     // text += `\nвывод средств доступен сразу по`
   } else {
-    text += `\nЦель не установлена`
+    text += '\nЦель не установлена'
   }
 
   text += '\n---------------------------------';

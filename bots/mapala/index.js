@@ -129,21 +129,21 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
           params,
         },
       );
-      console.log("message, data: ", message.data)
+      console.log('message, data: ', message.data)
       if (message && message.data) {
       // TODO set partner info
         await saveUser(bot.instanceName, user);
-        resolve({eosname: user.eosname, status: "ok"})
+        resolve({eosname: user.eosname, status: 'ok'})
       } else {
         await saveUser(bot.instanceName, user);
         console.error(message);
         ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже перезапустить робота командой /start.', Markup.removeKeyboard());
-        reject({eosname: user.eosname, status: "error", message: 'axios error'})
+        reject({eosname: user.eosname, status: 'error', message: 'axios error'})
       }
     } catch (e) {
       await saveUser(bot.instanceName, user);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже перезапустить робота командой /start.', Markup.removeKeyboard());
-      reject({eosname: user.eosname, status: "error", message: e.message})
+      reject({eosname: user.eosname, status: 'error', message: e.message})
     }
   })
 }
@@ -204,7 +204,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENTS');
 
-  user.state = "chat"
+  user.state = 'chat'
   user.request_channel_id = id
 
   if (!user.eosname) {
@@ -217,7 +217,7 @@ async function catchRequest(bot, user, ctx, text) {
 }
 
 async function addRequestAction(bot, user, ctx) {
-  ctx.reply("Введите текст рецепта:")
+  ctx.reply('Введите текст рецепта:')
   user.state = 'newrequest'
   await saveUser(bot.instanceName, user);
 }
@@ -262,7 +262,7 @@ async function nextQuiz(bot, user, ctx) {
     const menu = Markup // , "цели", "действия"
       .keyboard(mainButtons, { columns: 2 }).resize();
 
-    user.state = ""
+    user.state = ''
     await saveUser(bot.instanceName, user)
 
     const t = 'Ваша анкета принята!';
@@ -300,7 +300,7 @@ async function nextQuiz(bot, user, ctx) {
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
     }
 
-    user.state = ""
+    user.state = ''
     user.resume_channel_id = id
     user.is_student = true
     await saveUser(bot.instanceName, user)
@@ -365,7 +365,7 @@ module.exports.init = async (botModel, bot) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
 
     const clearMenu = Markup.removeKeyboard();
-    let r = await ctx.reply("Пожалуйста, подождите...", clearMenu, { reply_markup: { remove_keyboard: true } });
+    let r = await ctx.reply('Пожалуйста, подождите...', clearMenu, { reply_markup: { remove_keyboard: true } });
 
     await ctx.deleteMessage(r.message_id);
 
@@ -403,7 +403,7 @@ module.exports.init = async (botModel, bot) => {
         }
         const buttons = [];
 
-        buttons.push(Markup.button.callback('🆕 продолжить', `nextwelcome1`));
+        buttons.push(Markup.button.callback('🆕 продолжить', 'nextwelcome1'));
 
         user.del_msg = (await ctx.replyWithHTML('<b>Добро пожаловать в АКАДЕМИЮ КАЙФА! </b>\nМы проводим кайфовые события по всему миру, обучая кайфовать от жизни. ✌🏼', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id; // \n🛶🚁🎢🎡🌄🌅🏑🏏🏸🏒🥋🤿🏹🪁⛳️🥅🪃🥌⛸🏂🪂🤸‍♂️🤺🚵‍♂️🎯\n\n
         await saveUser(bot.instanceName, user);
@@ -441,7 +441,7 @@ module.exports.init = async (botModel, bot) => {
   bot.hears('👌 отзывы', async (ctx) => {
     const buttons = [];
 
-    buttons.push(Markup.button.callback('создать отзыв ◀️', `feedback`));
+    buttons.push(Markup.button.callback('создать отзыв ◀️', 'feedback'));
 
     buttons.push(Markup.button.url('просмотреть отзывы ➡️', bot.getEnv().TESTIMONIAL_CHANNEL));
 
@@ -460,14 +460,14 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     const buttons = [];
-    let text = ""
-    text += "<b>Статусы в Академии Кайфа:</b>"
+    let text = ''
+    text += '<b>Статусы в Академии Кайфа:</b>'
     text += '\n<i>Кайфуши</i> - это люди, любящие получать удовольствие от жизни.'
-    text += `\n<i>Кайфологи</i> - это люди, обучающие получать удовольствие от жизни.`
-    text += `\n<i>Кайфадемики</i> - это мастера получать удовольствие от жизни.`
+    text += '\n<i>Кайфологи</i> - это люди, обучающие получать удовольствие от жизни.'
+    text += '\n<i>Кайфадемики</i> - это мастера получать удовольствие от жизни.'
     text += '\n\nТы такой? Тогда заяви о себе!'
 
-    buttons.push(Markup.button.callback('заявить 🙋‍♂️', "startquiz"));
+    buttons.push(Markup.button.callback('заявить 🙋‍♂️', 'startquiz'));
     buttons.push(Markup.button.url('канал кайфуш ➡️', bot.getEnv().STUDENTS_CHANNEL));
 
     user.del_msg = (ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
@@ -494,13 +494,13 @@ module.exports.init = async (botModel, bot) => {
   bot.hears('💝 кайфовый канал', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    ctx.reply("Ссылка: ")
+    ctx.reply('Ссылка: ')
   });
 
   bot.hears('💭 чат кайфологов', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    ctx.reply("Ссылка: ")
+    ctx.reply('Ссылка: ')
   });
 
   bot.hears('🆕 добавить рецепт', async (ctx) => {
@@ -591,7 +591,7 @@ module.exports.init = async (botModel, bot) => {
 
           else if (user.state === 'set_goal_title') {
             user.create_goal.title = text;
-            user.create_goal.description = "";
+            user.create_goal.description = '';
             user.create_goal.target = `${parseFloat(bot.getEnv().TARGET).toFixed(4)} ${bot.getEnv().SYMBOL}`;
 
             saveUser(bot.instanceName, user);
@@ -606,7 +606,7 @@ module.exports.init = async (botModel, bot) => {
             // toPrint += `\nОписание: ${user.create_goal.description}`;
             // toPrint += `\nЦель: ${user.create_goal.target}`;
             // toPrint += '\nВаш взнос: 10.0000 FLOWER';
-            toPrint += `\n________________________________________________`
+            toPrint += '\n________________________________________________'
             toPrint += '\nВаша цель будет анонимно опубликована в канале целей кайфологов.';
 
             // eslint-disable-next-line max-len
@@ -624,13 +624,13 @@ module.exports.init = async (botModel, bot) => {
             else if (parseFloat(min) > parseFloat(amount)) {
               ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
             } else {
-              user.state = "set_withdraw_address"
+              user.state = 'set_withdraw_address'
               user.on_withdraw = {
                 amount
               }
               await saveUser(bot.instanceName, user);
 
-              ctx.reply("Введите адрес для получения USDT.TRC20: ")
+              ctx.reply('Введите адрес для получения USDT.TRC20: ')
             }
           }
 
@@ -641,9 +641,9 @@ module.exports.init = async (botModel, bot) => {
             const buttons = [];
 
             buttons.push(Markup.button.callback('Да', 'withdrawaction'));
-            buttons.push(Markup.button.callback('Отмена', `backto wallet `));
+            buttons.push(Markup.button.callback('Отмена', 'backto wallet '));
 
-            let text2 = "Подтверждение! Вы уверены, что хотите поставить средства на вывод?"
+            let text2 = 'Подтверждение! Вы уверены, что хотите поставить средства на вывод?'
             text2 += `\n\nСумма: ${user.on_withdraw.amount}`
             text2 += `\nАдрес: ${user.on_withdraw.address}`
 
@@ -756,18 +756,18 @@ module.exports.init = async (botModel, bot) => {
       );
 
       if (result.data.status === 'ok') {
-        await ctx.replyWithHTML(`Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:`)
+        await ctx.replyWithHTML('Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:')
         await ctx.reply(`${result.data.address}`)
       }
-      else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
+      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     } catch (e) {
-      ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
+      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     }
   }
 
   bot.action('startquiz', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    user.state = ""
+    user.state = ''
 
     if (user.is_student === false) {
       await startQuiz(bot, ctx, user)
@@ -784,7 +784,7 @@ module.exports.init = async (botModel, bot) => {
     // console.log('wobj', wobj)
     const user = await getUser(bot.instanceName, wobj.userId);
 
-    await updateWithdraw(bot.instanceName, withdraw_id, "confirmed")
+    await updateWithdraw(bot.instanceName, withdraw_id, 'confirmed')
 
     ctx.editMessageText('вывод обработан');
 
@@ -798,7 +798,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action('withdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    user.state = ""
+    user.state = ''
     let withdraw_id = await insertWithdraw(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
@@ -828,7 +828,7 @@ module.exports.init = async (botModel, bot) => {
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
         await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-        await updateWithdraw(bot.instanceName, withdraw_id, "waiting")
+        await updateWithdraw(bot.instanceName, withdraw_id, 'waiting')
       }).catch(e => {
         console.error(e)
         ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`)
@@ -848,7 +848,7 @@ module.exports.init = async (botModel, bot) => {
 
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome2`));
+    buttons.push(Markup.button.callback('➡️ продолжить', 'nextwelcome2'));
 
     user.del_msg = (await ctx.reply('Этот робот осуществляет контроль уровня доступа на события и позволяет зарабатывать на них в экосистеме закрытых клубов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -860,7 +860,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome3`));
+    buttons.push(Markup.button.callback('➡️ продолжить', 'nextwelcome3'));
 
     user.del_msg = (await ctx.reply('Пожизненный билет на все события Академии: 150$', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -872,7 +872,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome4`));
+    buttons.push(Markup.button.callback('➡️ продолжить', 'nextwelcome4'));
 
     user.del_msg = (await ctx.reply('Каждые 3 дня среди новых покупателей билетов проводится розыгрыш: \n- возврат стоимости билета и прибыль от 25% на стоимость билета.\n- фракции Академии, представляющие цифровое право требования прибыли Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -884,7 +884,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome5`));
+    buttons.push(Markup.button.callback('➡️ продолжить', 'nextwelcome5'));
 
     user.del_msg = (await ctx.reply('Академия осуществляет кайфовые цели участников в порядке живой очереди их приоритетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -896,7 +896,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('➡️ продолжить', `nextwelcome6`));
+    buttons.push(Markup.button.callback('➡️ продолжить', 'nextwelcome6'));
 
     user.del_msg = (await ctx.reply('На приоритет и скорость осуществления вашей кайфовой цели влияет количество фракций и количество проданных сетью билетов.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -908,7 +908,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage(user.del_msg);
 
-    buttons.push(Markup.button.callback('🎫 купить билет', `buyticket`));
+    buttons.push(Markup.button.callback('🎫 купить билет', 'buyticket'));
 
     user.del_msg = (await ctx.reply('Таким образом, участники осуществляют свои кайфовые цели здесь, пока покупают билеты Академии.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())).message_id;
     await saveUser(bot.instanceName, user);
@@ -918,7 +918,7 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const nextId = parseInt(ctx.match[1], 10);
-    console.log("nextId", nextId)
+    console.log('nextId', nextId)
     // await printTickets(bot, user, ctx, nextId);
   });
 
@@ -927,7 +927,7 @@ module.exports.init = async (botModel, bot) => {
     await ctx.deleteMessage();
     // console.log("купить билет")
     // await setBuyMenu(ctx)
-    buyTicket(bot, user, ctx, "USDT.TRC20")
+    buyTicket(bot, user, ctx, 'USDT.TRC20')
     // ctx.reply('покупаю!')
   });
 
@@ -1045,7 +1045,7 @@ module.exports.init = async (botModel, bot) => {
     const buttons = [];
     await ctx.deleteMessage();
 
-    buttons.push(Markup.button.callback('🆕 продолжить 3', `nextwelcome4`));
+    buttons.push(Markup.button.callback('🆕 продолжить 3', 'nextwelcome4'));
 
     await ctx.reply('Чтобы ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   });
@@ -1120,7 +1120,7 @@ module.exports.init = async (botModel, bot) => {
     const to = ctx.match[1];
     const hostname = ctx.match[2];
 
-    user.state = ""
+    user.state = ''
 
     await saveUser(bot.instanceName, user);
 
@@ -1133,7 +1133,7 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-  bot.action("withdraw", async (ctx) => {
+  bot.action('withdraw', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     user.state = 'set_withdraw_amount';
