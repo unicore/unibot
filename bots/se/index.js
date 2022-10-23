@@ -227,7 +227,7 @@ async function nextQuiz(bot, user, ctx) {
     text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`;
     text += `${quiz.answers[2].answer}`;
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 

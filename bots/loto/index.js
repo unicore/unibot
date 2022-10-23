@@ -540,7 +540,7 @@ module.exports.init = async (botModel, bot) => {
     try {
       let params = {
         username: user.eosname,
-        currency: currency,
+        currency,
       };
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 

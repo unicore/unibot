@@ -169,7 +169,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
 
-  let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
+  let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 

@@ -241,7 +241,7 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 

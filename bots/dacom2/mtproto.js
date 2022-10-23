@@ -202,7 +202,7 @@ async function setDiscussionGroup(bot, chatId, channelId) {
   const client = await connect();
 
   const result = await client.invoke(new Api.messages.MigrateChat({
-    chatId: chatId,
+    chatId,
   }));
 
   console.log('result on migrate:', result);
@@ -221,7 +221,7 @@ async function setDiscussionGroup(bot, chatId, channelId) {
   const result2 = await client.invoke(new Api.channels.SetDiscussionGroup({
     broadcast: `-100${channelId}`,
     group: migratedTo,
-    accessHash: accessHash,
+    accessHash,
   }));
 
   console.log('result2', result2);

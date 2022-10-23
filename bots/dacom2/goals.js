@@ -316,7 +316,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   let data = {
     host: hostname,
     task_id: taskId,
-    priority: priority,
+    priority,
   };
   console.log(data);
 
@@ -328,7 +328,7 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
         actor: user.eosname,
         permission: 'active',
       }],
-      data: data,
+      data,
     }],
   }, {
     blocksBehind: 3,
@@ -425,13 +425,13 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
       voter: user.eosname,
       host: hostname,
       report_id: reportId,
-      up: up,
+      up,
     },
   });
 
   try {
     await eos.transact({
-      actions: actions,
+      actions,
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
@@ -475,7 +475,7 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
           voter: user.eosname,
           host: hostname,
           goal_id: goalId,
-          up: up,
+          up,
         },
       }],
     }, {
@@ -558,7 +558,7 @@ async function editGoal(bot, ctx, user, goal) {
         actor: user.eosname,
         permission: 'active',
       }],
-      data: data,
+      data,
     }],
   }, {
     blocksBehind: 3,

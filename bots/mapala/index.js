@@ -200,7 +200,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply });
 
-  let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text: text });
+  let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENTS');
 
@@ -284,14 +284,14 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENT');
 
     await insertStudent(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
-      text: text,
+      text,
       message_id: id,
       channel_id: bot.getEnv().STUDENTS_CHANNEL_ID,
     });
@@ -736,7 +736,7 @@ module.exports.init = async (botModel, bot) => {
     try {
       let params = {
         username: user.eosname,
-        currency: currency,
+        currency,
       };
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 

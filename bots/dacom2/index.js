@@ -476,7 +476,7 @@ async function nextQuiz(bot, user, ctx) {
 
     let id = await ctx.reply('Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.');
 
-    let id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
+    let id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
     await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
 
@@ -1235,7 +1235,7 @@ module.exports.init = async (botModel, bot) => {
     try {
       let params = {
         username: user.eosname,
-        currency: currency,
+        currency,
         hostname: host,
         chat: {
           union_chat_id: unionchat,
@@ -1244,8 +1244,8 @@ module.exports.init = async (botModel, bot) => {
           goal_message_id: ctx.update.message.reply_to_message.forward_from_message_id,
           goal_channel_id: ctx.update.message.reply_to_message.forward_from_chat.id,
         },
-        type: type,
-        meta: meta,
+        type,
+        meta,
       };
 
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
@@ -1615,9 +1615,9 @@ module.exports.init = async (botModel, bot) => {
                   host: current_chat.host,
                   username: user.eosname,
                   task_id: task.task_id,
-                  data: data,
+                  data,
                   duration_secs: 60 * duration,
-                  asset_per_hour: asset_per_hour,
+                  asset_per_hour,
                 });
 
                 await insertReport(bot.instanceName, {
@@ -1752,13 +1752,13 @@ module.exports.init = async (botModel, bot) => {
               title: text,
               chat_id: ctx.update.message.chat.id,
               goal_message_id: ctx.update.message.reply_to_message.message_id,
-              chat_message_id: chat_message_id,
+              chat_message_id,
             });
 
             await ctx.deleteMessage(ctx.update.message.message_id);
 
             // TODO insert task
-            await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', { chatId: ctx.update.message.chat.id, task_id: task_id, goal_id: goal.goal_id });// goalId: goal.goalId,
+            await insertMessage(bot.instanceName, user, user.id, text, chat_message_id, 'report', { chatId: ctx.update.message.chat.id, task_id, goal_id: goal.goal_id });// goalId: goal.goalId,
           } catch (e) {
             ctx.reply(e.message, { reply_to_message_id: ctx.update.message.message_id });
           }
@@ -1856,7 +1856,7 @@ module.exports.init = async (botModel, bot) => {
               let hostname = pr.host;
 
               let goal = {
-                hostname: hostname,
+                hostname,
                 title: text,
                 description: '',
                 target: '0.0000 FLOWER',

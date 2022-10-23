@@ -199,7 +199,7 @@ async function createGoal(bot, ctx, user) {
     text += `Кайфолог: ${user.eosname}\n`;
     text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`;
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().GOALS_CHANNEL_ID, text, id, 'MASTER');
 

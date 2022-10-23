@@ -360,7 +360,7 @@ async function closeRequest(suffix, message_id) {
     const collection = db.collection(`dacomRequests_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
-      { message_id: message_id },
+      { message_id },
       { $set: { closed: true } },
       { upsert: false },
     );

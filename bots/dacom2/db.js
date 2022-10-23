@@ -421,7 +421,7 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
 
     await collection.updateOne(
       { channel_message_id, channel_id },
-      { $set: { chat_message_id: chat_message_id, chat_id: chat_id.toString() } },
+      { $set: { chat_message_id, chat_id: chat_id.toString() } },
       { upsert: false },
     );
   } catch (e) {
