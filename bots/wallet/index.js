@@ -198,7 +198,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply });
 
-  let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
+  const id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENTS');
 
@@ -242,11 +242,11 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      let message = q.message + ' <i>Введите ответ текстом:</i>';
+      const message = q.message + ' <i>Введите ответ текстом:</i>';
       await ctx.replyWithHTML(message, Markup.keyboard(buttons, { columns: 2 }).resize());
     } else {
       const clearMenu = Markup.removeKeyboard();
-      let message = q.message + ' <i>Введите ответ текстом:</i>';
+      const message = q.message + ' <i>Введите ответ текстом:</i>';
 
       await ctx.replyWithHTML(message, clearMenu, { reply_markup: { remove_keyboard: true } });
     }
@@ -282,7 +282,7 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
+    const id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENT');
 
@@ -363,7 +363,7 @@ module.exports.init = async (botModel, bot) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
 
     const clearMenu = Markup.removeKeyboard();
-    let r = await ctx.reply('Пожалуйста, подождите...', clearMenu, { reply_markup: { remove_keyboard: true } });
+    const r = await ctx.reply('Пожалуйста, подождите...', clearMenu, { reply_markup: { remove_keyboard: true } });
 
     await ctx.deleteMessage(r.message_id);
 
@@ -461,7 +461,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🧙🏻‍♂️ кайфология', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     const buttons = [];
     let text = '';
@@ -491,42 +491,42 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🆕 бросить вызов', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     await addRequestAction(bot, user, ctx);
   });
 
   bot.hears('💝 кайфовый канал', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     ctx.reply('Ссылка: ');
   });
 
   bot.hears('💭 чат кайфологов', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     ctx.reply('Ссылка: ');
   });
 
   bot.hears('🆕 добавить рецепт', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     await addRequestAction(bot, user, ctx);
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
     }
   });
 
   bot.hears('🎯 цели', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     await printGoalsMenu(bot, ctx, user, bot.getEnv().CORE_HOST);
   });
 
   bot.hears('🎫 билеты', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       // await printTickets(bot, user, ctx);
     }
@@ -537,7 +537,7 @@ module.exports.init = async (botModel, bot) => {
 
     if (user) {
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
 
         // console.log('need find reply: ', ctx.update.message.reply_to_message);
 
@@ -557,7 +557,7 @@ module.exports.init = async (botModel, bot) => {
         // проверяем не квиз ли
 
         const quiz = await getQuiz(bot.instanceName, user.id);
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
         // console.log("on else", text)
 
         if (text === '/skip') {
@@ -616,7 +616,7 @@ module.exports.init = async (botModel, bot) => {
           } else if (user.state === 'set_withdraw_amount') {
             const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
-            let { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
+            const { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
             const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
 
             if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
@@ -738,11 +738,11 @@ module.exports.init = async (botModel, bot) => {
 
   async function buyTicket(bot, user, ctx, currency) {
     try {
-      let params = {
+      const params = {
         username: user.eosname,
         currency,
       };
-      let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
+      const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 
       const result = await axios.post(
         path,
@@ -773,7 +773,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
     const withdraw_id = ctx.match[1];
     // console.log("withdraw_id: ", withdraw_id)
-    let wobj = await getWithdraw(bot.instanceName, withdraw_id);
+    const wobj = await getWithdraw(bot.instanceName, withdraw_id);
     // console.log('wobj', wobj)
     const user = await getUser(bot.instanceName, wobj.userId);
 
@@ -792,7 +792,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action('withdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     user.state = '';
-    let withdraw_id = await insertWithdraw(bot.instanceName, user, {
+    const withdraw_id = await insertWithdraw(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
       amount: user.on_withdraw.amount,
@@ -817,7 +817,7 @@ module.exports.init = async (botModel, bot) => {
 
         // TO ADMIN
 
-        let admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
+        const admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
         await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
@@ -1141,7 +1141,7 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
     // showBuySellMenu(bot, user, ctx);
     // console.log("helixBalances: ", balances)
-    let { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
+    const { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
 
     if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
     else {

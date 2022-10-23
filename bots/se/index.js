@@ -227,7 +227,7 @@ async function nextQuiz(bot, user, ctx) {
     text += `+${quiz.answers[0].answer.phone_number}, @${user.username}\n`;
     text += `${quiz.answers[2].answer}`;
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+    const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
@@ -348,7 +348,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
     }
@@ -360,7 +360,7 @@ module.exports.init = async (botModel, bot) => {
     // console.log("message: ", ctx.update.message)
     if (user) {
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
 
         // console.log('tyL: ', ctx.update.message.reply_to_message);
 
@@ -380,7 +380,7 @@ module.exports.init = async (botModel, bot) => {
         // проверяем не квиз ли
 
         const quiz = await getQuiz(bot.instanceName, user.id);
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
         // console.log("on else", text)
 
         if (quiz && !quiz.is_finish) {

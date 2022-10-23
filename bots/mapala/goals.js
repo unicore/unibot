@@ -152,7 +152,7 @@ async function burnNow(bot, ctx, user) {
 
 async function createGoal(bot, ctx, user) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-  let goal = {
+  const goal = {
     creator: user.eosname,
     host: user.create_goal.hostname,
     parent_id: 0,
@@ -164,7 +164,7 @@ async function createGoal(bot, ctx, user) {
 
   try {
     // console.log("goal",goal)
-    let res = await eos.transact({
+    const res = await eos.transact({
       actions: [{
         account: 'unicore',
         name: 'setgoal',
@@ -199,7 +199,7 @@ async function createGoal(bot, ctx, user) {
     text += `Кайфолог: ${user.eosname}\n`;
     text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`;
 
-    let id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text });
+    const id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().GOALS_CHANNEL_ID, text, id, 'MASTER');
 
@@ -221,7 +221,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
   console.log('goals', goals[0]);
-  let index = 1;
+  const index = 1;
   // eslint-disable-next-line no-restricted-syntax
   // for (const goal of goals) {
   //   const buttons = [];
@@ -258,10 +258,10 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const fillAmount = mingamount === 0 ? (mingpercent === 0 ? 'без ограничений' : `${mingpercent}% от суммы`) : `${parseFloat(mingamount / 10000).toFixed(4)} FLOWER`;
   let text = '';
 
-  let myGoal = goals.find((el) => el.creator === user.eosname);
+  const myGoal = goals.find((el) => el.creator === user.eosname);
   let k = 0;
 
-  let prevGoalsCount = goals.map((el) => {
+  const prevGoalsCount = goals.map((el) => {
     if (myGoal && el.id < myGoal.id) { k++; }
   });
 
@@ -278,7 +278,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 
   const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-  let totalPrevGoalsAmount = Math.floor(k * 300 / 150 * 4);
+  const totalPrevGoalsAmount = Math.floor(k * 300 / 150 * 4);
 
   // text += `\nСтоимость постановки цели: ${fillAmount}`;
   text += '\n---------------------------------';

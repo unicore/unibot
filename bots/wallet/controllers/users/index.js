@@ -77,7 +77,7 @@ module.exports.payReciever = async (req, res) => {
   }
 
   const user = await getUserByEosName(botName, eosname);
-  let message = 'payment is receiverd';
+  const message = 'payment is receiverd';
 
   await insertMessage(botName, user, 'operator', message);
 

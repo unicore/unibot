@@ -10,9 +10,9 @@ async function notify(bot, source, hostname, what, meta) {
   console.log('on notify');
   if (what === 'acceptReport') {
     console.log('on notify2');
-    let to = await getUserByEosName(bot.instanceName, meta.username);
+    const to = await getUserByEosName(bot.instanceName, meta.username);
     console.log('on notify3', to, meta);
-    let msg = await constructReportMessage(bot, hostname, meta);
+    const msg = await constructReportMessage(bot, hostname, meta);
 
     if (to) {
       await sendMessageToUser(bot, { id: to.id }, { text: `Ваш отчёт одобрен в проекте ${source.unionName}: \n\n${msg}` }, {});

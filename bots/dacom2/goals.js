@@ -70,7 +70,7 @@ function getGoalMsg(goal) {
 }
 
 async function disableButtons(bot, ctx, up) {
-  let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
+  const keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
 
   if (up) { keyboard[0][0].text = 'ожидание'; } else { keyboard[0][1].text = 'ожидание'; }
   try {
@@ -81,8 +81,8 @@ async function disableButtons(bot, ctx, up) {
 }
 
 async function enableReportButtons(bot, ctx, up, hostname, reportId) {
-  let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
-  let report = await fetchReport(bot, hostname, reportId);
+  const keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard;
+  const report = await fetchReport(bot, hostname, reportId);
 
   if (up) { keyboard[0][0].text = `👍 (${report.voters.length})`; } else { keyboard[0][1].text = 'ожидание'; }
 
@@ -100,11 +100,11 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
   if (goal) {
     console.log('GOAL MATCH2: ', goal.id);
 
-    let host = await fetchHost(bot, hostname);
-    let total_shares = host.total_shares;
+    const host = await fetchHost(bot, hostname);
+    const total_shares = host.total_shares;
     console.log('total_shares: ', total_shares, goal.positive_votes, goal.negative_votes);
-    let user = await getUserByEosName(bot.instanceName, goal.creator);
-    let from = (user.username && user.username !== '') ? '@' + user.username : goal.creator;
+    const user = await getUserByEosName(bot.instanceName, goal.creator);
+    const from = (user.username && user.username !== '') ? '@' + user.username : goal.creator;
 
     let text = '';
     text += `#ЦЕЛЬ_${goal.id} от ${from}:\n`;
@@ -115,7 +115,7 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
     let coordinator = '';
 
     if (goal.benefactor !== '') {
-      let coordUser = await getUserByEosName(bot.instanceName, goal.creator);
+      const coordUser = await getUserByEosName(bot.instanceName, goal.creator);
       coordinator = (user.username && user.username !== '') ? '@' + user.username : goal.benefactor;
     }
 
@@ -135,10 +135,10 @@ async function constructTaskMessage(bot, hostname, task, taskId) {
   if (!task && taskId) { task = await fetchTask(bot, hostname, taskId); }
 
   let text = '';
-  let level = task.priority === (0 || 1) ? '10 $/час' : (task.priority === 2 ? '20 $/час' : '40 $/час');
+  const level = task.priority === (0 || 1) ? '10 $/час' : (task.priority === 2 ? '20 $/час' : '40 $/час');
 
-  let user = await getUserByEosName(bot.instanceName, task.creator);
-  let from = (user.username && user.username !== '') ? '@' + user.username : task.creator;
+  const user = await getUserByEosName(bot.instanceName, task.creator);
+  const from = (user.username && user.username !== '') ? '@' + user.username : task.creator;
 
   text += `🏳️ #ДЕЙСТВИЕ_${task.id} от ${from}: \n`;
   text += `${task.title}\n\n`;
@@ -158,8 +158,8 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let bonus;
     let votes;
 
-    let user = await getUserByEosName(bot.instanceName, report.username);
-    let from = (user.username && user.username !== '') ? '@' + user.username : report.username;
+    const user = await getUserByEosName(bot.instanceName, report.username);
+    const from = (user.username && user.username !== '') ? '@' + user.username : report.username;
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`;
     text += `${report.data}\n\n`;
 
@@ -264,12 +264,12 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   if (!skip) { await ctx.editMessageReplyMarkup({ inline_keyboard: buttons }); }
 
   console.log(ctx.update.callback_query.message.reply_to_message);
-  let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id;
-  let chat_id = ctx.update.callback_query.message.reply_to_message.forward_from_chat.id;
+  const message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id;
+  const chat_id = ctx.update.callback_query.message.reply_to_message.forward_from_chat.id;
 
   console.log('message: ', message_id, chat_id);
 
-  let new_text = await constructGoalMessage(bot, hostname, goal);
+  const new_text = await constructGoalMessage(bot, hostname, goal);
 
   // get message from chat
 
@@ -290,16 +290,16 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
 }
 
 async function editReportMsg(bot, ctx, user, hostname, reportId) {
-  let report = await fetchReport(bot, hostname, reportId);
-  let new_text = await constructReportMessage(bot, hostname, report);
+  const report = await fetchReport(bot, hostname, reportId);
+  const new_text = await constructReportMessage(bot, hostname, report);
 
-  let buttons = [];
+  const buttons = [];
   buttons.push(Markup.button.callback(`👍 (${report.voters.length})`, `rvote ${hostname} ${reportId}`));
 
   // await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
   console.log(ctx.update);
-  let message_id = ctx.update.callback_query.message.message_id;
-  let chat_id = ctx.update.callback_query.message.chat.id;
+  const message_id = ctx.update.callback_query.message.message_id;
+  const chat_id = ctx.update.callback_query.message.chat.id;
 
   console.log('1: ', chat_id);
   console.log('2: ', message_id);
@@ -313,7 +313,7 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
-  let data = {
+  const data = {
     host: hostname,
     task_id: taskId,
     priority,
@@ -336,11 +336,11 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
   });
 
   // await editGoalMsg(bot, ctx, user, hostname, goalId);
-  let text = await constructTaskMessage(bot, hostname, null, taskId);
+  const text = await constructTaskMessage(bot, hostname, null, taskId);
   console.log('TEXT:', text);
 
-  let message_id = ctx.update.message.reply_to_message.message_id;
-  let chat_id = ctx.update.message.reply_to_message.chat.id;
+  const message_id = ctx.update.message.reply_to_message.message_id;
+  const chat_id = ctx.update.message.reply_to_message.chat.id;
 
   const buttons = [];
 
@@ -377,10 +377,10 @@ async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
   });
 
   // await editGoalMsg(bot, ctx, user, hostname, goalId);
-  let text = await constructGoalMessage(bot, hostname, null, goalId);
+  const text = await constructGoalMessage(bot, hostname, null, goalId);
   console.log('TEXT:', text);
-  let message_id = ctx.update.message.reply_to_message.forward_from_message_id;
-  let chat_id = ctx.update.message.reply_to_message.forward_from_chat.id;
+  const message_id = ctx.update.message.reply_to_message.forward_from_message_id;
+  const chat_id = ctx.update.message.reply_to_message.forward_from_chat.id;
 
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, text);
@@ -394,9 +394,9 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   console.log('on VOTE ACTION');
   await disableButtons(bot, ctx, up);
 
-  let host = await fetchHost(bot, hostname);
-  let report = await fetchReport(bot, hostname, reportId);
-  let actions = [];
+  const host = await fetchHost(bot, hostname);
+  const report = await fetchReport(bot, hostname, reportId);
+  const actions = [];
 
   if (user.eosname === host.architect && report.approved === 0) {
     actions.push({
@@ -438,7 +438,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     });
 
     await editReportMsg(bot, ctx, user, hostname, reportId);
-    let report = await fetchReport(bot, hostname, reportId);
+    const report = await fetchReport(bot, hostname, reportId);
 
     return report;
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
@@ -447,7 +447,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id });
     } else {
-      let msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
+      const msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
       setTimeout(() => ctx.deleteMessage(msg_id), 5000);
     }
 
@@ -488,7 +488,7 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
     } else {
-      let msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
+      const msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
       setTimeout(() => ctx.deleteMessage(msg_id), 5000);
     }
 
@@ -541,7 +541,7 @@ async function editGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
   let res;
-  let data = {
+  const data = {
     editor: user.eosname,
     goal_id: goal.id,
     host: goal.hostname,

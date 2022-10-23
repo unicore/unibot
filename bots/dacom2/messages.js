@@ -74,8 +74,8 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let bonus;
     let votes;
 
-    let user = await getUserByEosName(bot.instanceName, report.username);
-    let from = (user.username && user.username !== '') ? '@' + user.username : report.username;
+    const user = await getUserByEosName(bot.instanceName, report.username);
+    const from = (user.username && user.username !== '') ? '@' + user.username : report.username;
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`;
     text += `${report.data}\n\n`;
 

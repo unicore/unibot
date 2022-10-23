@@ -169,7 +169,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
 
-  let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+  const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
@@ -293,7 +293,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     if (ctx.update.message.chat.type === 'private') {
       await printWallet(bot, user);
     }
@@ -325,7 +325,7 @@ module.exports.init = async (botModel, bot) => {
     // console.log("message: ", ctx.update.message)
     if (user) {
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
 
         // console.log('tyL: ', ctx.update.message.reply_to_message);
 
@@ -343,7 +343,7 @@ module.exports.init = async (botModel, bot) => {
         }
       } else { // Если это диалог пользователя с ботом
         // проверяем не квиз ли
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
 
         if (user.state) {
           // SEND FROM USER IN BOT TO PUB CHANNEL

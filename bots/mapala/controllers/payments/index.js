@@ -41,16 +41,16 @@ module.exports.payReciever = async (req, res) => {
   }
 
   const user = await getUserByEosName(botName, eosname);
-  let message = `Поступила оплата в размере ${amount}`;
+  const message = `Поступила оплата в размере ${amount}`;
 
   const icomeMenu = Markup.keyboard(mainButtons, { columns: 2 }).resize();
 
   await insertMessage(botName, user, 'operator', message);
 
-  let params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
+  const params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
-  let cycle = params.host.current_cycle_num;
-  let pool = params.host.current_pool_num;
+  const cycle = params.host.current_cycle_num;
+  const pool = params.host.current_pool_num;
 
   await insertTicket(botName, user, {
     amount,

@@ -319,7 +319,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
         id = ctx.update.message.chat.id;
       }
 
-      let current_chat = await getUnion(bot.instanceName, (id).toString());
+      const current_chat = await getUnion(bot.instanceName, (id).toString());
 
       if (currentSlideIndex + 1 === education.length) {
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
@@ -474,9 +474,9 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    let id = await ctx.reply('Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.');
+    const id = await ctx.reply('Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.');
 
-    let id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+    const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
     await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
 
@@ -588,7 +588,7 @@ module.exports.init = async (botModel, bot) => {
 
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        let t = 'Добро пожаловать.\n\n';
+        const t = 'Добро пожаловать.\n\n';
         await ctx.reply(t, clearMenu);
 
         await startQuiz(bot, ctx, user);
@@ -598,10 +598,10 @@ module.exports.init = async (botModel, bot) => {
       }
     } else {
       console.log('ctx.update.message', ctx.update.message);
-      let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+      const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-      let chatId = ctx.message.chat.id;
-      let userId = ctx.update.message.from.id;
+      const chatId = ctx.message.chat.id;
+      const userId = ctx.update.message.from.id;
 
       const clearMenu = Markup.removeKeyboard();
 
@@ -610,7 +610,7 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-      let t = 'Добро пожаловать.\n\n';
+      const t = 'Добро пожаловать.\n\n';
       await ctx.reply(t, clearMenu);
 
       // TODO запуск WELCOME
@@ -669,7 +669,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // if (ctx.update.message.chat.type === 'private') {
     await printWallet(bot, user);
     // }
@@ -723,14 +723,14 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('make_me_admin', async (ctx) => {
     console.log('on start union', ctx);
-    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, '-1001598098546');
   });
 
   bot.command('team', async (ctx) => {
-    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-    let dacs = await getDacs(bot, current_chat.host);
+    const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+    const dacs = await getDacs(bot, current_chat.host);
 
     let text = '';
     let k = 0;
@@ -748,17 +748,17 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.command('list', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     if (current_chat) {
-      let projects = await getProjects(bot.instanceName);
+      const projects = await getProjects(bot.instanceName);
       let text = '';
 
-      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
+      const gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
 
-      let exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
+      const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
 
       text += 'Все публичные проекты экосистемы:\n';
 
@@ -773,17 +773,17 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.command('projects', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     if (current_chat) {
-      let projects = await getMyProjects(bot.instanceName, current_chat.host);
+      const projects = await getMyProjects(bot.instanceName, current_chat.host);
       let text = '';
 
-      let gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
+      const gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
 
-      let exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
+      const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
       text += `Проекты DAO ${current_chat.unionName}:\n`;
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`;
@@ -797,7 +797,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('make_new_projects_private', async (ctx) => {
     // finishEducation(bot, ctx)
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     user.is_private = true;
 
     await saveUser(bot.instanceName, user);
@@ -806,7 +806,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('make_new_projects_public', async (ctx) => {
     // finishEducation(bot, ctx)
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     user.is_private = false;
 
     await saveUser(bot.instanceName, user);
@@ -908,7 +908,7 @@ module.exports.init = async (botModel, bot) => {
     try {
       const eos = await bot.uni.getEosPassInstance(wif);
 
-      let helix = {
+      const helix = {
         host: eosname,
         chost: eosname,
         size_of_pool: 10000,
@@ -924,7 +924,7 @@ module.exports.init = async (botModel, bot) => {
 
       };
 
-      let host = {
+      const host = {
         username: eosname,
         platform: eosname,
         title: chat.title,
@@ -946,9 +946,9 @@ module.exports.init = async (botModel, bot) => {
         meta: JSON.stringify({}),
       };
 
-      let upgrade_res = await upgradeHost(eos, eosname, host, user);
-      let setparams_res = await setParamsToHost(eos, eosname, helix);
-      let start_res = await startHost(eos, eosname, eosname);
+      const upgrade_res = await upgradeHost(eos, eosname, host, user);
+      const setparams_res = await setParamsToHost(eos, eosname, helix);
+      const start_res = await startHost(eos, eosname, eosname);
     } catch (e) {
       ctx.reply(`ошибка при запуске союза, обратитесь в поддержку с сообщением: ${e.message}`);
       console.log(e);
@@ -956,7 +956,7 @@ module.exports.init = async (botModel, bot) => {
   }
 
   async function startUnion(bot, ctx) {
-    let res = await ctx.getChatAdministrators();
+    const res = await ctx.getChatAdministrators();
     let bot_is_admin = false;
 
     res.map((user) => {
@@ -971,16 +971,16 @@ module.exports.init = async (botModel, bot) => {
     if (!bot_is_admin) {
       ctx.reply(`Для создания DAO в чате робот @${bot.getEnv().BOTNAME} должен быть назначен администратором.`);
     } else {
-      let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+      const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
       if (current_chat) {
         await ctx.reply('DAO уже активно в этом чате. Показать команды: /help');
       } else {
-        let user = await checkAccountForExist(bot, ctx, ctx.from);
+        const user = await checkAccountForExist(bot, ctx, ctx.from);
 
         if (user) {
-          let type = 'union';
-          let chat = await ctx.getChat();
+          const type = 'union';
+          const chat = await ctx.getChat();
 
           try {
             let host = {
@@ -1037,7 +1037,6 @@ module.exports.init = async (botModel, bot) => {
     } catch (e) {
       ctx.reply(`error: ${e.message}`);
       console.log(e);
-      return;
     }
   }
 
@@ -1052,9 +1051,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('stat', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1064,9 +1063,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('add_channel', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1077,7 +1076,7 @@ module.exports.init = async (botModel, bot) => {
       return;
     }
 
-    let newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+    const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
     console.log('newsChannel', newsChannel);
 
     if (!newsChannel) {
@@ -1092,9 +1091,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('cancel_set_news_channel', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1108,9 +1107,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('iam', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1121,9 +1120,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('wallet', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
 
     if (!current_chat) {
       return ctx.reply('Союз не найден');
@@ -1134,8 +1133,8 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('helix', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1145,8 +1144,8 @@ module.exports.init = async (botModel, bot) => {
 
   bot.command('withdraw', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1170,14 +1169,14 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.command('donate', async (ctx) => {
-    let msg_id = (await ctx.reply('Пожалуйста, подождите', { reply_to_message_id: ctx.update.message.message_id })).message_id;
+    const msg_id = (await ctx.reply('Пожалуйста, подождите', { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     await checkForExistBCAccount(bot, ctx);
 
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     let goal;
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
@@ -1193,7 +1192,7 @@ module.exports.init = async (botModel, bot) => {
       return;
     }
 
-    let exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionChat');
+    const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionChat');
 
     if (exist) {
       let address;
@@ -1224,7 +1223,7 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
     // showBuySellMenu(bot, user, ctx);
     // console.log("helixBalances: ", balances)
-    let { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
+    const { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
 
     if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
     else {
@@ -1234,7 +1233,7 @@ module.exports.init = async (botModel, bot) => {
 
   async function getAddress(bot, user, ctx, host, unionchat, currency, type, meta) {
     try {
-      let params = {
+      const params = {
         username: user.eosname,
         currency,
         hostname: host,
@@ -1249,7 +1248,7 @@ module.exports.init = async (botModel, bot) => {
         meta,
       };
 
-      let path = `${bot.getEnv().PAY_GATEWAY}/generate`;
+      const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 
       const result = await axios.post(
         path,
@@ -1266,16 +1265,16 @@ module.exports.init = async (botModel, bot) => {
   }
 
   bot.command('set_priority', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
     if (!current_chat) {
       ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
       return;
     }
 
-    let text = ctx.update.message.text;
-    let entities = ctx.update.message.entities;
+    const text = ctx.update.message.text;
+    const entities = ctx.update.message.entities;
     let priority = 0;
 
     entities.map((entity) => {
@@ -1284,7 +1283,7 @@ module.exports.init = async (botModel, bot) => {
 
     // TODO get task from message
     // if not task - return
-    let task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id);
+    const task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id);
 
     if (!task) {
       ctx.reply('Действие не найдено. Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.', { reply_to_message_id: ctx.update.message.message_id });
@@ -1292,14 +1291,14 @@ module.exports.init = async (botModel, bot) => {
       if (!priority) {
         ctx.reply('Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.', { reply_to_message_id: ctx.update.message.message_id });
       } else {
-        let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+        const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
 
         if (current_chat && task) {
           try {
             // await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
             await setTaskPriority(bot, ctx, user, current_chat.host, task.task_id, priority);
             await ctx.deleteMessage(ctx.update.message.message_id);
-            let tprior = (priority === 0 || priority === 1) ? '10 $/час' : ((priority === 2) ? '20 $/час' : '40 $/час');
+            const tprior = (priority === 0 || priority === 1) ? '10 $/час' : ((priority === 2) ? '20 $/час' : '40 $/час');
             await ctx.reply(`Координатор установил ставку действия: ${tprior}`, { reply_to_message_id: ctx.update.message.reply_to_message.message_id });
           } catch (e) {
             console.log(e);
@@ -1313,12 +1312,12 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.command('set_coordinator', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     // TODO only architect can set coordinator!
 
-    let text = ctx.update.message.text;
-    let entities = ctx.update.message.entities;
+    const text = ctx.update.message.text;
+    const entities = ctx.update.message.entities;
     let curator = '';
 
     entities.map((entity) => {
@@ -1328,10 +1327,10 @@ module.exports.init = async (botModel, bot) => {
     if (curator === '') {
       ctx.reply('Для установки куратора отметьте пользователя командой /set_coordinator @telegram_username', { reply_to_message_id: ctx.update.message.message_id });
     } else {
-      let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
-      let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString());
+      const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+      const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString());
 
-      let curator_object = await getUserByUsername(bot.instanceName, curator);
+      const curator_object = await getUserByUsername(bot.instanceName, curator);
 
       if (current_chat && goal && curator_object) {
         console.log('ON HERE');
@@ -1350,12 +1349,12 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.command('add_to_team', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     // TODO only architect can set coordinator!
 
     let text = ctx.update.message.text;
-    let entities = ctx.update.message.entities;
+    const entities = ctx.update.message.entities;
     let dac = '';
 
     entities.map((entity) => {
@@ -1365,15 +1364,15 @@ module.exports.init = async (botModel, bot) => {
     text = text.replace('/add_to_team ', '');
     text = text.replace('@' + dac, '');
 
-    let role = text.replace(' ', '');
+    const role = text.replace(' ', '');
     console.log('text: ', role);
 
     if (dac === '') {
       ctx.reply('Для добавления члена команды отметьте пользователя /add_to_team @telegram_username', { reply_to_message_id: ctx.update.message.message_id });
     } else {
-      let current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+      const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
 
-      let curator_object = await getUserByUsername(bot.instanceName, dac);
+      const curator_object = await getUserByUsername(bot.instanceName, dac);
 
       if (current_chat && curator_object) {
         try {
@@ -1450,15 +1449,15 @@ module.exports.init = async (botModel, bot) => {
   async function checkText(user, ctx, tags, text) {
     for (const tag of tags) {
       if (tag.tag === 'log') {
-        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+        const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
         if (current_chat) {
-          let target = await getUnionByHostType(bot.instanceName, tag.id, 'unionNews');
+          const target = await getUnionByHostType(bot.instanceName, tag.id, 'unionNews');
 
           if (target) {
-            let dacs = await getDacs(bot, target.host);
+            const dacs = await getDacs(bot, target.host);
 
-            let user_in_team = dacs.find((el) => el.dac === user.eosname);
+            const user_in_team = dacs.find((el) => el.dac === user.eosname);
 
             if (!user_in_team) {
               await ctx.reply('Только член команды может публиковать сообщения в новостном канале этого DAO');
@@ -1471,15 +1470,15 @@ module.exports.init = async (botModel, bot) => {
               await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
             }
           } else {
-            let project = tags.find((el) => el.tag === 'project');
+            const project = tags.find((el) => el.tag === 'project');
 
             if (project) {
               if (project.id) {
-                let pr = await getProject(bot.instanceName, project.id);
+                const pr = await getProject(bot.instanceName, project.id);
 
-                let goal = tags.find((el) => el.tag === 'goal');
+                const goal = tags.find((el) => el.tag === 'goal');
                 if (goal) {
-                  let g = await getGoal(bot.instanceName, goal.id);
+                  const g = await getGoal(bot.instanceName, goal.id);
                   if (g) {
                     if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: g.chat_id }, ctx.update.message, { caption: text, reply_to_message_id: g.chat_message_id }); } else { await sendMessageToUser(bot, { id: g.chat_id }, { text }, { reply_to_message_id: g.chat_message_id }); }
 
@@ -1501,11 +1500,11 @@ module.exports.init = async (botModel, bot) => {
       }
 
       if (tag.tag === 'project') {
-        let gexist = tags.find((el) => el.tag === 'goal');
-        let logexist = tags.find((el) => el.tag === 'log');
+        const gexist = tags.find((el) => el.tag === 'goal');
+        const logexist = tags.find((el) => el.tag === 'log');
 
         if (!gexist && !logexist) {
-          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+          const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
           if (!current_chat) {
             ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
@@ -1523,9 +1522,9 @@ module.exports.init = async (botModel, bot) => {
           }
 
           const id = await sendMessageToUser(bot, { id: ctx.chat.id }, { text: 'Пожалуйста, подождите, мы создаём канал проекта.' });
-          let goalChatResult = await createChat(bot, user, current_chat.host, text, 'project', user.is_private);
+          const goalChatResult = await createChat(bot, user, current_chat.host, text, 'project', user.is_private);
 
-          let goal = {
+          const goal = {
             hostname: current_chat.host,
             title: text,
             description: '',
@@ -1560,18 +1559,17 @@ module.exports.init = async (botModel, bot) => {
           console.log('NOT INSIDE!', tags.indexOf('goal') === -1);
         }
       } else if (tag.tag === 'report') {
-        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+        const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
         if (!current_chat) {
           ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
           return;
         }
 
-        let is_fast_report = (tags.find((t) => t.tag === 'goal') && tags.find((t) => t.tag === 'task') && tags.find((t) => t.tag === 'report'));
+        const is_fast_report = (tags.find((t) => t.tag === 'goal') && tags.find((t) => t.tag === 'task') && tags.find((t) => t.tag === 'report'));
         if (ctx.update.message.reply_to_message || tag.id || is_fast_report) {
           try {
             let task;
-            let reply_to;
 
             let [duration, ...data] = text.split(',');
 
@@ -1596,12 +1594,12 @@ module.exports.init = async (botModel, bot) => {
                 task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id);
               }
             } else {
-              let task_tag = tags.find((t) => t.tag === 'task');
+              const task_tag = tags.find((t) => t.tag === 'task');
 
               task = await getTaskById(bot.instanceName, current_chat.host, task_tag.id);
             }
 
-            reply_to = task.chat_message_id;
+            const reply_to = task.chat_message_id;
 
             if (!task) {
               ctx.reply('Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели как ответ на конкретное действие.', { reply_to_message_id: ctx.update.message.message_id });
@@ -1610,9 +1608,9 @@ module.exports.init = async (botModel, bot) => {
                 console.log('CURRENT_CHAT: ', current_chat);
 
                 // let duration = 1 //час
-                let asset_per_hour = '0.0000 FLOWER';
+                const asset_per_hour = '0.0000 FLOWER';
 
-                let reportId = await createReport(bot, ctx, user, {
+                const reportId = await createReport(bot, ctx, user, {
                   host: current_chat.host,
                   username: user.eosname,
                   task_id: task.task_id,
@@ -1632,7 +1630,7 @@ module.exports.init = async (botModel, bot) => {
                   // report_channel_message_id: reportMessageId
                 });
 
-                let new_text = await constructReportMessage(bot, current_chat.host, null, reportId);
+                const new_text = await constructReportMessage(bot, current_chat.host, null, reportId);
 
                 const buttons = [];
                 buttons.push(Markup.button.callback('👍 (0)', `rvote ${current_chat.host} ${reportId}`));
@@ -1666,15 +1664,15 @@ module.exports.init = async (botModel, bot) => {
             ctx.reply(e.message);
           }
         } else {
-          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+          const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
           // let exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-          let exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
+          const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
 
           ctx.reply('Ошибка! Поставка отчётов к действиям доступна только в обсуждениях конкретной цели.', { reply_to_message_id: ctx.update.message.message_id });
         }
       } else if (tag.tag === 'task') {
-        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+        const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
         if (!current_chat) {
           ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
           return;
@@ -1703,9 +1701,9 @@ module.exports.init = async (botModel, bot) => {
           try {
             // const msg = await getMessage(bot.instanceName, )
             console.log('ctx.update.message.reply_to_message.message_id: ', ctx.update.message);
-            let goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString());
+            const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, ctx.update.message.reply_to_message.sender_chat.id.toString());
             console.log('GOAL:', goal);
-            let task = {
+            const task = {
               host: current_chat.host,
               creator: user.eosname,
               permlink: '',
@@ -1740,9 +1738,9 @@ module.exports.init = async (botModel, bot) => {
             buttons.push(Markup.button.switchToCurrentChat('создать отчёт', `#report_${task_id} ЗАМЕНИТЕ_НА_ЗАТРАЧЕННОЕ_ВРЕМЯ_В_МИНУТАХ, ЗАМЕНИТЕ_НА_ТЕКСТ_ОТЧЁТА`));
             const request = Markup.inlineKeyboard(buttons, { columns: 1 }).resize();
             // console.log("before C")
-            let task_text = await constructTaskMessage(bot, current_chat.host, task);
+            const task_text = await constructTaskMessage(bot, current_chat.host, task);
 
-            let chat_message_id = (await ctx.reply(task_text, { reply_to_message_id: ctx.update.message.message_id, ...request })).message_id; //
+            const chat_message_id = (await ctx.reply(task_text, { reply_to_message_id: ctx.update.message.message_id, ...request })).message_id; //
 
             await sendMessageToBrothers(bot, user, goal, task_text, 'task', request);
 
@@ -1800,27 +1798,27 @@ module.exports.init = async (botModel, bot) => {
           // let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString())
           if (!tags.find((t) => t.tag === 'report')) {
             // exist = await getUnionByType(bot.instanceName, current_chat.ownerEosname, "goalsChannel")
-            let exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
+            const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
 
             ctx.reply('Ошибка! Постановка действий доступна только в обсуждениях конкретной цели.', { reply_to_message_id: ctx.update.message.message_id });
           }
         }
       } else if (tag.tag === 'goal') {
-        let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+        const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
         if (!current_chat) { return; }
 
-        let dacs = await getDacs(bot, current_chat.host);
-        let user_in_team = dacs.find((el) => el.dac === user.eosname);
+        const dacs = await getDacs(bot, current_chat.host);
+        const user_in_team = dacs.find((el) => el.dac === user.eosname);
 
-        let exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString());
+        const exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString());
 
         if (exist.type !== 'unionChat') {
           await ctx.reply('Ошибка! Постановка целей доступна только в главном чате союза.', { reply_to_message_id: ctx.message.message_id });
           return;
         }
 
-        let project = tags.find((el) => el.tag === 'project');
+        const project = tags.find((el) => el.tag === 'project');
 
         if (!project) {
           ctx.reply('Ошибка! Любая цель должна принадлежать к проекту. Форма создания цели: text #project_<number> #goal');
@@ -1833,7 +1831,7 @@ module.exports.init = async (botModel, bot) => {
             return;
           }
 
-          let text_goal = text;
+          const text_goal = text;
 
           const buttons = [];
 
@@ -1845,18 +1843,17 @@ module.exports.init = async (botModel, bot) => {
           let text_to_channel;
 
           if (project.id) {
-            let pr;
             let projectChannelId;
 
-            pr = await getProject(bot.instanceName, project.id);
+            const pr = await getProject(bot.instanceName, project.id);
 
             if (pr) {
               projectChannelId = pr.id;
 
               let msg;
-              let hostname = pr.host;
+              const hostname = pr.host;
 
-              let goal = {
+              const goal = {
                 hostname,
                 title: text,
                 description: '',
@@ -1938,14 +1935,14 @@ module.exports.init = async (botModel, bot) => {
           user.new_soviet = {};
           await saveUser(bot.instanceName, user);
         } else if (user.state === 'start_soviet') {
-          let d = new Date(text);
+          const d = new Date(text);
 
           user.new_soviet.start_at = d;
-          let time = d.getTime() / 1000;
+          const time = d.getTime() / 1000;
 
           await createGroupCall(bot, ctx.update.message.chat.id, time);
         } else if (user.state === 'set_news_channel') {
-          let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+          const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
           if (!current_chat) {
             return;
@@ -1957,7 +1954,7 @@ module.exports.init = async (botModel, bot) => {
           }
 
           if (ctx.update.message.forward_from_chat) {
-            let res = await checkBotIsAdmin(bot, user, ctx, ctx.update.message.forward_from_chat.id);
+            const res = await checkBotIsAdmin(bot, user, ctx, ctx.update.message.forward_from_chat.id);
             if (res.status === 'ok') {
               if (!res.user_is_admin) {
                 ctx.reply('Ошибка! Вы не являетесь администратором канала');
@@ -1969,7 +1966,7 @@ module.exports.init = async (botModel, bot) => {
                 return;
               }
 
-              let res2 = await ctx.telegram.getChat(ctx.update.message.forward_from_chat.id);
+              const res2 = await ctx.telegram.getChat(ctx.update.message.forward_from_chat.id);
 
               if (res2.type === 'channel') {
                 await insertUnion(bot.instanceName, {
@@ -2015,18 +2012,18 @@ module.exports.init = async (botModel, bot) => {
         } else {
           console.log('on ELSE');
           if (ctx.update.message.reply_to_message) { // Если это ответ на чье-то сообщение
-            let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+            const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
             console.log('cant find current chat, skip');
 
             if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) { console.log('should works', ctx.chat); }
 
             if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) {
               // const msg = await getMessage(bot.instanceName, ctx.chat.id, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
-              let target = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
+              const target = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
 
               // console.log('msg', msg)
 
-              let text2 = `${text}`;
+              const text2 = `${text}`;
               if (target) {
                 const id = await sendMessageToUser(bot, { id: target.id }, { text: text2 });
 
@@ -2041,7 +2038,7 @@ module.exports.init = async (botModel, bot) => {
         // проверяем не квиз ли
 
         const quiz = await getQuiz(bot.instanceName, user.id);
-        let { text } = ctx.update.message;
+        const { text } = ctx.update.message;
 
         if (quiz && !quiz.is_finish) {
           quiz.answers.map((el, index) => {
@@ -2057,7 +2054,7 @@ module.exports.init = async (botModel, bot) => {
             ctx.reply('Ожидаю сообщения');
           } else if (user.state === 'chat' || user.state === '') {
             try {
-              let text2 = `Партнёр пишет: ${text}`;
+              const text2 = `Партнёр пишет: ${text}`;
               const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, { reply_to_message_id: user.partners_chat_id });
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
@@ -2068,7 +2065,7 @@ module.exports.init = async (botModel, bot) => {
             }
             //
           } else if (user.state === 'set_withdraw_amount') {
-            let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+            const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
             if (!current_chat) {
               await ctx.reply('Союз не найден');
@@ -2077,7 +2074,7 @@ module.exports.init = async (botModel, bot) => {
 
             const helix = await getHelixParams(bot, current_chat.host);
 
-            let { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
+            const { min, max } = await getMaxWithdrawAmount(bot, user, ctx);
             const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
 
             if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
@@ -2136,11 +2133,11 @@ module.exports.init = async (botModel, bot) => {
           if (true) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             const buttons = [];
             if (union.type === 'goalsChannel' || union.type === 'projectChannel') {
-              let goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString());
+              const goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString());
               console.log('ИНСТРУКЦИЯ:Ж ', goal, ctx.update.message.sender_chat.id);
               // console.log("forward fro: ", ctx.update.message)
 
-              let goalid = goal ? goal.goal_id : null;
+              const goalid = goal ? goal.goal_id : null;
 
               if (goalid) {
                 buttons.push(Markup.button.callback('👍', `upvote ${union.host} ${goalid}`));
@@ -2148,8 +2145,8 @@ module.exports.init = async (botModel, bot) => {
                 buttons.push(Markup.button.switchToCurrentChat('создать действие', `#task_${goalid} ЗАМЕНИТЕ_НА_ТЕКСТ_ДЕЙСТВИЯ`));
 
                 const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize();
-                let instructions = await getGoalInstructions();
-                let iid = (await ctx.reply(instructions, { reply_to_message_id: ctx.message.message_id, ...request })).message_id;
+                const instructions = await getGoalInstructions();
+                const iid = (await ctx.reply(instructions, { reply_to_message_id: ctx.message.message_id, ...request })).message_id;
 
                 await insertMessage(bot.instanceName, { id: 'bot' }, 'goalInstruction', text, iid, 'autoforward', { forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id });
 
@@ -2191,7 +2188,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
     const withdraw_id = ctx.match[1];
     // console.log("withdraw_id: ", withdraw_id)
-    let wobj = await getWithdraw(bot.instanceName, withdraw_id);
+    const wobj = await getWithdraw(bot.instanceName, withdraw_id);
     // console.log('wobj', wobj)
     const user = await getUser(bot.instanceName, wobj.userId);
 
@@ -2205,7 +2202,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action('withdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     user.state = '';
-    let withdraw_id = await insertWithdraw(bot.instanceName, user, {
+    const withdraw_id = await insertWithdraw(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
       amount: user.on_withdraw.amount,
@@ -2230,7 +2227,7 @@ module.exports.init = async (botModel, bot) => {
 
         // TO ADMIN
 
-        let admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
+        const admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
         await sendMessageToUser(bot, admin, { text: `Получена новая заявка на вывод на сумму:\n${user.on_withdraw.amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
         await sendMessageToUser(bot, admin, { text: `${user.on_withdraw.address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
@@ -2252,8 +2249,8 @@ module.exports.init = async (botModel, bot) => {
     const hostname = ctx.match[1];
     const reportId = parseInt(ctx.match[2], 10);
 
-    let report = await rvoteAction(bot, ctx, user, hostname, reportId, true);
-    let current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+    const report = await rvoteAction(bot, ctx, user, hostname, reportId, true);
+    const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     await notify(bot, current_chat, hostname, 'acceptReport', { ...report });
   });

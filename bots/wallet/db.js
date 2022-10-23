@@ -391,7 +391,7 @@ async function insertWithdraw(suffix, user, withdraw) {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
 
-    let res = await collection.insertOne(withdraw);
+    const res = await collection.insertOne(withdraw);
     console.log('INSERT RES', res);
     return res.insertedId;
   } catch (e) {
@@ -434,7 +434,7 @@ async function getTickets(suffix, user) {
     const db = await loadDB();
     const collection = db.collection(`dacomTickets_${suffix}`);
 
-    let tickets = await collection.find({ eosname: user.eosname }).toArray();
+    const tickets = await collection.find({ eosname: user.eosname }).toArray();
 
     return tickets;
   } catch (e) {

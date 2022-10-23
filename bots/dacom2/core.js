@@ -263,14 +263,14 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-      let id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
+      const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
     } else {
       await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
   } catch (e) {
     // eslint-disable-next-line max-len
     // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    let id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
+    const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
   }
 }
 
@@ -363,7 +363,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
   const buttons = [];
   console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id;
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -389,17 +389,17 @@ async function printHelixStat(bot, user, hostname, ctx) {
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
     console.log('estimateSysIncome', estimateSysIncome);
 
-    let cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
-    let hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
-    let ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
-    let dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
 
     // console.log("royalty: ", royalty)
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000;
-    let levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
+    const convert_rate = params.host.sale_shift / 10000;
+    const levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
 
     // text += '\n---------------------------------';
     text += `\n| Союз: ${params.host.username} | ${params.host.title}`;
@@ -449,7 +449,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d);
 
-    let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
@@ -537,7 +537,7 @@ async function printWallet(bot, user, ctx, hostname) {
     else {
       text += '\n\nсообщение будет удалено через 30 секунд';
 
-      let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
+      const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
       setTimeout(
         () => {
@@ -554,7 +554,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
   const buttons = [];
   console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id;
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -589,14 +589,14 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
     console.log('estimateSysIncome', estimateSysIncome);
-    let royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
     console.log('royalty: ', royalty);
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000;
+    const convert_rate = params.host.sale_shift / 10000;
 
-    let io = await getUserIntelOwn(bot, hostname, user.eosname);
+    const io = await getUserIntelOwn(bot, hostname, user.eosname);
 
     // text += '\n---------------------------------';
     text += `\n| Аккаунт: ${user.eosname}`;
@@ -621,7 +621,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d);
 
-    let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {

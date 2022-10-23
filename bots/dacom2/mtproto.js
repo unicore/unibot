@@ -27,7 +27,6 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   // const request = new Api.messages.SendMessage({peer: "me", message: "hello"})
   let result;
   let chatId;
-  let channelId;
   let chatLink;
   let channelLink;
   let channelTitle;
@@ -61,7 +60,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     forImport: false,
   }));
 
-  channelId = parseInt((result.chats[0].id.value));
+  const channelId = parseInt((result.chats[0].id.value));
 
   result = await client.invoke(
     new Api.messages.CreateChat({
@@ -94,7 +93,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   chatId = await setDiscussionGroup(bot, parseInt(chatId), parseInt(channelId));
   console.log('AFTE RCREATE DISCUSS');
 
-  let admin_result = await client.invoke(new Api.channels.EditAdmin({
+  const admin_result = await client.invoke(new Api.channels.EditAdmin({
     channel: chatId,
     userId: bot.getEnv().BOTNAME,
     isAdmin: true,
@@ -207,8 +206,8 @@ async function setDiscussionGroup(bot, chatId, channelId) {
 
   console.log('result on migrate:', result);
 
-  let migratedTo = parseInt(result.chats[0].migratedTo.channelId.value);
-  let accessHash = parseInt(result.chats[0].migratedTo.accessHash.value);
+  const migratedTo = parseInt(result.chats[0].migratedTo.channelId.value);
+  const accessHash = parseInt(result.chats[0].migratedTo.accessHash.value);
 
   console.log('migratedTo:', migratedTo, 'accessHash:', accessHash);
 
@@ -294,11 +293,11 @@ async function exportChatLink(channelId, messageId) {
 async function makeAdmin(bot, chatId, userId, ctx) {
   const client = await connect();
 
-  let chat = await client.invoke(new Api.messages.GetFullChat({
+  const chat = await client.invoke(new Api.messages.GetFullChat({
     chatId: Math.abs(chatId),
   }));
 
-  let newAdmin = chat.users.find((el) => parseInt(el.id.value) === userId);
+  const newAdmin = chat.users.find((el) => parseInt(el.id.value) === userId);
   console.log('newAdmin: ', newAdmin);
   let result;
 
