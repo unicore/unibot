@@ -14,7 +14,7 @@ async function notify(bot, source, hostname, what, meta) {
     console.log("on notify3", to, meta)
     let msg = await constructReportMessage(bot, hostname, meta)
 
-    if (to){
+    if (to) {
       await sendMessageToUser(bot, {id: to.id}, { text: `Ваш отчёт одобрен в проекте ${source.unionName}: \n\n${msg}` }, {});
     }
   }

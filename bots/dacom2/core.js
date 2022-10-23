@@ -215,12 +215,12 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
   toPrint += `\n\t🔗 В очереди: ${myTail.totalUserInTail}`;
   // if (hostname === bot.getEnv().DEMO_HOST) {
-    // contract = 'faketoken';
-    // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
-    // toPrint += `\n\nВаш демо-баланс: ${bal}`;
+  // contract = 'faketoken';
+  // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
+  // toPrint += `\n\nВаш демо-баланс: ${bal}`;
   // } else {
-    // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
-    // toPrint += `\n\nВаш доступный баланс: ${bal}`;
+  // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+  // toPrint += `\n\nВаш доступный баланс: ${bal}`;
   // }
 
   const buttons = [];
@@ -357,7 +357,7 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
     if (ctx)
       return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`)
     else
-    return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` });
+      return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` });
   });
 
   await Promise.all(messagePromises);
@@ -475,8 +475,8 @@ async function printWallet(bot, user, ctx, hostname) {
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
   // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-    buttons.push(Markup.button.callback('вывести', 'withdraw'));
+  // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+  buttons.push(Markup.button.callback('вывести', 'withdraw'));
   // }
 
   if (user && user.eosname) {
@@ -504,7 +504,7 @@ async function printWallet(bot, user, ctx, hostname) {
     let estimateSysIncome
     let royalty
 
-    if (hostname){
+    if (hostname) {
       params = await getHelixParams(bot, hostname);
       convert_rate = params.host.sale_shift / 10000
       totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
@@ -548,7 +548,7 @@ async function printWallet(bot, user, ctx, hostname) {
           ctx.deleteMessage(ctx.update.message.message_id)
           ctx.deleteMessage(id)
         },
-      30 * 1000,
+        30 * 1000,
       )
     }
   }
@@ -763,7 +763,7 @@ async function retireAction(bot, user, amount, address) {
       blocksBehind: 3,
       expireSeconds: 30,
     }).then(async () => {
-     resolve()
+      resolve()
     }).catch(async (e) => {
       reject(e)
     });
@@ -1233,7 +1233,7 @@ async function exitFromTail(bot, ctx, user, hostname) {
   }
 }
 
-async function getWelcome(){
+async function getWelcome() {
   let text = ''
   text += `Любая цель - это проект, предложенный и утвержденный участниками союза.`
   text += `Для создания цели напишите ваш запрос с тегом #goal в этот чат.`
@@ -1243,7 +1243,7 @@ async function getWelcome(){
   return text
 }
 
-async function getGoalInstructions(){
+async function getGoalInstructions() {
   let text = ""
   text += `Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.`
   // text += `\n\n/donate - создать взнос в цель и получить возможность голосовать за цели (минимальный взнос 10 USDT)`
@@ -1259,28 +1259,28 @@ async function getGoalInstructions(){
 async function addToTeam(bot, ctx, user, hostname, dac, title) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'adddac',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          username: dac,
-          host: hostname,
-          weight: 1,
-          limit_type: "",
-          income_limit: "0.0000 FLOWER",
-          title: title,
-          descriptor: ""
-        },
+  await eos.transact({
+    actions: [{
+      account: 'unicore',
+      name: 'adddac',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
       }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
+      data: {
+        username: dac,
+        host: hostname,
+        weight: 1,
+        limit_type: "",
+        income_limit: "0.0000 FLOWER",
+        title: title,
+        descriptor: ""
+      },
+    }],
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
 }
 
 module.exports = {

@@ -347,8 +347,8 @@ module.exports.init = async (botModel, bot) => {
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
 
-   let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-   
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
       if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
@@ -366,7 +366,7 @@ module.exports.init = async (botModel, bot) => {
     }
 
     await ctx.reply('Добро пожаловать на игровую платформу развития человека от Института Коллективного Разума.\n\n');
-    
+
     await printQuests(ctx)
   });
 
@@ -390,153 +390,153 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-//___________
+  // ___________
 
-async function setSellMenu(bot, ctx, user) {
-  let myOrders = await getMyOrders(bot, user.eosname);
-  myOrders = myOrders.filter((el) => el.parent_creator === '');
+  async function setSellMenu(bot, ctx, user) {
+    let myOrders = await getMyOrders(bot, user.eosname);
+    myOrders = myOrders.filter((el) => el.parent_creator === '');
 
-  if (myOrders.length > 0) {
-    const order = myOrders[0];
+    if (myOrders.length > 0) {
+      const order = myOrders[0];
 
-    const childOrders = await getChildOrders(bot, order.id);
+      const childOrders = await getChildOrders(bot, order.id);
 
-    const token = parseTokenString(order.out_quantity);
-    const outRate = await bot.uni.p2pContract.getUsdRate(token.symbol, 4);
+      const token = parseTokenString(order.out_quantity);
+      const outRate = await bot.uni.p2pContract.getUsdRate(token.symbol, 4);
 
-    const outQuantity = `${(parseFloat(order.quote_quantity) / parseFloat(outRate)).toFixed(4)} ${token.symbol}`;
+      const outQuantity = `${(parseFloat(order.quote_quantity) / parseFloat(outRate)).toFixed(4)} ${token.symbol}`;
 
-    const buttons = [];
+      const buttons = [];
 
-    let text = `У вас есть активная заявка на сумму ${outQuantity}`;
-    if (childOrders.length > 0) {
-      if (childOrders[0].status === 'finish') {
-        text += '\nСтатус: завершена';
-        buttons.push(Markup.button.callback('Очистить заявку', `delorder ${order.id}`));
+      let text = `У вас есть активная заявка на сумму ${outQuantity}`;
+      if (childOrders.length > 0) {
+        if (childOrders[0].status === 'finish') {
+          text += '\nСтатус: завершена';
+          buttons.push(Markup.button.callback('Очистить заявку', `delorder ${order.id}`));
+
+          ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        } else {
+          text += '\nСтатус: в процессе';
+          text += '\n\nОтменить заявку до завершения или отмены обмена партнёром невозможно.';
+
+          ctx.reply(text);
+        }
+      } else {
+        text += '\nСтатус: ожидание';
+        text += '\n\nОтменить заявку?';
+        buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${order.id}`));
 
         ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-      } else {
-        text += '\nСтатус: в процессе';
-        text += '\n\nОтменить заявку до завершения или отмены обмена партнёром невозможно.';
-
-        ctx.reply(text);
       }
     } else {
-      text += '\nСтатус: ожидание';
-      text += '\n\nОтменить заявку?';
-      buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${order.id}`));
-
-      ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+      const buttons = [];
+      buttons.push(Markup.button.callback('USDT (сеть TRC20)', 'sellwith USDT'));
+      ctx.reply('\n Выберите валюту для получения помощи: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     }
-  } else {
-    const buttons = [];
-    buttons.push(Markup.button.callback('USDT (сеть TRC20)', 'sellwith USDT'));
-    ctx.reply('\n Выберите валюту для получения помощи: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   }
-}
 
-async function showBuySellMenu(bot, user, ctx) {
-  const myOrders = await bot.uni.p2pContract.getOrders(user.eosname);
-  const buyOrders = myOrders.filter((el) => el.type === 'buy');
+  async function showBuySellMenu(bot, user, ctx) {
+    const myOrders = await bot.uni.p2pContract.getOrders(user.eosname);
+    const buyOrders = myOrders.filter((el) => el.type === 'buy');
 
-  if (user.state === 'giveHelp') {
-    if (buyOrders.length === 0) setBuyMenu(ctx);
-    else {
-      const buyOrder = buyOrders[0];
-      const buttons2 = [];
-      buttons2.push(Markup.button.callback('Отменить заявку', `cancelorder ${buyOrder.id}`));
-      ctx.reply(`У вас уже есть активная заявка на оказание помощи на сумму ${buyOrder.out_quantity}. `, Markup.inlineKeyboard(buttons2, { columns: 1 }).resize());
+    if (user.state === 'giveHelp') {
+      if (buyOrders.length === 0) setBuyMenu(ctx);
+      else {
+        const buyOrder = buyOrders[0];
+        const buttons2 = [];
+        buttons2.push(Markup.button.callback('Отменить заявку', `cancelorder ${buyOrder.id}`));
+        ctx.reply(`У вас уже есть активная заявка на оказание помощи на сумму ${buyOrder.out_quantity}. `, Markup.inlineKeyboard(buttons2, { columns: 1 }).resize());
+      }
+    } else if (user.state === 'getHelp') {
+      await setSellMenu(bot, ctx, user);
     }
-  } else if (user.state === 'getHelp') {
-    await setSellMenu(bot, ctx, user);
   }
-}
 
-async function checkSponsor(bot, username, sponsor, contract) {
-  const promoBudget = await getPromoBudget(bot, sponsor);
-  const userHasRequest = await hasRequest(bot, username, contract);
-  const partner = await getPartner(bot, username);
+  async function checkSponsor(bot, username, sponsor, contract) {
+    const promoBudget = await getPromoBudget(bot, sponsor);
+    const userHasRequest = await hasRequest(bot, username, contract);
+    const partner = await getPartner(bot, username);
 
-  return parseFloat(promoBudget) > 0 && !userHasRequest && partner.referer === sponsor;
-}
+    return parseFloat(promoBudget) > 0 && !userHasRequest && partner.referer === sponsor;
+  }
 
-async function isAdmin(bot, id) {
-  return Number(id) === Number(bot.getEnv().ADMIN_ID);
-}
+  async function isAdmin(bot, id) {
+    return Number(id) === Number(bot.getEnv().ADMIN_ID);
+  }
 
-async function depositAction(bot, ctx, user) {
-  const helix = await getHelixParams(bot, user.deposit_action.hostname);
-  try {
+  async function depositAction(bot, ctx, user) {
+    const helix = await getHelixParams(bot, user.deposit_action.hostname);
+    try {
+      const eos = await bot.uni.getEosPassInstance(user.wif);
+
+      const data = await eos.transact({
+        actions: [{
+          account: helix.host.root_token_contract,
+          name: 'transfer',
+          authorization: [{
+            actor: user.eosname,
+            permission: 'active',
+          }],
+          data: {
+            from: user.eosname,
+            to: 'unicore',
+            quantity: user.deposit_action.quantity,
+            memo: `100-${user.deposit_action.hostname}-`,
+          },
+        }],
+      }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      });
+
+      const cons = data.processed.action_traces[0].inline_traces[1].console;
+      const regex = /BALANCE_ID: (\w+);?/gi;
+      const group = regex.exec(cons);
+      const balanceId = group[1];
+      // eslint-disable-next-line max-len
+      const balance = await getOneUserHelixBalance(bot, user.deposit_action.hostname, user.eosname, balanceId);
+      await addUserHelixBalance(user.eosname, balance);
+      await ctx.replyWithHTML('Взнос успешно принят');
+      await printHelixWallet(bot, ctx, user, user.deposit_action.hostname);
+    } catch (e) {
+      await ctx.replyWithHTML(e.message);
+      console.error('ere: ', e);
+    }
+  }
+
+  async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
     const eos = await bot.uni.getEosPassInstance(user.wif);
-
-    const data = await eos.transact({
-      actions: [{
-        account: helix.host.root_token_contract,
-        name: 'transfer',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
+    try {
+      await eos.transact({
+        actions: [{
+          account: 'unicore',
+          name: 'refreshbal',
+          authorization: [{
+            actor: user.eosname,
+            permission: 'active',
+          }],
+          data: {
+            username: user.eosname,
+            balance_id: balanceId,
+            partrefresh: 50,
+          },
         }],
-        data: {
-          from: user.eosname,
-          to: 'unicore',
-          quantity: user.deposit_action.quantity,
-          memo: `100-${user.deposit_action.hostname}-`,
-        },
-      }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
-
-    const cons = data.processed.action_traces[0].inline_traces[1].console;
-    const regex = /BALANCE_ID: (\w+);?/gi;
-    const group = regex.exec(cons);
-    const balanceId = group[1];
-    // eslint-disable-next-line max-len
-    const balance = await getOneUserHelixBalance(bot, user.deposit_action.hostname, user.eosname, balanceId);
-    await addUserHelixBalance(user.eosname, balance);
-    await ctx.replyWithHTML('Взнос успешно принят');
-    await printHelixWallet(bot, ctx, user, user.deposit_action.hostname);
-  } catch (e) {
-    await ctx.replyWithHTML(e.message);
-    console.error('ere: ', e);
+      }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      });
+      // NOTIFY user
+      await printUserBalances(bot, ctx, user, hostname, currentIndex, true);
+    } catch (e) {
+      await ctx.replyWithHTML(e.message);
+      console.error(e);
+    }
   }
-}
-
-async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
-  const eos = await bot.uni.getEosPassInstance(user.wif);
-  try {
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'refreshbal',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          username: user.eosname,
-          balance_id: balanceId,
-          partrefresh: 50,
-        },
-      }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
-    // NOTIFY user
-    await printUserBalances(bot, ctx, user, hostname, currentIndex, true);
-  } catch (e) {
-    await ctx.replyWithHTML(e.message);
-    console.error(e);
-  }
-}
 
   bot.action(/buywith (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const currency = ctx.match[1];
-    
+
     user.order_action = {
       name: 'createorder',
       data: {
@@ -562,13 +562,13 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 
   bot.hears('🎫 выбрать квест', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     // await setBuyMenu(ctx)
     printQuests(ctx)
     // ctx.reply('покупаю!')
   });
 
-  async function printQuests(ctx){
+  async function printQuests(ctx) {
     let text = "ОСТРОВ ВЕРЫ 🏝\n\n"
 
     text += `Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n`
@@ -592,7 +592,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const quest = ctx.match[1];
-    
+
     let text = ""
     // text = `Локация: кафе у моря\n\n`
     text += `Пришедший не откуда
@@ -671,7 +671,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 
     text = ""
     text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n `
-    
+
     user.state = "quest"
     user.quest = "faith_island"
 
@@ -1633,7 +1633,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     if (user) {
       if (ctx.update.message.chat.type !== 'private') {
         let { text } = ctx.update.message;
-        
+
         if (ctx.update.message.reply_to_message) {
           // eslint-disable-next-line max-len
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id);
@@ -1704,7 +1704,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
             const id = await sendMessageToUser(bot, { id: bot.getEnv().SIN_CHANNEL }, { text });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().SIN_CHANNEL, text, id, 'question');
-            
+
             user.sins_count ? user.sins_count += 1 : user.sins_count = 1
 
             await saveUser(bot.instanceName, user);

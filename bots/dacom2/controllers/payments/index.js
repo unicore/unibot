@@ -1,5 +1,5 @@
 const {
-  getUserByEosName, insertMessage, insertTicket,getGoalByChatMessage
+  getUserByEosName, insertMessage, insertTicket, getGoalByChatMessage
 } = require('../../db');
 const { sendMessageToUser } = require('../../messages');
 
@@ -45,7 +45,7 @@ module.exports.payReciever = async (req, res) => {
     };
   }
 
-  if (type === "donate" && !meta){
+  if (type === "donate" && !meta) {
     res.code(401);
     return {
       ok: false,
@@ -69,12 +69,12 @@ module.exports.payReciever = async (req, res) => {
 
   let goal = await getGoalByChatMessage(bot.instanceName, "core", chat.goal_message_id)
 
-  if (type === "donate"){
+  if (type === "donate") {
     let text = await constructGoalMessage(bot, hostname, null, meta.goal_id)
 
-     try{
+    try {
       await bot.telegram.editMessageText(chat.goal_channel_id, chat.goal_message_id, null, text);
-    } catch(e){
+    } catch (e) {
       console.log("same message!", e)
     }
     // await editGoalMsg(bot, ctx, user, hostname, meta.goal_id, true)

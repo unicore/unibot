@@ -951,7 +951,7 @@ module.exports.init = async (botModel, bot) => {
       }
     }
   });
-  
+
   bot.action('skip', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
@@ -965,7 +965,7 @@ module.exports.init = async (botModel, bot) => {
 
     await sendMessageToUser(bot, user, { text: t }, menu);
   });
-  
+
   bot.action('skipdemo', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 

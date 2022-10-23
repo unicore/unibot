@@ -418,7 +418,7 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
     const db = await loadDB();
     const collection = db.collection(`dacomGoals_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    
+
     await collection.updateOne(
       { channel_message_id, channel_id },
       { $set: {"chat_message_id": chat_message_id, "chat_id": chat_id.toString()} },
@@ -434,7 +434,7 @@ async function addMainChatMessageToReport(suffix, report_channel_message_id, upd
     const db = await loadDB();
     const collection = db.collection(`dacomReports_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    
+
     await collection.updateOne(
       { report_channel_message_id },
       { $set: updater },
@@ -456,7 +456,7 @@ async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id
       channel_message_id,
       channel_id
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -471,7 +471,7 @@ async function getGoal(suffix, goal_id) {
     let res = await collection.findOne({
       goal_id
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -487,7 +487,7 @@ async function getAllHeadGoalsMessages(suffix, goal_id) {
       goal_id: goal_id.toString()
     }).toArray();
 
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -503,7 +503,7 @@ async function getTaskByChatMessage(suffix, host, chat_message_id) {
       host,
       chat_message_id
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -519,7 +519,7 @@ async function getTaskById(suffix, host, task_id) {
       host,
       task_id
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -534,7 +534,7 @@ async function getUnion(suffix, chatId) {
     let res = await collection.findOne({
       id: chatId
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -550,7 +550,7 @@ async function getUnionByType(suffix, ownerEosname, type) {
       ownerEosname,
       type
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -566,13 +566,13 @@ async function getUnionByHostType(suffix, host, type) {
       host,
       type
     });
-    return res 
+    return res
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
 
-async function insertProject(suffix, project){
+async function insertProject(suffix, project) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomProjects_${suffix}`);

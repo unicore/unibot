@@ -221,8 +221,8 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   //   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
   //   toPrint += `\n\nВаш демо-баланс: ${bal}`;
   // } else {
-    const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().TARGET);
-    toPrint += `\n\nВаш доступный баланс: ${bal}`;
+  const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().TARGET);
+  toPrint += `\n\nВаш доступный баланс: ${bal}`;
   // }
 
   const buttons = [];
@@ -364,10 +364,10 @@ async function cantBuyTicket(ctx, bot, user) {
 async function printWallet(bot, user, ctx) {
   const buttons = [];
 
-    // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
-    // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+  // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
+  // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
-    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+  // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
 
   if (user && user.eosname) {
     // const account = await bot.uni.readApi.getAccount(user.eosname);
@@ -382,9 +382,9 @@ async function printWallet(bot, user, ctx) {
     // buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
 
     // if (balances.length === 0)
-      buttons.push(Markup.button.callback('🎫 купить лицензию', `buyticket`));
+    buttons.push(Markup.button.callback('🎫 купить лицензию', `buyticket`));
     // else
-      // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
+    // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
 
     buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
 
@@ -495,7 +495,7 @@ async function retireAction(bot, user, amount, address) {
       blocksBehind: 3,
       expireSeconds: 30,
     }).then(async () => {
-     resolve()
+      resolve()
     }).catch(async (e) => {
       reject(e)
     });
