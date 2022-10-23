@@ -1,5 +1,5 @@
 const {
-  getUserByEosName, insertMessage, insertTicket
+  getUserByEosName, insertMessage, insertTicket,
 } = require('../../db');
 const { sendMessageToUser } = require('../../messages');
 
@@ -17,7 +17,7 @@ module.exports.payReciever = async (req, res) => {
     botName,
     eosname,
     amount,
-    trx_id
+    trx_id,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'mapala');
@@ -57,7 +57,7 @@ module.exports.payReciever = async (req, res) => {
     cycle,
     pool,
     trx_id,
-    eosname
+    eosname,
   })
 
   await sendMessageToUser(bot, user, { text: message }, icomeMenu);

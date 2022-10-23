@@ -311,7 +311,7 @@ async function insertMessage(suffix, user, from, message, message_id, type, meta
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       type, message_id, id: user.id, eosname: user.eosname, from, message, time: new Date(),
-      ...meta
+      ...meta,
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -358,7 +358,7 @@ async function insertUnion(suffix, union) {
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       ...union,
-      created_at: new Date()
+      created_at: new Date(),
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -374,7 +374,7 @@ async function insertGoal(suffix, goal) {
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       ...goal,
-      created_at: new Date()
+      created_at: new Date(),
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -390,7 +390,7 @@ async function insertTask(suffix, task) {
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       ...task,
-      created_at: new Date()
+      created_at: new Date(),
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -406,7 +406,7 @@ async function insertReport(suffix, report) {
     await collection.insertOne({
       // eslint-disable-next-line camelcase
       ...report,
-      created_at: new Date()
+      created_at: new Date(),
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -454,7 +454,7 @@ async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id
     let res = await collection.findOne({
       host,
       channel_message_id,
-      channel_id
+      channel_id,
     });
     return res
   } catch (e) {
@@ -469,7 +469,7 @@ async function getGoal(suffix, goal_id) {
     const collection = db.collection(`dacomGoals_${suffix}`);
 
     let res = await collection.findOne({
-      goal_id
+      goal_id,
     });
     return res
   } catch (e) {
@@ -484,7 +484,7 @@ async function getAllHeadGoalsMessages(suffix, goal_id) {
     const collection = db.collection(`dacomGoals_${suffix}`);
 
     let res = await collection.find({
-      goal_id: goal_id.toString()
+      goal_id: goal_id.toString(),
     }).toArray();
 
     return res
@@ -501,7 +501,7 @@ async function getTaskByChatMessage(suffix, host, chat_message_id) {
 
     let res = await collection.findOne({
       host,
-      chat_message_id
+      chat_message_id,
     });
     return res
   } catch (e) {
@@ -517,7 +517,7 @@ async function getTaskById(suffix, host, task_id) {
 
     let res = await collection.findOne({
       host,
-      task_id
+      task_id,
     });
     return res
   } catch (e) {
@@ -532,7 +532,7 @@ async function getUnion(suffix, chatId) {
     const collection = db.collection(`dacomUnions_${suffix}`);
     console.log('GET UNION: ', chatId)
     let res = await collection.findOne({
-      id: chatId
+      id: chatId,
     });
     return res
   } catch (e) {
@@ -548,7 +548,7 @@ async function getUnionByType(suffix, ownerEosname, type) {
 
     let res = await collection.findOne({
       ownerEosname,
-      type
+      type,
     });
     return res
   } catch (e) {
@@ -564,7 +564,7 @@ async function getUnionByHostType(suffix, host, type) {
 
     let res = await collection.findOne({
       host,
-      type
+      type,
     });
     return res
   } catch (e) {
@@ -656,7 +656,7 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     await collection.updateOne(
       { '_id': mongoose.Types.ObjectId(withdraw_id) },
       { $set: {
-        status
+        status,
       } },
       { upsert: false },
     );
@@ -733,5 +733,5 @@ module.exports = {
   insertProject,
   getUnionByHostType,
   getAllHeadGoalsMessages,
-  getGoal
+  getGoal,
 };

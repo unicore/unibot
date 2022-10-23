@@ -535,13 +535,13 @@ module.exports.init = async (botModel, bot) => {
     try {
       let params = {
         username: user.eosname,
-        currency: currency
+        currency: currency,
       }
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`
 
       const result = await axios.post(
         path,
-        params
+        params,
       );
 
       if (result.data.status === 'ok')

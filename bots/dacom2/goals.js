@@ -456,7 +456,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
   } catch (e) {
-    console.log('on error: ',)
+    console.log('on error: ')
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
     } else {

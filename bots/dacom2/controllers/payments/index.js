@@ -1,5 +1,5 @@
 const {
-  getUserByEosName, insertMessage, insertTicket, getGoalByChatMessage
+  getUserByEosName, insertMessage, insertTicket, getGoalByChatMessage,
 } = require('../../db');
 const { sendMessageToUser } = require('../../messages');
 
@@ -22,7 +22,7 @@ module.exports.payReciever = async (req, res) => {
     trx_id,
     chat,
     type,
-    meta
+    meta,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'dacom2');
@@ -49,7 +49,7 @@ module.exports.payReciever = async (req, res) => {
     res.code(401);
     return {
       ok: false,
-      message: 'metadata for donate type is not accepted'
+      message: 'metadata for donate type is not accepted',
     }
   }
 

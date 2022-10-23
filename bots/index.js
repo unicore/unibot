@@ -23,7 +23,7 @@ const BOTS = {
   se: SeBot,
   mapala: MapalaBot,
   dacom2: Dacom2Bot,
-  wallet: WalletBot
+  wallet: WalletBot,
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {

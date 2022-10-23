@@ -27,7 +27,7 @@ const {
   exitFromTail,
   cantBuyTicket,
   depositAction,
-  retireAction
+  retireAction,
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -89,7 +89,7 @@ const {
   insertWithdraw,
   updateWithdraw,
   getUserByEosName,
-  getWithdraw
+  getWithdraw,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -291,7 +291,7 @@ async function nextQuiz(bot, user, ctx) {
       eosname: user.eosname,
       text: text,
       message_id: id,
-      channel_id: bot.getEnv().STUDENTS_CHANNEL_ID
+      channel_id: bot.getEnv().STUDENTS_CHANNEL_ID,
     })
 
     if (!user.eosname) {
@@ -630,7 +630,7 @@ module.exports.init = async (botModel, bot) => {
             } else {
               user.state = 'set_withdraw_address'
               user.on_withdraw = {
-                amount
+                amount,
               }
               await saveUser(bot.instanceName, user);
 
@@ -750,13 +750,13 @@ module.exports.init = async (botModel, bot) => {
     try {
       let params = {
         username: user.eosname,
-        currency: currency
+        currency: currency,
       }
       let path = `${bot.getEnv().PAY_GATEWAY}/generate`
 
       const result = await axios.post(
         path,
-        params
+        params,
       );
 
       if (result.data.status === 'ok') {
@@ -809,7 +809,7 @@ module.exports.init = async (botModel, bot) => {
       amount: user.on_withdraw.amount,
       address: user.on_withdraw.address,
       created_at: new Date(),
-      status: 'created'
+      status: 'created',
     })
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);

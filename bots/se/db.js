@@ -360,5 +360,5 @@ module.exports = {
   insertMessage,
   getMessage,
   getChat,
-  getUserByResumeChannelId
+  getUserByResumeChannelId,
 };

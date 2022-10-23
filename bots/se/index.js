@@ -80,7 +80,7 @@ const {
   saveQuiz,
   insertMessage,
   getMessage,
-  getUserByResumeChannelId
+  getUserByResumeChannelId,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');

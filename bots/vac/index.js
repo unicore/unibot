@@ -80,7 +80,7 @@ const {
   saveQuiz,
   insertMessage,
   getMessage,
-  getUserByResumeChannelId
+  getUserByResumeChannelId,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -160,7 +160,7 @@ const quizDefinition = [
   { message: 'Какая ваша профессиональная специализация?'},
   { message: 'В чём хотели бы развиваться?' },
   { message: 'Расскажите о себе или пришлите ссылку на резюме' },
-  { message: 'Почему вы хотите сотрудничать с Институтом?'}
+  { message: 'Почему вы хотите сотрудничать с Институтом?'},
 ];
 
 async function startQuiz(bot, ctx, user) {

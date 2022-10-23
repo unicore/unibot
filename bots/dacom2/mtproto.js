@@ -68,7 +68,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     new Api.messages.CreateChat({
       users: ['me', bot.getEnv().BOTNAME],
       title: chatTitle,
-    })
+    }),
   );
 
   chatId = parseInt((result.chats[0].id.value))
@@ -77,7 +77,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     peer: chatId,
     // legacyRevokePermanent: true,
     // requestNeeded: false,
-    title: 'Welcome'
+    title: 'Welcome',
   }));
 
   chatLink = chatLink.link
@@ -86,7 +86,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     peer: channelId,
     // legacyRevokePermanent: true,
     // requestNeeded: false,
-    title: 'Welcome'
+    title: 'Welcome',
   }));
 
   channelLink = channelLink.link
@@ -110,9 +110,9 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
       addAdmins: true,
       anonymous: false,
       manageCall: true,
-      other: true
+      other: true,
     }),
-    rank: 'оператор'
+    rank: 'оператор',
   }));
 
   await client.invoke(new Api.channels.EditAdmin({
@@ -129,9 +129,9 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
       addAdmins: true,
       anonymous: false,
       manageCall: true,
-      other: true
+      other: true,
     }),
-    rank: 'оператор'
+    rank: 'оператор',
   }));
 
   console.log('ADMIN RESULT: ', admin_result)
@@ -145,7 +145,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     unionName,
     link: chatLink,
     projectCount: projectCount + 1,
-    is_private
+    is_private,
   })
 
   await insertUnion(bot.instanceName, {
@@ -157,7 +157,7 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     unionName,
     link: channelLink,
     projectCount: projectCount + 1,
-    is_private
+    is_private,
   })
   console.log('GOALS CHANNEL: ', result)
 
@@ -201,7 +201,7 @@ async function setDiscussionGroup(bot, chatId, channelId) {
   const client = await connect()
 
   const result = await client.invoke(new Api.messages.MigrateChat({
-    chatId: chatId
+    chatId: chatId,
   }));
 
   console.log('result on migrate:', result)
@@ -214,13 +214,13 @@ async function setDiscussionGroup(bot, chatId, channelId) {
   await client.invoke(new Api.channels.TogglePreHistoryHidden({
     channel: `${migratedTo}`,
     enabled: false,
-    accessHash
+    accessHash,
   }));
 
   const result2 = await client.invoke(new Api.channels.SetDiscussionGroup({
     broadcast: `-100${channelId}`,
     group: migratedTo,
-    accessHash: accessHash
+    accessHash: accessHash,
   }));
 
   console.log('result2', result2)
@@ -263,7 +263,7 @@ async function exportChatLink(channelId, messageId) {
   console.log('channelId: ', channelId, messageId)
   const result = await client.invoke(new Api.messages.GetDiscussionMessage({
     peer: channelId,
-    msgId: messageId
+    msgId: messageId,
   }));
   // const result = await client.invoke(new Api.messages.ReadDiscussion({
   //   peer: channelId,
@@ -307,7 +307,7 @@ async function makeAdmin(bot, chatId, userId, ctx) {
         chatId: Math.abs(chatId),
         userId: parseInt(newAdmin.id.value),
         accessHash: parseInt(newAdmin.accessHash.value),
-        isAdmin: true
+        isAdmin: true,
       }));
 
       // await client.invoke(new Api.channels.EditAdmin({
@@ -424,5 +424,5 @@ module.exports = {
   exportChatLink,
   insertUnion,
   makeChannelAdmin,
-  checkBotIsAdmin
+  checkBotIsAdmin,
 };

@@ -8,7 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
-  getTickets
+  getTickets,
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -117,7 +117,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     totalWhiteBalances,
     totalBlackBalances,
     totalBalances,
-    totalPurchaseAmount
+    totalPurchaseAmount,
   };
 }
 
@@ -1084,5 +1084,5 @@ module.exports = {
   exitFromTail,
   cantBuyTicket,
   depositAction,
-  retireAction
+  retireAction,
 };
