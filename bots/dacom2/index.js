@@ -2159,7 +2159,7 @@ module.exports.init = async (botModel, bot) => {
               buttons.push(Markup.button.callback('отклонить', 'vote'));
               const request = Markup.inlineKeyboard(buttons, { columns: 2 }).resize();
               ctx.reply('Выберите действие: ', { reply_to_message_id: ctx.message.message_id, ...request });
-              await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, { 'report_chat_message_id': ctx.message.message_id });
+              await addMainChatMessageToReport(bot.instanceName, ctx.update.message.forward_from_message_id, { report_chat_message_id: ctx.message.message_id });
             } else {
 
             }
