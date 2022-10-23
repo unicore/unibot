@@ -587,7 +587,7 @@ module.exports.init = async (botModel, bot) => {
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
-  };
+  }
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);

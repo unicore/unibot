@@ -265,7 +265,7 @@ const quizDefinition = [
 
 async function welcome(bot, ctx) {
   await pushEducation(bot, ctx, 0);
-};
+}
 
 async function finishEducation(bot, ctx, id) {
   const icomeMenu = Markup

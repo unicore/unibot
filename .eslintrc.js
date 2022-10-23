@@ -30,7 +30,6 @@ module.exports = {
     'import/order': 'off',
     'no-unused-expressions': 'off',
     'no-await-in-loop': 'off',
-    'no-extra-semi': 'off',
     'no-lonely-if': 'off',
     radix: 'off',
     'no-empty': 'off',
