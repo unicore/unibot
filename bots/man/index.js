@@ -240,7 +240,6 @@ async function startQuiz(bot, ctx, user) {
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   return ctx.reply('Меня зовут @DACombot, я робот и ваш проводник в мир сообществ Коллективного Разума.\n\nПожалуйста, поделитесь своим контактом для продолжения знакомства.', request);
-
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -353,7 +352,6 @@ module.exports.init = async (botModel, bot) => {
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
       if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
-      
         user = ctx.update.message.from;
         user.app = bot.getEnv().APP;
 
@@ -370,7 +368,6 @@ module.exports.init = async (botModel, bot) => {
     await ctx.reply('Добро пожаловать на игровую платформу развития человека от Института Коллективного Разума.\n\n');
     
     await printQuests(ctx)
-
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
@@ -590,7 +587,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
-
   };
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
@@ -682,7 +678,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     await saveUser(bot.instanceName, user)
 
     await ctx.replyWithHTML(text)
-  
   })
 
   bot.hears('Вступить', async (ctx) => {
@@ -1718,7 +1713,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 
             if (user.sins_count >= 100)
               await ctx.reply("Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!")
-
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 

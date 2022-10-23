@@ -162,16 +162,13 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     console.log('GOALS CHANNEL: ', result)
 
   return {chatId, channelId, chatLink, channelLink}
-  
 }   
 
 async function checkBotIsAdmin(bot, user, ctx, chatId) {
   let res 
   
   try {
-
     res = await bot.telegram.getChatAdministrators(chatId)
-
   } catch(e) {
     ctx.reply(`Ошибка! Бот ${bot.getEnv().BOTNAME} должен быть назначен администратором в новостном канале DAO. Для отмены установки новостного канала вызовите команду /cancel_set_news_channel`)
     return {status: 'error', message: e.message}
@@ -230,7 +227,6 @@ async function setDiscussionGroup(bot, chatId, channelId){
   
   return migratedTo
   // console.log('SET DISCUSSION: ', result)
-
 }
 
 async function createGroupCall(bot, chatId, scheduleDate) {
@@ -307,7 +303,6 @@ async function makeAdmin(bot, chatId, userId, ctx){
   
   try{
     if (newAdmin){
-
       await client.invoke(new Api.messages.EditChatAdmin({
           chatId: Math.abs(chatId),
           userId: parseInt(newAdmin.id.value),
@@ -340,16 +335,13 @@ async function makeAdmin(bot, chatId, userId, ctx){
       //   accessHash: parseInt(newAdmin.accessHash.value),
       //   isAdmin: true
       // }));
-
     }
   } catch(e){
     result = e
     console.log("error: ", e)
-    
   }
   
   return result
-
 }
 
 async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
@@ -422,7 +414,6 @@ async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
   // }
   
   // return result
-
 }
 
 module.exports = {

@@ -207,7 +207,6 @@ async function createGoal(bot, ctx, user) {
     user.create_goal = {};
     await saveUser(bot.instanceName, user);
   } catch (e) {
-
     console.log(goal)
     ctx.reply(e.message);
     console.error(e);
@@ -291,7 +290,6 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
     text += `\nДо начала накопления: ${totalPrevGoalsAmount} билетов`
     text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`  
     // text += `\nвывод средств доступен сразу по`
-
   } else {
     text += `\nЦель не установлена`
   }

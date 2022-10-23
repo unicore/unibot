@@ -16,9 +16,7 @@ async function notify(bot, source, hostname, what, meta) {
 
     if (to){
       await sendMessageToUser(bot, {id: to.id}, { text: `Ваш отчёт одобрен в проекте ${source.unionName}: \n\n${msg}` }, {});
-      
     }
-
   }
 
   // }

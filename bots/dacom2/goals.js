@@ -122,7 +122,6 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
     let coordinator = ""
 
     if (goal.benefactor !== ""){
-
       let coordUser = await getUserByEosName(bot.instanceName, goal.creator)
       coordinator = (user.username && user.username !== "") ? '@' + user.username : goal.benefactor
     }
@@ -140,7 +139,6 @@ async function constructGoalMessage(bot, hostname, goal, goalId){
 
     return text
   } else return ""
-
 }
 
 async function constructTaskMessage(bot, hostname, task, taskId){
@@ -191,7 +189,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
           // text + `В проекте: ${prData.data.base.repo.full_name}\n`;
           text += `📁 файлов затронуто: ${prData.data.changed_files}\n`;
           text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
-
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
           if (githubCommitUrl) {
@@ -210,7 +207,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
             // text += `В проекте: ${repoData.data.full_name}\n`;
             text += `📁 файлов затронуто: ${commitData.data.files.length}\n`;
             text += `\tстроки: +${commitData.data.stats.additions} -${commitData.data.stats.deletions}\n`;
-
           }
         }
       } catch (e) {
@@ -235,7 +231,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       } else {
         bonus = `${parseFloat((report.positive_votes - report.negative_votes) /  (goal.second_circuit_votes  + report.positive_votes ) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1) )).toFixed(2) } POWER\n`
       }
-
     }
 
     text += `Подарок: ${report.requested} + ${bonus}\n`
@@ -245,13 +240,10 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     // text += `Постановщик: ${report.creator}\n`
     // text += `Координатор: ${report.benefactor}\n`
     return text
-
   } else return null
-
 }
 
 async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
-
   const goal = await fetchGoal(bot, hostname, goalId);
   console.log("GOAL MATCH: ", goal.id, goalId)
 
@@ -308,7 +300,6 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   // console.log("modified", modified)
 
   // console.log(buttons)
-
 }
 
 async function editReportMsg(bot, ctx, user, hostname, reportId) {
@@ -330,11 +321,9 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
   } catch(e){
     console.log("SAME MESSAG!")
   }
-
 }
 
 async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
-
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
     let data = {
@@ -379,7 +368,6 @@ async function setTaskPriority(bot, ctx, user, hostname, taskId, priority) {
 }
 
 async function setBenefactor(bot, ctx, user, hostname, goalId, curator) {
-
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
     await eos.transact({
@@ -467,7 +455,6 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
 
     return report
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
-
   } catch (e) {
     console.log("on error: ", )
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
@@ -479,7 +466,6 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
 
     console.error(e);
     await enableReportButtons(bot, ctx, up, hostname, reportId)
-
   }
 }
 
@@ -511,7 +497,6 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
     });
 
     await editGoalMsg(bot, ctx, user, hostname, goalId);
-
   } catch (e) {
     if (e.message === 'assertion failure with message: You dont have shares for voting process') {
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
@@ -592,7 +577,6 @@ async function editGoal(bot, ctx, user, goal) {
     blocksBehind: 3,
     expireSeconds: 30,
   });
-
  }
 
 async function createGoal(bot, ctx, user, goal) {

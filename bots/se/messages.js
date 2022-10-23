@@ -5,7 +5,6 @@ const { loadDB } = require('./db');
 
 async function sendMessageToUser(bot, user, message, extra) {
   try{
-
     let id = {};
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id);
