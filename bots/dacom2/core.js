@@ -120,7 +120,6 @@ async function getCondition(bot, hostname, key) {
   return 0;
 }
 
-
 async function getDacs(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'dacs');
 
@@ -366,9 +365,6 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
   await Promise.all(messagePromises);
 }
 
-
-
-
 async function printHelixStat(bot, user, hostname, ctx) {
   const buttons = [];
   console.log("ON PRUNT", ctx.update)
@@ -410,7 +406,6 @@ async function printHelixStat(bot, user, hostname, ctx) {
 
     let convert_rate = params.host.sale_shift / 10000
     let levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
-
 
     // text += '\n---------------------------------';
     text += `\n| Союз: ${params.host.username} | ${params.host.title}`;
@@ -523,8 +518,6 @@ async function printWallet(bot, user, ctx, hostname) {
 
     }
 
-
-
     // text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
     text += `\n| Цветки: ${totalBal}`;
@@ -563,8 +556,6 @@ async function printWallet(bot, user, ctx, hostname) {
     }
   }
 }
-
-
 
 async function printPublicWallet(bot, user, hostname, ctx) {
   const buttons = [];
@@ -652,7 +643,6 @@ async function printPublicWallet(bot, user, hostname, ctx) {
   }
 }
 
-
 async function transferAction(bot, user, amount, ctx) {
   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
@@ -707,11 +697,6 @@ async function withdrawPartnerRefBalance(bot, username) {
   }
 }
 
-
-
-
-
-
 async function goalWithdraw(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
@@ -734,7 +719,6 @@ async function goalWithdraw(bot, ctx, user, goal) {
     expireSeconds: 30,
   })
 }
-
 
 async function internalWithdrawAction(bot, user, hostname, balanceId) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
@@ -760,7 +744,6 @@ async function internalWithdrawAction(bot, user, hostname, balanceId) {
     console.log('internalWithdrawActionError: ', e);
   });
 }
-
 
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
@@ -806,13 +789,11 @@ async function massWithdrawAction(bot, user, hostname, balances) {
   }
 }
 
-
 async function getUserIntelOwn(bot, hostname, username) {
   const ios = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'intelown', username, username, 1);
 
   return ios[0] || {total_reports: 0, approved_reports: 0}
 }
-
 
 async function getHelixsList(bot) {
   let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', 'unicore', 'ahosts');
@@ -1279,8 +1260,6 @@ async function getGoalInstructions(){
 
   return text
 }
-
-
 
 async function addToTeam(bot, ctx, user, hostname, dac, title) {
   const eos = await bot.uni.getEosPassInstance(user.wif);

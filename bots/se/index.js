@@ -136,11 +136,9 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   return user.eosname;
 }
 
-
 async function isAdmin(bot, id) {
   return Number(id) === Number(bot.getEnv().ADMIN_ID);
 }
-
 
 async function checkForExistBCAccount(bot, ctx) {
   const user = ctx.update.message.from.id;
@@ -153,7 +151,6 @@ async function checkForExistBCAccount(bot, ctx) {
 
   return true;
 }
-
 
 const quizDefinition = [
   { message: 'Contants' },
@@ -222,8 +219,6 @@ async function nextQuiz(bot, user, ctx) {
     // const menu = Markup // , "цели", "действия"
     //   .keyboard(['🪙 кошелёк'], { columns: 1 }).resize();
 
-
-
     const t = 'Благодарим! Мы ответим вам в ближайшее время.';
 
     await sendMessageToUser(bot, user, { text: t });
@@ -245,7 +240,6 @@ async function nextQuiz(bot, user, ctx) {
     } 
   
     await saveUser(bot.instanceName, user)  
-    
     
   }
 }
@@ -337,7 +331,6 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
   bot.on('contact', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     const quiz = await getQuiz(bot.instanceName, user.id);
@@ -352,17 +345,12 @@ module.exports.init = async (botModel, bot) => {
     await nextQuiz(bot, user, ctx);
   });
 
-
   bot.hears('🏫 Об Институте', async (ctx) => {
     await getUser(bot.instanceName, ctx.update.message.from.id);
     await checkForExistBCAccount(bot, ctx);
 
     ctx.reply('Главный Вход: https://intellect.run');
   });
-
-
-
-
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -372,13 +360,11 @@ module.exports.init = async (botModel, bot) => {
 
   });
 
-
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
-
 
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
@@ -395,7 +381,6 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
-        
 
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -457,7 +442,6 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
   bot.action('mypartners', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     await printPartners(bot, user);
@@ -480,7 +464,6 @@ module.exports.init = async (botModel, bot) => {
       await ctx.replyWithHTML('Недостаточно прав');
     }
   });
-
 
   return null;
 };

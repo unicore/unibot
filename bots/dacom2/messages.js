@@ -7,7 +7,6 @@ const { fetchReport, fetchGoal } = require("./goals");
 async function sendMessageToUser(bot, user, message, extra) {
   try{
 
-
     let id = {};
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id, extra);
@@ -66,8 +65,6 @@ async function sendMessageToAll(bot, message, extra) {
   return users.length;
 }
 
-
-
 async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId)
     report = await fetchReport(bot, hostname, reportId);
@@ -84,7 +81,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let from = (user.username && user.username !== "") ? '@' + user.username : report.username
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
-
 
     if (bot.octokit) {
       try {

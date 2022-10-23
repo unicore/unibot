@@ -952,7 +952,6 @@ module.exports.init = async (botModel, bot) => {
       }
     }
   });
-
   
   bot.action('skip', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -1861,7 +1860,6 @@ module.exports.init = async (botModel, bot) => {
       ctx.editMessageText('Ордер не найден');
     }
   });
-
 
   bot.action(/transfer/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);

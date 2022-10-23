@@ -13,7 +13,6 @@ const apiHash = process.env.API_HASH
 
 const stringSession = new StringSession(process.env.STRING_SESSION)
 
-
 async function connect(){
   const client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 })
   await client.connect()
@@ -55,7 +54,6 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     chatTitle = `Обсуждение проекта #${projectCount + 1} ${unionName}` 
   }
 
-
     result = await client.invoke(new Api.channels.CreateChannel({
       title: channelTitle,
       about: '',
@@ -74,8 +72,6 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     );
 
     chatId = parseInt((result.chats[0].id.value))
-  
-   
 
     chatLink = await client.invoke(new Api.messages.ExportChatInvite({
       peer: chatId,
@@ -169,7 +165,6 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   
 }   
 
-
 async function checkBotIsAdmin(bot, user, ctx, chatId) {
   let res 
   
@@ -200,7 +195,6 @@ async function checkBotIsAdmin(bot, user, ctx, chatId) {
 }
 
 async function MigrateChat(bot, chatId){
-  
   
   // return {id: migratedTo, accessHash}
 
@@ -236,7 +230,6 @@ async function setDiscussionGroup(bot, chatId, channelId){
   
   return migratedTo
   // console.log('SET DISCUSSION: ', result)
-
 
 }
 
@@ -308,7 +301,6 @@ async function makeAdmin(bot, chatId, userId, ctx){
     chatId: Math.abs(chatId),
   }));
   
-  
   let newAdmin = chat.users.find(el => parseInt(el.id.value) === userId)
   console.log('newAdmin: ', newAdmin)
   let result
@@ -360,8 +352,6 @@ async function makeAdmin(bot, chatId, userId, ctx){
 
 }
 
-
-
 async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
   const client = await connect()
   
@@ -375,7 +365,6 @@ async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
   // let chat = await client.invoke(new Api.channels.GetFullChannel({
   //   channel: chatId,
   // }));
-  
   
   // let newAdmin = chat.users.find(el => parseInt(el.id.value) === userId)
   // console.log('newAdmin: ', newAdmin)
@@ -397,9 +386,6 @@ async function makeChannelAdmin(bot, chatId, userId, ctx, channelId){
   //     //     accessHash: parseInt(newAdmin.accessHash.value),
   //     //     isAdmin: true
   //     // }));
-      
-      
-
 
   //     // await client.invoke(new Api.channels.EditAdmin({
   //     //   channel: "1619899041",

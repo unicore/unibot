@@ -7,7 +7,6 @@ async function notify(bot, source, hostname, what, meta) {
 
   // if (current_chat){
 
-
   console.log("on notify")
   if (what === 'acceptReport') {
     console.log("on notify2")

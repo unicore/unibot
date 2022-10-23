@@ -88,7 +88,6 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
 
     totalPurchaseAmount = `${(parseFloat(totalPurchaseAmount) + parseFloat(balance.purchase_amount)).toFixed(4)} FLOWER`;
 
-
     if (hostname) {
       if (parseFloat(balance.available) < parseFloat(balance.purchase_amount)) {
         if (helix.host.current_cycle_num > balance.cycle_num) {
@@ -378,8 +377,6 @@ async function printWallet(bot, user, ctx) {
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
 
-
-
     // let tickets = await getTickets(bot.instanceName, user)
     // let currentTicket = tickets[0]
 
@@ -392,12 +389,10 @@ async function printWallet(bot, user, ctx) {
 
     buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
 
-
     const refStat = await getRefStat(bot, user.eosname, bot.getEnv().SYMBOL);
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
-
 
     const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
@@ -481,8 +476,6 @@ async function transferAction(bot, user, amount, ctx) {
   }
 }
 
-
-
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   return new Promise(async (resolve, reject) => {
@@ -512,7 +505,6 @@ async function retireAction(bot, user, amount, address) {
 
   })
 }
-
 
 async function withdrawPartnerRefBalance(bot, username) {
   const partner = await getPartner(bot, username);
@@ -568,7 +560,6 @@ async function getHelixsList(bot) {
   helixs = helixs.filter((el) => el.username !== bot.getEnv().DEMO_HOST);
   return helixs;
 }
-
 
 async function depositAction(bot, ctx, user) {
   const helix = await getHelixParams(bot, user.deposit_action.hostname);
@@ -639,7 +630,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     console.error(e);
   }
 }
-
 
 async function internalRefreshAction(bot, balance, username) {
   const eos = await bot.uni.getEosPassInstance(bot.getEnv().REFRESHER_WIF);

@@ -223,7 +223,6 @@ const quizDefinition = [
   { message: 'Мы ищем свой путь в новой реальности и планируем своё будущее, объединяя людей в сообщества и проекты по интересам и компетенциям. Вы готовы взять свою ответственность за своё будущее?', buttons: ['Готов', 'Отмена'] },
 ];
 
-
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
 
@@ -287,12 +286,6 @@ async function nextQuiz(bot, user, ctx) {
   }
 }
 
-
-
-
-
-
-
 module.exports.init = async (botModel, bot) => {
   const protocol = bot.getEnv().PROTOCOL.replace('://', '');
   let host = String(bot.getEnv().ENDPOINT);
@@ -349,10 +342,6 @@ module.exports.init = async (botModel, bot) => {
   // eslint-disable-next-line no-param-reassign
   bot.eosapi = EosApi(options);
 
-
-
-
-
   bot.start(async (ctx) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
 
@@ -384,25 +373,6 @@ module.exports.init = async (botModel, bot) => {
 
   });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   bot.hears('🪙 кошелёк', async (ctx) => {
     // await checkForExistBCAccount(bot, ctx);
     // print("here")
@@ -423,38 +393,7 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
-
-
-
-
-
-
-
-
-
-
 //___________
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 async function setSellMenu(bot, ctx, user) {
   let myOrders = await getMyOrders(bot, user.eosname);
@@ -515,10 +454,6 @@ async function showBuySellMenu(bot, user, ctx) {
     await setSellMenu(bot, ctx, user);
   }
 }
-
-
-
-
 
 async function checkSponsor(bot, username, sponsor, contract) {
   const promoBudget = await getPromoBudget(bot, sponsor);
@@ -601,10 +536,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
   }
 }
 
-
-
-
-
   bot.action(/buywith (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const currency = ctx.match[1];
@@ -632,7 +563,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
   });
 
-
   bot.hears('🎫 выбрать квест', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
@@ -640,7 +570,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     printQuests(ctx)
     // ctx.reply('покупаю!')
   });
-
 
   async function printQuests(ctx){
     let text = "ОСТРОВ ВЕРЫ 🏝\n\n"
@@ -660,11 +589,9 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     // buttons.push(Markup.button.callback('предыдущий [0]', 'nextquest'));
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
-
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
 
   };
-
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -758,8 +685,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
   
   })
 
-
-
   bot.hears('Вступить', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     await startQuiz(bot, ctx, user);
@@ -823,7 +748,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
       await printHelixWallet(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
     }
   });
-
 
   bot.action('skipdemo', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -1706,8 +1630,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 
     await transferAction(bot, user, amount, ctx);
   });
-
-
 
   bot.on('message', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);

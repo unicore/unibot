@@ -46,7 +46,6 @@ module.exports.sendMessage = async (req, res) => {
   };
 };
 
-
 module.exports.payReciever = async (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'origin, content-type, accept');

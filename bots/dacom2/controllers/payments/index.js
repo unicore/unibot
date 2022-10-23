@@ -53,7 +53,6 @@ module.exports.payReciever = async (req, res) => {
     }
   }
 
-
   const user = await getUserByEosName(botName, eosname);
   let sender = (user.username && user.username !== "") ? '@' + user.username : user.eosname
   let message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`
@@ -80,7 +79,6 @@ module.exports.payReciever = async (req, res) => {
     }
     // await editGoalMsg(bot, ctx, user, hostname, meta.goal_id, true)
   }
-
 
   return {
     ok: true,

@@ -138,11 +138,9 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   return user.eosname;
 }
 
-
 async function isAdmin(bot, id) {
   return Number(id) === Number(bot.getEnv().ADMIN_ID);
 }
-
 
 async function checkForExistBCAccount(bot, ctx) {
   const user = ctx.update.message.from.id;
@@ -155,7 +153,6 @@ async function checkForExistBCAccount(bot, ctx) {
 
   return true;
 }
-
 
 const quizDefinition = [
   { message: 'Contants' },
@@ -189,10 +186,6 @@ async function catchRequest(bot, user, ctx, text){
     await insertRequest(bot.instanceName, user, id, text)
     
 }
-
-
-
-
 
 module.exports.init = async (botModel, bot) => {
   const protocol = bot.getEnv().PROTOCOL.replace('://', '');
@@ -284,7 +277,6 @@ module.exports.init = async (botModel, bot) => {
         
         await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-
       }
     } else {
 
@@ -301,17 +293,12 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
   }
 
-
   bot.hears('🏫 Об Институте', async (ctx) => {
     await getUser(bot.instanceName, ctx.update.message.from.id);
     await checkForExistBCAccount(bot, ctx);
 
     ctx.reply('Главный Вход: https://intellect.run');
   });
-
-
-
-
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -320,7 +307,6 @@ module.exports.init = async (botModel, bot) => {
     } 
 
   });
-
 
   bot.hears('🆕 cоздать запрос', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -344,16 +330,11 @@ module.exports.init = async (botModel, bot) => {
 
   });
 
-
-
-
-
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
-
 
       if (ctx.update.message.chat.type !== 'private') {//CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
@@ -370,7 +351,6 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
-        
 
         } else {
           await insertMessage(bot.instanceName, user, 'user', text);
@@ -449,7 +429,6 @@ module.exports.init = async (botModel, bot) => {
       }
     }
   });
-
   
   bot.action('createrequest', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -479,7 +458,6 @@ module.exports.init = async (botModel, bot) => {
       await ctx.replyWithHTML('Недостаточно прав');
     }
   });
-
 
   return null;
 };

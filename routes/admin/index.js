@@ -12,7 +12,6 @@ module.exports = (fastify, opts, done) => {
   fastify.post('/disable-bot', Admin.disableBot);
   fastify.post('/change-bot-mode', Admin.changeBotMode);
   fastify.post('/set-bot-env', Admin.setEnv);
-  
 
   // eslint-disable-next-line global-require
   // fastify.register(require('../../bots/dacom/routes'), { prefix: '/dacom' });

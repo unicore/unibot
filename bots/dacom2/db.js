@@ -76,7 +76,6 @@ async function getAllQuizzes(suffix) {
   return null;
 }
 
-
 async function saveQuiz(suffix, user, quiz) {
   try {
     const db = await loadDB();
@@ -137,7 +136,6 @@ async function getUserByEosName(suffix, eosname) {
   return null;
 }
 
-
 async function getUserByUsername(suffix, username) {
   try {
     const db = await loadDB();
@@ -149,7 +147,6 @@ async function getUserByUsername(suffix, username) {
   }
   return null;
 }
-
 
 async function getUserByResumeChannelId(suffix, partners_channel_id) {
   try {
@@ -352,7 +349,6 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
-
 // eslint-disable-next-line camelcase
 async function insertUnion(suffix, union) {
   try {
@@ -368,8 +364,6 @@ async function insertUnion(suffix, union) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 // eslint-disable-next-line camelcase
 async function insertGoal(suffix, goal) {
@@ -387,8 +381,6 @@ async function insertGoal(suffix, goal) {
   }
 }
 
-
-
 // eslint-disable-next-line camelcase
 async function insertTask(suffix, task) {
   try {
@@ -404,8 +396,6 @@ async function insertTask(suffix, task) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 // eslint-disable-next-line camelcase
 async function insertReport(suffix, report) {
@@ -423,8 +413,6 @@ async function insertReport(suffix, report) {
   }
 }
 
-
-
 async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message_id, chat_id, channel_id) {
   try {
     const db = await loadDB();
@@ -441,7 +429,6 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
   }
 }
 
-
 async function addMainChatMessageToReport(suffix, report_channel_message_id, updater) {
   try {
     const db = await loadDB();
@@ -457,7 +444,6 @@ async function addMainChatMessageToReport(suffix, report_channel_message_id, upd
     console.log('error: ', e.message);
   }
 }
-
 
 // eslint-disable-next-line camelcase
 async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id) {
@@ -476,8 +462,6 @@ async function getGoalByChatMessage(suffix, host, channel_message_id, channel_id
   }
 }
 
-
-
 // eslint-disable-next-line camelcase
 async function getGoal(suffix, goal_id) {
   try {
@@ -492,7 +476,6 @@ async function getGoal(suffix, goal_id) {
     console.log('error: ', e.message);
   }
 }
-
 
 // eslint-disable-next-line camelcase
 async function getAllHeadGoalsMessages(suffix, goal_id) {
@@ -510,9 +493,6 @@ async function getAllHeadGoalsMessages(suffix, goal_id) {
   }
 }
 
-
-
-
 // eslint-disable-next-line camelcase
 async function getTaskByChatMessage(suffix, host, chat_message_id) {
   try {
@@ -528,7 +508,6 @@ async function getTaskByChatMessage(suffix, host, chat_message_id) {
     console.log('error: ', e.message);
   }
 }
-
 
 // eslint-disable-next-line camelcase
 async function getTaskById(suffix, host, task_id) {
@@ -546,10 +525,6 @@ async function getTaskById(suffix, host, task_id) {
   }
 }
 
-
-
-
-
 // eslint-disable-next-line camelcase
 async function getUnion(suffix, chatId) {
   try {
@@ -564,8 +539,6 @@ async function getUnion(suffix, chatId) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 // eslint-disable-next-line camelcase
 async function getUnionByType(suffix, ownerEosname, type) {
@@ -583,7 +556,6 @@ async function getUnionByType(suffix, ownerEosname, type) {
   }
 }
 
-
 // eslint-disable-next-line camelcase
 async function getUnionByHostType(suffix, host, type) {
   try {
@@ -600,14 +572,12 @@ async function getUnionByHostType(suffix, host, type) {
   }
 }
 
-
 async function insertProject(suffix, project){
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomProjects_${suffix}`);
 
     let res = await collection.insertOne(project);
-
 
   } catch (e) {
     console.log('error: ', e.message);
@@ -628,7 +598,6 @@ async function getProjectsCount(suffix) {
   }
 }
 
-
 async function getProjects(suffix) {
   try {
     const db = await loadDB();
@@ -643,7 +612,6 @@ async function getProjects(suffix) {
   }
 }
 
-
 async function getMyProjects(suffix, host) {
   try {
     const db = await loadDB();
@@ -657,8 +625,6 @@ async function getMyProjects(suffix, host) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function getProject(suffix, number) {
   try {
@@ -675,7 +641,6 @@ async function getProject(suffix, number) {
   }
 }
 
-
 async function insertWithdraw(suffix, user, withdraw) {
   try {
     const db = await loadDB();
@@ -688,8 +653,6 @@ async function insertWithdraw(suffix, user, withdraw) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function updateWithdraw(suffix, withdraw_id, status) {
   try {
@@ -709,8 +672,6 @@ async function updateWithdraw(suffix, withdraw_id, status) {
   }
 }
 
-
-
 async function getWithdraw(suffix, withdraw_id) {
   try {
     const db = await loadDB();
@@ -722,7 +683,6 @@ async function getWithdraw(suffix, withdraw_id) {
     console.log('error: ', e.message);
   }
 }
-
 
 async function getTickets(suffix, user) {
   try {
@@ -737,7 +697,6 @@ async function getTickets(suffix, user) {
     console.log('error: ', e.message);
   }
 }
-
 
 module.exports = {
   loadDB,
