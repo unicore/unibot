@@ -29,8 +29,8 @@ async function getHelixParams(bot, hostname) {
     const poolExpiredAt = await new Date(currentPool.pool_expired_at);
 
     currentPool.expired_seconds = ((poolExpiredAt - bctime) / 1000).toFixed(2);
-    if (currentPool.expired_seconds > 31540000) currentPool.expired_time = 'режим ожидания';
-    else currentPool.expired_time = timestampToDHMS(currentPool.expired_seconds);
+
+    if (currentPool.expired_seconds > 31540000) currentPool.expired_time = 'режим ожидания'; else currentPool.expired_time = timestampToDHMS(currentPool.expired_seconds);
 
     currentPool.priority_time = await new Date(currentPool.priority_until);
     // eslint-disable-next-line max-len
@@ -51,11 +51,11 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
 
   if (hostname) {
     balances = balances.filter((bal) => bal.host === hostname);
+
     // eslint-disable-next-line no-param-reassign
     if (!helix) helix = await getHelixParams(bot, hostname);
-  } else {
+  } else
     balances = balances.filter((bal) => bal.host !== bot.getEnv().DEMO_HOST);
-  }
 
   const blackBalances = [];
   const whiteBalances = [];
@@ -81,7 +81,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
       totalBalances = `${(parseFloat(totalBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
     }
 
-    if (hostname) {
+    if (hostname)
       if (parseFloat(balance.available) < parseFloat(balance.purchase_amount)) {
         if (helix.host.current_cycle_num > balance.cycle_num) {
           priorityBalances.push(balance);
@@ -94,7 +94,6 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
         winBalances.push(balance);
         totalWinBalances = `${(parseFloat(totalWinBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
       }
-    }
   });
 
   return {
@@ -116,7 +115,9 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
 async function getCondition(bot, hostname, key) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'conditions');
   const condition = conditions.find((cond) => cond.key_string === key);
+
   if (condition) return condition.value;
+
   return 0;
 }
 
@@ -130,6 +131,7 @@ async function getCurrentUserDeposit(bot, hostname, username) {
   const hoststat = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'hoststat', username, username, 1);
 
   if (hoststat.length > 0) return hoststat[0].blocked_now;
+
   return 0;
 }
 
@@ -159,9 +161,11 @@ async function getTail(bot, username, hostname) {
 async function getLiquidBalance(bot, username, symbol, contract = 'eosio.token') {
   let liquidBal = await bot.eosapi.getCurrencyBalance(contract, username, symbol);
 
-  if (liquidBal.length === 0) liquidBal = `${(0).toFixed(4)} ${symbol}`;
-  // eslint-disable-next-line prefer-destructuring
-  else liquidBal = liquidBal[0];
+  if (liquidBal.length === 0)
+    liquidBal = `${(0).toFixed(4)} ${symbol}`;
+  else
+    // eslint-disable-next-line prefer-destructuring
+    liquidBal = liquidBal[0];
 
   return liquidBal;
 }
@@ -235,27 +239,23 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
   buttons.push(Markup.button.callback('Обновить', `select ${hostname}`));
 
-  if (skipForDemo) {
+  if (skipForDemo)
     buttons.push(Markup.button.callback('Мой опыт', `showexp ${hostname} `));
     // buttons.push(Markup.button.callback('Цели', `showgoals ${hostname} `));
-  }
 
-  if (bot.getEnv().MODE !== 'community') {
+  if (bot.getEnv().MODE !== 'community')
     buttons.push(Markup.button.callback('Очередь', `tail ${hostname}`));
-  }
 
   buttons.push(Markup.button.callback('Мои взносы', `mybalances ${hostname} `));
 
   buttons.push(Markup.button.callback('Совершить взнос', `deposit ${hostname}`));
 
-  if (skipForDemo) {
-    if (subscribedNow) buttons.push(Markup.button.callback('✅ Подписка на обновления', `subscribe ${hostname}`));
-    else buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`));
-  }
+  if (skipForDemo)
+    if (subscribedNow) buttons.push(Markup.button.callback('✅ Подписка на обновления', `subscribe ${hostname}`)); else buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`));
 
   let reply_to
-  if (ctx.update.message.reply_to_message)
-    reply_to = ctx.update.message.reply_to_message.message_id
+
+  if (ctx.update.message.reply_to_message) reply_to = ctx.update.message.reply_to_message.message_id
 
   try {
     if (params.currentPool.expired_time === 'режим ожидания') {
@@ -264,14 +264,13 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-      let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
-    } else {
+      let id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
+    } else
       await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    }
   } catch (e) {
     // eslint-disable-next-line max-len
     // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
+    let id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
   }
 }
 
@@ -306,7 +305,9 @@ async function getRefStat(bot, username, symbol) {
   const stats = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', symbol, 'refstat', username, username, 1000, 2, 'i64');
 
   const stat = stats.find((st) => st.symbol === symbol);
+
   if (!stat) return `${(0).toFixed(4)} ${symbol}`;
+
   return stat.withdrawed;
 }
 
@@ -354,10 +355,9 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
   });
   const messagePromises = results.map((id) => {
     const target = refBalances.find((el) => Number(el.id) === Number(id));
-    if (ctx)
-      return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`)
-    else
-      return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` });
+
+    if (ctx) return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`)
+    else return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` });
   });
 
   await Promise.all(messagePromises);
@@ -453,7 +453,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
 
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
@@ -536,12 +536,12 @@ async function printWallet(bot, user, ctx, hostname) {
 
     text += '\n---------------------------------';
     text += `\nСсылка для приглашений: ${link}\n`; //
+
     // eslint-disable-next-line max-len
-    if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    else {
+    if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize()); else {
       text += '\n\nсообщение будет удалено через 30 секунд';
 
-      let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+      let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
       setTimeout(
         () => {
@@ -625,7 +625,7 @@ async function printPublicWallet(bot, user, hostname, ctx) {
     // eslint-disable-next-line max-len
     await ctx.deleteMessage(d)
 
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    let id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
@@ -643,11 +643,11 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 async function transferAction(bot, user, amount, ctx) {
   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
-  if (parseFloat(amount) === 0) {
+  if (parseFloat(amount) === 0)
     await ctx.replyWithHTML('Сумма перевода должна быть больше нуля.');
-  } else if (parseFloat(bal) < parseFloat(amount)) {
+  else if (parseFloat(bal) < parseFloat(amount))
     await ctx.replyWithHTML('Недостаточный баланс для перевода. Введите другую сумму.');
-  } else {
+  else {
     const eos = await bot.uni.getEosPassInstance(user.wif);
 
     eos.transact({
@@ -690,6 +690,7 @@ async function withdrawPartnerRefBalance(bot, username) {
   if (partner) {
     const { referer } = partner;
     const user = await getUserByEosName(bot.instanceName, referer);
+
     if (user && user.eosname) await withdrawAllUserRefBalances(bot, user);
   }
 }
@@ -772,7 +773,7 @@ async function retireAction(bot, user, amount, address) {
 
 async function massWithdrawAction(bot, user, hostname, balances) {
   // eslint-disable-next-line no-restricted-syntax
-  for (const balance of balances) {
+  for (const balance of balances)
     try {
       // eslint-disable-next-line no-await-in-loop
       await internalWithdrawAction(bot, user, hostname, balance.id);
@@ -781,13 +782,12 @@ async function massWithdrawAction(bot, user, hostname, balances) {
     } catch (e) {
       console.log('ERROR:', e);
     }
-  }
 }
 
 async function getUserIntelOwn(bot, hostname, username) {
   const ios = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'intelown', username, username, 1);
 
-  return ios[0] || {total_reports: 0, approved_reports: 0}
+  return ios[0] || { total_reports: 0, approved_reports: 0 }
 }
 
 async function getHelixsList(bot) {
@@ -834,13 +834,10 @@ async function refreshAllBalances(bot, hostname, baseUser, skip) {
     let ahosts;
     let users;
 
-    if (baseUser) users = [baseUser];
-    else users = await collection.find({}).toArray();
+    if (baseUser) users = [baseUser]; else users = await collection.find({}).toArray();
 
-    if (hostname) ahosts = [{ username: hostname }];
-    else {
+    if (hostname) ahosts = [{ username: hostname }]; else
       ahosts = await getHelixsList(bot);
-    }
 
     // eslint-disable-next-line no-restricted-syntax
     for (const ahost of ahosts) {
@@ -857,14 +854,13 @@ async function refreshAllBalances(bot, hostname, baseUser, skip) {
           // eslint-disable-next-line no-await-in-loop
           await addUserHelixBalance(user.eosname, bal);
 
-          if (bal && bal.last_recalculated_win_pool_id < helix.host.current_pool_id) {
+          if (bal && bal.last_recalculated_win_pool_id < helix.host.current_pool_id)
             try {
               // eslint-disable-next-line no-await-in-loop
               await internalRefreshAction(bot, bal, user.eosname);
             } catch (e) {
               console.log('error on all-refresh: ', e);
             }
-          }
         }
       }
     }
@@ -872,12 +868,11 @@ async function refreshAllBalances(bot, hostname, baseUser, skip) {
     console.log(e);
   }
 
-  if (!skip) {
+  if (!skip)
     setTimeout(
       () => refreshAllBalances(bot),
       60 * 1000,
     );
-  }
 }
 
 async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
@@ -894,14 +889,13 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     if (priorBal) isPriority = true;
 
     const buttons = [];
-    if (balances.all.length === 1) {
-      buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
-    } else {
-      if (currentIndex === 0) buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
-      else buttons.push(Markup.button.callback(`Предыдущий (${currentIndex})`, `mybalances ${hostname} ${currentIndex - 1}`));
 
-      if (balances.all.length - 1 - currentIndex === 0) buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
-      else buttons.push(Markup.button.callback(`Следующий (${balances.all.length - 1 - currentIndex})`, `mybalances ${hostname} ${currentIndex + 1}`));
+    if (balances.all.length === 1)
+      buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
+    else {
+      if (currentIndex === 0) buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`)); else buttons.push(Markup.button.callback(`Предыдущий (${currentIndex})`, `mybalances ${hostname} ${currentIndex - 1}`));
+
+      if (balances.all.length - 1 - currentIndex === 0) buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`)); else buttons.push(Markup.button.callback(`Следующий (${balances.all.length - 1 - currentIndex})`, `mybalances ${hostname} ${currentIndex + 1}`));
     }
 
     buttons.push(Markup.button.callback('Обновить', `refreshaction ${hostname} ${currentBalance.id} ${currentIndex}`));
@@ -916,16 +910,15 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     if (parseFloat(currentBalance.compensator_amount) > 0) toPrint += `\n\nНа крайнем одноцветном столе:\n\t\t${currentBalance.compensator_amount}`;
 
     toPrint += `\n\nДоступно сейчас:\n\t\t${currentBalance.available}`; // (${parseFloat(currentBalance.root_percent / 10000).toFixed(1)}%)
+
     // TODO отобразить в следующем цикле
-    if (parseFloat(currentBalance.available) >= parseFloat(currentBalance.purchase_amount)) {
+    if (parseFloat(currentBalance.available) >= parseFloat(currentBalance.purchase_amount))
       toPrint += `\n\nПрибыль:\n\t\t${((parseFloat(currentBalance.available) / parseFloat(currentBalance.purchase_amount)) * 100 - 100).toFixed(1)}%`;
-    } else {
+    else
       toPrint += `\n\nУбыток:\n\t\t${((parseFloat(currentBalance.available) / parseFloat(currentBalance.purchase_amount)) * 100 - 100).toFixed(1)}%`;
-    }
 
     // eslint-disable-next-line max-len
-    if (nextIndex === undefined || fresh === true) await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    else ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+    if (nextIndex === undefined || fresh === true) await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize()); else ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   } else {
     const buttons = [];
     buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
@@ -944,11 +937,10 @@ async function withdrawAction(bot, ctx, user, hostname, balanceId) {
       // empty
     }
 
-    if (bal.win === 1) {
+    if (bal.win === 1)
       ctx.reply(`Вы получили подарок из кассы ${hostname.toUpperCase()} на сумму ${bal.available} с чистой прибылью ${bal.root_percent / 10000}%`);
-    } else {
+    else
       ctx.reply(`Вы получили подарок из кассы ${hostname.toUpperCase()} на сумму ${bal.available}`);
-    }
 
     await printUserBalances(bot, ctx, user, hostname);
 
@@ -995,11 +987,10 @@ async function notifyNewTable(bot, hostname) {
   const text = `Внимание! Открыт новый стол в кассе ${hostname.toUpperCase()}!`;
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const user of users) {
+  for (const user of users)
     // TODO??? подумать, должо ли быть параллельным, так как раньше результат не ожидался
     // eslint-disable-next-line no-await-in-loop
     await sendMessageToUser(bot, user, { text });
-  }
 }
 
 async function autoHostRefresh(bot) {
@@ -1070,6 +1061,7 @@ async function priorityAction(bot, user, hostname, balanceId) {
     console.error('priority error: ', e, user.eosname);
     return e.message;
   }
+
   return null;
 }
 
@@ -1115,9 +1107,8 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 
   currentHelix = helixs[currentIndex];
 
-  if (hostname) {
+  if (hostname)
     currentHelix = helixs.find((el) => el.username === hostname);
-  }
 
   if (currentHelix) {
     const params = await getHelixParams(bot, currentHelix.username);
@@ -1156,13 +1147,12 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     // TODO если есть опыт - обновить и вывести опытный поток
     // Если что-то начислено - обновить карточку и сообщить отдельным сообщением
     //
-    if (hostname) {
+    if (hostname)
       ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    } else if (nextIndex === undefined) {
+    else if (nextIndex === undefined)
       await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    } else {
+    else
       ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    }
   }
 }
 
@@ -1207,9 +1197,8 @@ async function printTail(bot, user, hostname) {
     text += `\nВсе ваши взносы в очереди:\n\t\t${tail.totalUserInTail}`;
 
     buttons.push(Markup.button.callback('Выйти из очереди', `withdrtail ${hostname}`));
-  } else {
+  } else
     text += 'У вас нет взносов, участвующих в очереди.';
-  }
 
   text += '\n\nПервый взнос с начала очереди автоматически попадает в первые два стола каждого нового цикла, пока взнос не будет исчерпан.';
 
@@ -1219,12 +1208,13 @@ async function printTail(bot, user, hostname) {
 
 async function exitFromTail(bot, ctx, user, hostname) {
   const tail = await getTail(bot, user.eosname, hostname);
+
   try {
     // eslint-disable-next-line no-restricted-syntax
-    for (const bal of tail.userTailBalances) {
+    for (const bal of tail.userTailBalances)
       // eslint-disable-next-line no-await-in-loop
       await exitTailAction(bot, hostname, user, bal.id);
-    }
+
     ctx.editMessageText(`Произведен успешный выход из очереди на сумму ${tail.totalUserInTail}`);
 
     await printTail(bot, user, hostname);

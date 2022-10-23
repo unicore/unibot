@@ -1,8 +1,8 @@
 const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
-const { saveUser, insertMessage, insertGoal} = require('./db');
-const {getHelixParams} = require('./core')
+const { saveUser, insertMessage, insertGoal } = require('./db');
+const { getHelixParams } = require('./core')
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
 
 async function getVotesCount(bot, hostname, username) {
@@ -19,7 +19,9 @@ async function fetchGoals(bot, hostname) {
 
 async function fetchUPower(bot, hostname, username) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'power3', username, username, 1);
+
   if (goals[0]) return goals[0].power;
+
   return 0;
 }
 
@@ -27,17 +29,14 @@ async function fetchConditions(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'conditions');
   // eslint-disable-next-line array-callback-return
   conditions.map((cond, index) => {
-    if (cond.key_string === 'condaddgoal') {
+    if (cond.key_string === 'condaddgoal')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condaddtask') {
+    if (cond.key_string === 'condaddtask')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condjoinhost') {
+    if (cond.key_string === 'condjoinhost')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
   });
 
   return conditions;
@@ -67,11 +66,11 @@ async function editGoalMsg(ctx, user, hostname, goalId) {
 
   const buttons = [];
 
-  if (goal.voters.find((el) => user.eosname === el)) {
+  if (goal.voters.find((el) => user.eosname === el))
     buttons.push(Markup.button.callback('Снять голос', `voteup ${hostname} ${goal.id}`));
-  } else if (goal.status !== 'filled') {
+  else if (goal.status !== 'filled')
     buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
-  }
+
   // eslint-disable-next-line max-len
   await ctx.editMessageText(getGoalMsg(index, goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 }
@@ -102,11 +101,10 @@ async function voteAction(bot, ctx, user, hostname, goalId) {
 
     await editGoalMsg(ctx, user, hostname, goalId);
   } catch (e) {
-    if (e.message === 'assertion failure with message: You dont have shares for voting process') {
+    if (e.message === 'assertion failure with message: You dont have shares for voting process')
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
-    } else {
+    else
       ctx.reply(e.message);
-    }
 
     console.error(e);
   }
@@ -199,7 +197,7 @@ async function createGoal(bot, ctx, user) {
     text += `Кайфолог: ${user.eosname}\n`
     text += `Цель на ${user.create_goal.target}:\n\n${user.create_goal.title}`
 
-    let id = await sendMessageToUser(bot, {id : bot.getEnv().GOALS_CHANNEL_ID}, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().GOALS_CHANNEL_ID }, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().GOALS_CHANNEL_ID, text, id, 'MASTER');
 
@@ -262,18 +260,16 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   let k = 0
 
   let prevGoalsCount = goals.map(el => {
-    if (myGoal && el.id < myGoal.id)
-      k++
+    if (myGoal && el.id < myGoal.id) k++
   })
 
   const buttons = [];
   // buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
 
-  if (!myGoal) {
+  if (!myGoal)
     buttons.push(Markup.button.callback('➕ установить цель', `creategoal ${hostname}`));
-  } else {
+  else
     buttons.push(Markup.button.callback('➕ пополнить цель', `fillgoal ${hostname} ${myGoal.id}`));
-  }
 
   buttons.push(Markup.button.url('перейти в канал ➡️', bot.getEnv().GOALS_CHANNEL));
 
@@ -283,6 +279,7 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 
   // text += `\nСтоимость постановки цели: ${fillAmount}`;
   text += '\n---------------------------------';
+
   // text += `\nВаши акции: ${userPower.power} POWER`;
   // text += `\nДоступ: ${userPower.power} POWER`;
   if (myGoal) {
@@ -290,9 +287,8 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
     text += `\nДо начала накопления: ${totalPrevGoalsAmount} билетов`
     text += `\nНакоплено: ${parseFloat(myGoal.available).toFixed(0)}/${bot.getEnv().TARGET} ${bot.getEnv().SYMBOL}`
     // text += `\nвывод средств доступен сразу по`
-  } else {
+  } else
     text += '\nЦель не установлена'
-  }
 
   text += '\n---------------------------------';
   text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //

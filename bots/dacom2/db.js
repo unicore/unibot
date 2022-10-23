@@ -12,6 +12,7 @@ async function getUserHelixBalance(suffix, username) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -30,6 +31,7 @@ async function saveUser(suffix, user) {
     console.log('error: ', e.message);
   }
 }
+
 async function saveHost(suffix, host) {
   try {
     const db = await loadDB();
@@ -92,7 +94,7 @@ async function saveQuiz(suffix, user, quiz) {
 }
 
 async function addUserHelixBalance(suffix, username, balance) {
-  if (balance) {
+  if (balance)
     try {
       const db = await loadDB();
 
@@ -109,7 +111,6 @@ async function addUserHelixBalance(suffix, username, balance) {
     } catch (e) {
       console.log('error: ', e.message);
     }
-  }
 }
 
 async function delUserHelixBalance(suffix, username, balanceId) {
@@ -133,6 +134,7 @@ async function getUserByEosName(suffix, eosname) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -145,6 +147,7 @@ async function getUserByUsername(suffix, username) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -157,6 +160,7 @@ async function getUserByResumeChannelId(suffix, partners_channel_id) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -167,9 +171,8 @@ async function getNicknameByEosName(suffix, eosname) {
 
     const user = await collection.findOne({ eosname });
 
-    if (user !== null) {
+    if (user !== null)
       return `${user.first_name} ${user.last_name}`;
-    }
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -183,10 +186,12 @@ async function getTelegramByEosName(suffix, eosname) {
     const collection = db.collection(`dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ eosname });
+
     if (user) return `@${user.username}`;
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return 'не определён';
 }
 
@@ -226,7 +231,7 @@ const getRestoredUserFromAnyBots = async (currentBotName, id) => {
   const botsModes = ['dacom', 'helix'];
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const botMode of botsModes) {
+  for (const botMode of botsModes)
     // eslint-disable-next-line no-restricted-syntax
     for (const bot of bots) {
       // eslint-disable-next-line no-await-in-loop,no-use-before-define
@@ -238,14 +243,13 @@ const getRestoredUserFromAnyBots = async (currentBotName, id) => {
         return;
       }
     }
-  }
 
   // eslint-disable-next-line no-use-before-define
   const user = await getUser(null, id, 'users', true);
-  if (user) {
+
+  if (user)
     // eslint-disable-next-line no-await-in-loop
     await saveUser(currentBotName, user);
-  }
 };
 
 async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
@@ -255,9 +259,10 @@ async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
     const collection = db.collection(collectionName || `dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ id });
-    if (user) {
+
+    if (user)
       return user;
-    }
+
     if (!disableRestoreFromAnyBots) {
       await getRestoredUserFromAnyBots(suffix, id);
       return await getUser(suffix, id, null, true);
@@ -291,8 +296,7 @@ async function getSubscribers(bot, hostname) {
     let users;
 
     // eslint-disable-next-line max-len
-    if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray();
-    else users = await collection.find({ subscribed_to: hostname }).toArray();
+    if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray(); else users = await collection.find({ subscribed_to: hostname }).toArray();
 
     return users;
   } catch (e) {
@@ -421,7 +425,7 @@ async function addMainChatMessageToGoal(suffix, channel_message_id, chat_message
 
     await collection.updateOne(
       { channel_message_id, channel_id },
-      { $set: {'chat_message_id': chat_message_id, 'chat_id': chat_id.toString()} },
+      { $set: { 'chat_message_id': chat_message_id, 'chat_id': chat_id.toString() } },
       { upsert: false },
     );
   } catch (e) {
@@ -588,7 +592,7 @@ async function getProjectsCount(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let tickets = await collection.find({type: 'projectChannel'}).toArray();
+    let tickets = await collection.find({ type: 'projectChannel' }).toArray();
 
     return tickets.length
   } catch (e) {
@@ -601,7 +605,7 @@ async function getProjects(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel', is_private: false}).toArray();
+    let projects = await collection.find({ type: 'projectChannel', is_private: false }).toArray();
 
     return projects
   } catch (e) {
@@ -614,7 +618,7 @@ async function getMyProjects(suffix, host) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let projects = await collection.find({type: 'projectChannel', host}).toArray();
+    let projects = await collection.find({ type: 'projectChannel', host }).toArray();
 
     return projects
   } catch (e) {
@@ -627,7 +631,7 @@ async function getProject(suffix, number) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    let project = await collection.findOne({type: 'projectChannel', projectCount: Number(number)})
+    let project = await collection.findOne({ type: 'projectChannel', projectCount: Number(number) })
 
     return project
   } catch (e) {
@@ -655,9 +659,11 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
       { '_id': mongoose.Types.ObjectId(withdraw_id) },
-      { $set: {
-        status,
-      } },
+      {
+        $set: {
+          status,
+        },
+      },
       { upsert: false },
     );
   } catch (e) {
@@ -670,7 +676,7 @@ async function getWithdraw(suffix, withdraw_id) {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    return await collection.findOne({ '_id':  mongoose.Types.ObjectId(withdraw_id)});
+    return await collection.findOne({ '_id': mongoose.Types.ObjectId(withdraw_id) });
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -681,7 +687,7 @@ async function getTickets(suffix, user) {
     const db = await loadDB();
     const collection = db.collection(`dacomTickets_${suffix}`);
 
-    let tickets = await collection.find({eosname: user.eosname}).toArray();
+    let tickets = await collection.find({ eosname: user.eosname }).toArray();
 
     return tickets
   } catch (e) {

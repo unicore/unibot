@@ -8,23 +8,21 @@ module.exports.addBot = async (req) => {
     token,
   } = req.body;
 
-  if (!validateName(name)) {
+  if (!validateName(name))
     return { ok: false, message: 'Invalid name' };
-  }
 
-  if (!validateToken(token)) {
+  if (!validateToken(token))
     return { ok: false, message: 'Invalid token' };
-  }
 
   const botByName = await Bot.findOne({ name });
-  if (botByName) {
+
+  if (botByName)
     return { ok: false, message: `Bot with name ${name} already exists` };
-  }
 
   const botByToken = await Bot.findOne({ token });
-  if (botByToken) {
+
+  if (botByToken)
     return { ok: false, message: 'Bot with same token already exists' };
-  }
 
   await Bot.create({ name, token });
 
@@ -59,18 +57,17 @@ module.exports.setBotToken = async (req) => {
   } = req.body;
 
   const bot = await Bot.findOne({ name });
-  if (!bot) {
-    return { ok: false, message: 'Bot not found' };
-  }
 
-  if (!validateToken(token)) {
+  if (!bot)
+    return { ok: false, message: 'Bot not found' };
+
+  if (!validateToken(token))
     return { ok: false, message: 'Invalid token' };
-  }
 
   const botByToken = await Bot.findOne({ token });
-  if (botByToken && botByToken.name !== name) {
+
+  if (botByToken && botByToken.name !== name)
     return { ok: false, message: 'Bot with same token already exists' };
-  }
 
   bot.token = token;
   await bot.save();
@@ -85,13 +82,12 @@ module.exports.enableBot = async (req) => {
   } = req.body;
 
   const bot = await Bot.findOne({ name });
-  if (!bot) {
-    return { ok: false, message: 'Bot not found' };
-  }
 
-  if (bot.isActive) {
+  if (!bot)
+    return { ok: false, message: 'Bot not found' };
+
+  if (bot.isActive)
     return { ok: false, message: 'Bot already enabled' };
-  }
 
   bot.isActive = true;
   await bot.save();
@@ -107,17 +103,17 @@ module.exports.disableBot = async (req) => {
   } = req.body;
 
   const bot = await Bot.findOne({ name });
-  if (!bot) {
-    return { ok: false, message: 'Bot not found' };
-  }
 
-  if (!bot.isActive) {
+  if (!bot)
+    return { ok: false, message: 'Bot not found' };
+
+  if (!bot.isActive)
     return { ok: false, message: 'Bot already disabled' };
-  }
 
   bot.isActive = false;
   await bot.save();
   const telegrafInstance = await bot.getTelegrafInstance();
+
   if (telegrafInstance) {
     await telegrafInstance.clearFunc();
     await telegrafInstance.telegram.deleteWebhook();
@@ -150,18 +146,18 @@ module.exports.changeBotMode = async (req) => {
   } = req.body;
 
   const bot = await Bot.findOne({ name });
-  if (!bot) {
-    return { ok: false, message: 'Bot not found' };
-  }
 
-  if (!ALLOWED_MODES[mode]) {
+  if (!bot)
+    return { ok: false, message: 'Bot not found' };
+
+  if (!ALLOWED_MODES[mode])
     return { ok: false, message: `Mode ${mode} is not allowed` };
-  }
 
   bot.mode = mode;
   await bot.save();
   const telegrafInstance = await bot.getTelegrafInstance();
   await bot.incVersion();
+
   if (telegrafInstance) {
     await telegrafInstance.clearFunc();
     await telegrafInstance.telegram.deleteWebhook();
@@ -179,18 +175,18 @@ module.exports.setEnv = async (req) => {
   } = req.body;
 
   const bot = await Bot.findOne({ name });
-  if (!bot) {
-    return { ok: false, message: 'Bot not found' };
-  }
 
-  if (typeof env !== 'object' || !env) {
+  if (!bot)
+    return { ok: false, message: 'Bot not found' };
+
+  if (typeof env !== 'object' || !env)
     return { ok: false, message: 'Env is invalid' };
-  }
 
   bot.env = env;
   await bot.save();
   const telegrafInstance = await bot.getTelegrafInstance();
   await bot.incVersion();
+
   if (telegrafInstance) {
     await telegrafInstance.clearFunc();
     await telegrafInstance.telegram.deleteWebhook();

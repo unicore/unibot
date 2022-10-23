@@ -122,6 +122,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
     };
 
     console.log('referer on register: ', params.referer, 'username: ', generatedAccount.name, 'ref: ', ref);
+
     try {
       const message = await axios.get(
         `${bot.getEnv().REGISTRATOR}/set`,
@@ -130,20 +131,21 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
         },
       );
       console.log('message, data: ', message.data)
+
       if (message && message.data) {
       // TODO set partner info
         await saveUser(bot.instanceName, user);
-        resolve({eosname: user.eosname, status: 'ok'})
+        resolve({ eosname: user.eosname, status: 'ok' })
       } else {
         await saveUser(bot.instanceName, user);
         console.error(message);
         ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже перезапустить робота командой /start.', Markup.removeKeyboard());
-        reject({eosname: user.eosname, status: 'error', message: 'axios error'})
+        reject({ eosname: user.eosname, status: 'error', message: 'axios error' })
       }
     } catch (e) {
       await saveUser(bot.instanceName, user);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже перезапустить робота командой /start.', Markup.removeKeyboard());
-      reject({eosname: user.eosname, status: 'error', message: e.message})
+      reject({ eosname: user.eosname, status: 'error', message: e.message })
     }
   })
 }
@@ -200,16 +202,15 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply });
 
-  let id = await sendMessageToUser(bot, {id : bot.getEnv().STUDENTS_CHANNEL_ID}, { text: text });
+  let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text: text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENTS');
 
   user.state = 'chat'
   user.request_channel_id = id
 
-  if (!user.eosname) {
+  if (!user.eosname)
     user.eosname = await generateAccount(bot, ctx, false, user.ref);
-  }
 
   await saveUser(bot.instanceName, user)
 
@@ -257,7 +258,7 @@ async function nextQuiz(bot, user, ctx) {
   } else {
     quiz.is_finish = true;
     await saveQuiz(bot.instanceName, user, quiz);
-    const {mainButtons} = require('./utils/bot')
+    const { mainButtons } = require('./utils/bot')
 
     const menu = Markup // , "цели", "действия"
       .keyboard(mainButtons, { columns: 2 }).resize();
@@ -281,10 +282,11 @@ async function nextQuiz(bot, user, ctx) {
         text += `\n${answer.message}`
         text += `\n${answer.answer}\n`
       }
+
       k++
     }
 
-    let id = await sendMessageToUser(bot, {id : bot.getEnv().STUDENTS_CHANNEL_ID}, { text: text });
+    let id = await sendMessageToUser(bot, { id: bot.getEnv().STUDENTS_CHANNEL_ID }, { text: text });
 
     await insertMessage(bot.instanceName, user, bot.getEnv().STUDENTS_CHANNEL_ID, text, id, 'STUDENT');
 
@@ -296,9 +298,8 @@ async function nextQuiz(bot, user, ctx) {
       channel_id: bot.getEnv().STUDENTS_CHANNEL_ID,
     })
 
-    if (!user.eosname) {
+    if (!user.eosname)
       user.eosname = await generateAccount(bot, ctx, false, user.ref);
-    }
 
     user.state = ''
     user.resume_channel_id = id
@@ -397,10 +398,12 @@ module.exports.init = async (botModel, bot) => {
             user.eosname = (await generateAccount(bot, ctx, false, ref)).eosname;
             await saveUser(bot.instanceName, user);
           }
+
           user.is_student = false
           user.resume_chat_id = null
           user.resume_channel_id = null
         }
+
         const buttons = [];
 
         buttons.push(Markup.button.callback('🆕 продолжить', 'nextwelcome1'));
@@ -421,9 +424,8 @@ module.exports.init = async (botModel, bot) => {
 
     console.log(ctx.tg)
     quiz.answers.map((el, index) => {
-      if (index === quiz.current_quiz) {
+      if (index === quiz.current_quiz)
         el.answer = ctx.update.message.contact;
-      }
     });
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -476,8 +478,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🌀 касса', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
@@ -510,9 +514,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    if (ctx.update.message.chat.type === 'private') {
+
+    if (ctx.update.message.chat.type === 'private')
       await printWallet(bot, user);
-    }
   });
 
   bot.hears('🎯 цели', async (ctx) => {
@@ -523,6 +527,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🎫 билеты', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (ctx.update.message.chat.type === 'private') {
       // await printTickets(bot, user, ctx);
     }
@@ -531,7 +536,7 @@ module.exports.init = async (botModel, bot) => {
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    if (user) {
+    if (user)
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
 
@@ -546,9 +551,8 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
-        } else {
+        } else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       } else { // Если это диалог пользователя с ботом
         // проверяем не квиз ли
 
@@ -565,9 +569,8 @@ module.exports.init = async (botModel, bot) => {
           await sendMessageToUser(bot, user, { text: t }, menu);
         } else if (quiz && !quiz.is_finish) {
           quiz.answers.map((el, index) => {
-            if (index === quiz.current_quiz) {
+            if (index === quiz.current_quiz)
               el.answer = text;
-            }
           });
 
           await saveQuiz(bot.instanceName, user, quiz);
@@ -584,12 +587,9 @@ module.exports.init = async (botModel, bot) => {
               user.transfer_action.data.to = text;
               saveUser(bot.instanceName, user).then();
               await ctx.replyWithHTML('Введите сумму перевода:');
-            } else {
+            } else
               await ctx.replyWithHTML('Аккаунт получателя не существует. Проверьте имя аккаунта и повторите попытку.');
-            }
-          }
-
-          else if (user.state === 'set_goal_title') {
+          } else if (user.state === 'set_goal_title') {
             user.create_goal.title = text;
             user.create_goal.description = '';
             user.create_goal.target = `${parseFloat(bot.getEnv().TARGET).toFixed(4)} ${bot.getEnv().SYMBOL}`;
@@ -611,19 +611,17 @@ module.exports.init = async (botModel, bot) => {
 
             // eslint-disable-next-line max-len
             await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-          }
-
-          else if (user.state === 'set_withdraw_amount') {
+          } else if (user.state === 'set_withdraw_amount') {
             const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
-            let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+            let { min, max } = await getMaxWithdrawAmount(bot, user, ctx)
             const amount = `${parseFloat(text).toFixed(helix.host.precision)} ${helix.host.symbol}`;
 
-            if (parseFloat(amount) > parseFloat(max)) ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-
-            else if (parseFloat(min) > parseFloat(amount)) {
+            if (parseFloat(amount) > parseFloat(max))
+              ctx.reply(`Ошибка!\n\n Введенная сумма больше вашего баланса. Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами:`);
+            else if (parseFloat(min) > parseFloat(amount))
               ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, вы ставите на вывод: ${amount}. Повторите ввод суммы цифрами:`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-            } else {
+            else {
               user.state = 'set_withdraw_address'
               user.on_withdraw = {
                 amount,
@@ -632,9 +630,7 @@ module.exports.init = async (botModel, bot) => {
 
               ctx.reply('Введите адрес для получения USDT.TRC20: ')
             }
-          }
-
-          else if (user.state === 'set_withdraw_address') {
+          } else if (user.state === 'set_withdraw_address') {
             user.on_withdraw.address = text
             await saveUser(bot.instanceName, user);
 
@@ -648,9 +644,7 @@ module.exports.init = async (botModel, bot) => {
             text2 += `\nАдрес: ${user.on_withdraw.address}`
 
             ctx.reply(text2, Markup.inlineKeyboard(buttons, { columns: 2 }))
-          }
-
-          else if (user.state === 'set_deposit_amount') {
+          } else if (user.state === 'set_deposit_amount') {
             const { hostname } = user.deposit_action;
             const helix = await getHelixParams(bot, user.deposit_action.hostname);
 
@@ -667,17 +661,15 @@ module.exports.init = async (botModel, bot) => {
 
             if (maxDeposit > 0) {
               const currentDeposit = await getCurrentUserDeposit(bot, hostname, user.eosname);
-              if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER, ваш текущий взнос: ${currentDeposit}`);
-              else {
+
+              if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER, ваш текущий взнос: ${currentDeposit}`); else
                 depositNow = true;
-              }
-            } else if (parseFloat(amount) > parseFloat(liquidBal)) {
+            } else if (parseFloat(amount) > parseFloat(liquidBal))
               await ctx.reply(`Недостаточный баланс для совершения взноса. Ваш баланс: ${liquidBal}. Введите сумму заново.`);
-            } else if (parseFloat(amount) > parseFloat(helix.currentPool.remain)) {
+            else if (parseFloat(amount) > parseFloat(helix.currentPool.remain))
               await ctx.reply(`Максимальный взнос, который может принять этот стол #${helix.currentPool.pool_num}: ${helix.currentPool.remain}. Введите сумму заново.`);
-            } else {
+            else
               depositNow = true;
-            }
 
             if (depositNow) {
               user.state = '';
@@ -690,9 +682,7 @@ module.exports.init = async (botModel, bot) => {
               ctx.reply(`Вы уверены что хотите произвести взнос в кассу ${user.deposit_action.hostname} на сумму ${user.deposit_action.quantity}?`, Markup.inlineKeyboard(buttons, { columns: 2 }));
               await saveUser(bot.instanceName, user);
             }
-          }
-
-          else if (user.state === 'transfer_amount') {
+          } else if (user.state === 'transfer_amount') {
             const amount = `${parseFloat(text).toFixed(4)} FLOWER`;
 
             const buttons = [];
@@ -707,12 +697,12 @@ module.exports.init = async (botModel, bot) => {
             ctx.reply(textTo, Markup.inlineKeyboard(buttons, { columns: 2 }));
             user.state = '';
             await saveUser(bot.instanceName, user);
-          } else if (user.state === 'newrequest') {
+          } else if (user.state === 'newrequest')
             // console.log("HERE 1")
             await catchRequest(bot, user, ctx, text)
-          } else if (user.state === 'chat') {
+          else if (user.state === 'chat') {
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.resume_chat_id)
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.resume_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.resume_chat_id });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -720,25 +710,22 @@ module.exports.init = async (botModel, bot) => {
 
             // ctx.reply('Сообщение отправлено');
           }
-        } else {
+        } else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       }
-    } else {
-      if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-        if (ctx.update.message.sender_chat.id === bot.getEnv().STUDENTS_CHANNEL) { // если словили пересылку из прикрепленного канала
-          if (ctx.update.message.forward_from_chat.id === bot.getEnv().STUDENTS_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+    else
+    if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
+      if (ctx.update.message.sender_chat.id === bot.getEnv().STUDENTS_CHANNEL) // если словили пересылку из прикрепленного канала
+        if (ctx.update.message.forward_from_chat.id === bot.getEnv().STUDENTS_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+          user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
-            if (user && !user.resume_chat_id) {
-              // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-              user.resume_chat_id = ctx.update.message.message_id
-              await saveUser(bot.instanceName, user);
-            }
+          if (user && !user.resume_chat_id) {
+            // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+            user.resume_chat_id = ctx.update.message.message_id
+            await saveUser(bot.instanceName, user);
           }
         }
-      } else { // Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
-      }
+    } else { // Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
     }
   });
 
@@ -758,8 +745,7 @@ module.exports.init = async (botModel, bot) => {
       if (result.data.status === 'ok') {
         await ctx.replyWithHTML('Для оплаты принимаем USDT в сети TRC20.\nИнструкция для оплаты: свяжитесь с Владом (@skyone77777) или отправьте 150 USDT.TRC20. \n\nАдрес для оплаты в USDT поступит следующим сообщением:')
         await ctx.reply(`${result.data.address}`)
-      }
-      else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
+      } else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     } catch (e) {
       ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ')
     }
@@ -772,9 +758,8 @@ module.exports.init = async (botModel, bot) => {
     if (user.is_student === false) {
       await startQuiz(bot, ctx, user)
       await nextQuiz(bot, user, ctx);
-    } else {
+    } else
       ctx.reply('Вы уже кайфуша! Повторно опубликовать анкету временно нельзя.')
-    }
   });
 
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
@@ -988,8 +973,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action(/deposit (\w+)/gi, async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1007,8 +994,8 @@ module.exports.init = async (botModel, bot) => {
 
     if (maxDeposit > 0) {
       const currentDeposit = await getCurrentUserDeposit(bot, hostname, user.eosname);
-      if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER`);
-      else {
+
+      if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER`); else {
         user.state = 'set_deposit_amount';
         user.deposit_action = { hostname };
         await saveUser(bot.instanceName, user);
@@ -1016,20 +1003,19 @@ module.exports.init = async (botModel, bot) => {
         const max2 = `${((maxDeposit / 10000) - parseFloat(currentDeposit)).toFixed(4)} FLOWER`;
 
         // eslint-disable-next-line max-len
-        if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain)) {
+        if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain))
           max = liquidBal;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain))
           max = params.currentPool.remain;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain))
           // eslint-disable-next-line max-len
           max = parseFloat(max2) >= parseFloat(params.currentPool.remain) ? params.currentPool.remain : max2;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain))
           // eslint-disable-next-line max-len
           max = parseFloat(max2) >= parseFloat(params.currentPool.remain) ? params.currentPool.remain : max2;
-        }
 
         await ctx.reply(`Введите сумму взноса до ${max}.`);
       }
@@ -1068,9 +1054,8 @@ module.exports.init = async (botModel, bot) => {
     if (isAdminUser && message) {
       const count = await sendMessageToAll(bot, { text: message });
       await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
-    } else {
+    } else
       await ctx.replyWithHTML('Недостаточно прав');
-    }
   });
 
   bot.action(/transfer/gi, async (ctx) => {
@@ -1112,7 +1097,7 @@ module.exports.init = async (botModel, bot) => {
     const min = `${(2 / parseFloat(1)).toFixed(0)} ${bot.getEnv().SYMBOL}`;
     const max = `${(((parseFloat(balances.totalBalances) + parseFloat(liquidBal)) * parseFloat(1)) / parseFloat(1)).toFixed(4)} ${bot.getEnv().SYMBOL}`;
 
-    return {min, max}
+    return { min, max }
   }
 
   bot.action(/backto (\w+)\s(\w+)?/gi, async (ctx) => {
@@ -1124,13 +1109,10 @@ module.exports.init = async (botModel, bot) => {
 
     await saveUser(bot.instanceName, user);
 
-    if (to === 'helixs') await printHelixs(bot, ctx, user, null, hostname);
-
-    else if (to === 'helix') {
+    if (to === 'helixs') await printHelixs(bot, ctx, user, null, hostname); else if (to === 'helix')
       await printHelixWallet(bot, ctx, user, hostname);
-    } else if (to === 'wallet') {
+    else if (to === 'wallet')
       await printWallet(bot, user);
-    }
   });
 
   bot.action('withdraw', async (ctx) => {
@@ -1140,12 +1122,12 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
     // showBuySellMenu(bot, user, ctx);
     // console.log("helixBalances: ", balances)
-    let {min, max} = await getMaxWithdrawAmount(bot, user, ctx)
+    let { min, max } = await getMaxWithdrawAmount(bot, user, ctx)
 
-    if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-    else {
+    if (parseFloat(max) >= parseFloat(min))
+      ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму для вывода от ${min} до ${max} цифрами.`);
+    else
       ctx.reply(`Ошибка!. Минимальная сумма для создания заявки: ${min}, на вашем балансе: ${max}. `); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-    }
 
     // if (parseFloat(liquidBal) === 0){
     //   ctx.reply('Ошибка! У вас нет USDT для вывода. ')

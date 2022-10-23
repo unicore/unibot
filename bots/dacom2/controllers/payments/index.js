@@ -4,10 +4,10 @@ const {
 const { sendMessageToUser } = require('../../messages');
 
 const { getHelixParams, printWallet } = require('../../core');
-const {constructGoalMessage} = require('../../goals');
+const { constructGoalMessage } = require('../../goals');
 
 const { getBotByNameAndType } = require('../../../../common/getBotByNameAndType');
-const {mainButtons} = require('../../utils/bot')
+const { mainButtons } = require('../../utils/bot')
 const { Markup } = require('telegraf');
 
 module.exports.payReciever = async (req, res) => {
@@ -57,15 +57,15 @@ module.exports.payReciever = async (req, res) => {
   let sender = (user.username && user.username !== '') ? '@' + user.username : user.eosname
   let message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`
 
-  await insertMessage(botName, {id: chat.union_chat_id}, 'operator', message);
+  await insertMessage(botName, { id: chat.union_chat_id }, 'operator', message);
 
-  await sendMessageToUser(bot, {id: chat.union_chat_id}, { text: message });
+  await sendMessageToUser(bot, { id: chat.union_chat_id }, { text: message });
 
   let message2 = `Поступил взнос в размере ${amount} от ${sender}`
 
-  await insertMessage(botName, {id: chat.reply_to_message_chat_id}, 'operator', message, {reply_to_message_id: chat.reply_to_message_id});
+  await insertMessage(botName, { id: chat.reply_to_message_chat_id }, 'operator', message, { reply_to_message_id: chat.reply_to_message_id });
 
-  await sendMessageToUser(bot, {id: chat.reply_to_message_chat_id}, { text: message2 }, {reply_to_message_id: chat.reply_to_message_id});
+  await sendMessageToUser(bot, { id: chat.reply_to_message_chat_id }, { text: message2 }, { reply_to_message_id: chat.reply_to_message_id });
 
   let goal = await getGoalByChatMessage(bot.instanceName, 'core', chat.goal_message_id)
 

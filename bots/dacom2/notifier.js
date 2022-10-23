@@ -8,15 +8,15 @@ async function notify(bot, source, hostname, what, meta) {
   // if (current_chat){
 
   console.log('on notify')
+
   if (what === 'acceptReport') {
     console.log('on notify2')
     let to = await getUserByEosName(bot.instanceName, meta.username)
     console.log('on notify3', to, meta)
     let msg = await constructReportMessage(bot, hostname, meta)
 
-    if (to) {
-      await sendMessageToUser(bot, {id: to.id}, { text: `Ваш отчёт одобрен в проекте ${source.unionName}: \n\n${msg}` }, {});
-    }
+    if (to)
+      await sendMessageToUser(bot, { id: to.id }, { text: `Ваш отчёт одобрен в проекте ${source.unionName}: \n\n${msg}` }, {});
   }
 
   // }

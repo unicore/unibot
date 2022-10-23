@@ -18,7 +18,9 @@ async function getPartner(bot, username) {
 async function getPromoBudget(bot, username, contract = 'eosio.token') {
   let promo = await lazyFetchAllTableInternal(bot.eosapi, 'part', 'part', 'pbudgets', username, username, 100, 2, 'i64');
   promo = promo.find((el) => el.contract === contract);
+
   if (promo) return promo.budget;
+
   return '0.0000 FLOWER';
 }
 
@@ -36,6 +38,7 @@ async function loadStructure(bot, partnerBase) {
   const partners = [];
 
   const line = await getMyPartners(bot, partnerBase);
+
   // eslint-disable-next-line no-restricted-syntax
   for (const row of line) {
     // eslint-disable-next-line no-await-in-loop
@@ -47,15 +50,14 @@ async function loadStructure(bot, partnerBase) {
 
   partners.forEach((partner) => {
     str.push(partner);
-    if (partner.partners && partner.partners.length > 0) {
+
+    if (partner.partners && partner.partners.length > 0)
       // eslint-disable-next-line no-restricted-syntax
-      for (const row of partner.partners) {
+      for (const row of partner.partners)
         if (row.username) {
           row.username = `+${row.username}`;
           str.push(row);
         }
-      }
-    }
   });
   return str;
 }
@@ -66,8 +68,9 @@ async function getStructure(bot, baseUsername) {
   const newStr = [];
 
   let k = 1;
+
   // eslint-disable-next-line no-restricted-syntax
-  for (const row of structure) {
+  for (const row of structure)
     if (row.username) {
       const regex = /([a-z]+)/gi;
 
@@ -86,13 +89,10 @@ async function getStructure(bot, baseUsername) {
         let totalWhite = '0.0000 FLOWER';
         let totalBlack = '0.0000 FLOWER';
 
-        if (balances) {
+        if (balances)
           // eslint-disable-next-line no-restricted-syntax
-          for (const bal of balances) {
-            if (bal.pool_color === 'white') totalWhite = `${parseFloat(totalWhite) + parseFloat(bal.available)} FLOWER`;
-            else totalBlack = `${parseFloat(totalBlack) + parseFloat(bal.available)} FLOWER`;
-          }
-        }
+          for (const bal of balances)
+            if (bal.pool_color === 'white') totalWhite = `${parseFloat(totalWhite) + parseFloat(bal.available)} FLOWER`; else totalBlack = `${parseFloat(totalBlack) + parseFloat(bal.available)} FLOWER`;
 
         newStr.push({
           '#': k,
@@ -106,9 +106,8 @@ async function getStructure(bot, baseUsername) {
         k += 1;
       }
     }
-  }
 
-  if (newStr.length === 0) {
+  if (newStr.length === 0)
     newStr.push({
       '#': 0,
       'Системное имя': 'партнёров нет',
@@ -118,7 +117,7 @@ async function getStructure(bot, baseUsername) {
       'На белых столах': '-',
       'На чёрных столах': '-',
     });
-  }
+
   return newStr;
 }
 
@@ -185,6 +184,7 @@ async function continueDemo(bot, user, from) {
   // TODO set menu
   let text = '';
   let menu;
+
   if (from === 'eosio') {
     text += 'Вы получили 1000 демо-цветков! 🌼 Давайте с их помощью заработаем еще цветков, и сотворим добро. 💵';
     text += '\n\nВаша задача - положить 🌼 цветки на стол и забрать их с последующих столов с прибылью.';
@@ -254,9 +254,8 @@ async function prepareSpreadAction(bot, user, ctx) {
     buttons.push(Markup.button.callback('отмена', 'backto wallet '));
 
     ctx.reply(`Ваш рекламный бюджет: ${myPromoBalance}. В вашей структуре ${nullUsers.length} партнёров, не обладающими балансами. Распределить по 1 FLOWER для них из вашего рекламного бюджета на каждого из них?`, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-  } else {
+  } else
     ctx.reply('У вас нет партнёров для распределения');
-  }
 }
 
 async function spreadNowAction(ctx) {

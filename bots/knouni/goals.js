@@ -16,7 +16,9 @@ async function fetchGoals(bot, hostname) {
 
 async function fetchUPower(bot, hostname, username) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'power3', username, username, 1);
+
   if (goals[0]) return goals[0].power;
+
   return 0;
 }
 
@@ -24,17 +26,14 @@ async function fetchConditions(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'conditions');
   // eslint-disable-next-line array-callback-return
   conditions.map((cond, index) => {
-    if (cond.key_string === 'condaddgoal') {
+    if (cond.key_string === 'condaddgoal')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condaddtask') {
+    if (cond.key_string === 'condaddtask')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condjoinhost') {
+    if (cond.key_string === 'condjoinhost')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
   });
 
   return conditions;
@@ -64,11 +63,11 @@ async function editGoalMsg(ctx, user, hostname, goalId) {
 
   const buttons = [];
 
-  if (goal.voters.find((el) => user.eosname === el)) {
+  if (goal.voters.find((el) => user.eosname === el))
     buttons.push(Markup.button.callback('Снять голос', `voteup ${hostname} ${goal.id}`));
-  } else if (goal.status !== 'filled') {
+  else if (goal.status !== 'filled')
     buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
-  }
+
   // eslint-disable-next-line max-len
   await ctx.editMessageText(getGoalMsg(index, goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 }
@@ -99,11 +98,10 @@ async function voteAction(bot, ctx, user, hostname, goalId) {
 
     await editGoalMsg(ctx, user, hostname, goalId);
   } catch (e) {
-    if (e.message === 'assertion failure with message: You dont have shares for voting process') {
+    if (e.message === 'assertion failure with message: You dont have shares for voting process')
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
-    } else {
+    else
       ctx.reply(e.message);
-    }
 
     console.error(e);
   }
@@ -195,15 +193,16 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
 
   console.log('goals', goals.length);
   let index = 1;
+
   // eslint-disable-next-line no-restricted-syntax
   for (const goal of goals) {
     const buttons = [];
 
-    if (goal.voters.find((el) => user.eosname === el)) {
+    if (goal.voters.find((el) => user.eosname === el))
       buttons.push(Markup.button.callback('Снять голос', `voteup ${hostname} ${goal.id}`));
-    } else if (goal.status !== 'filled') {
+    else if (goal.status !== 'filled')
       buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
-    }
+
     // eslint-disable-next-line no-await-in-loop,max-len
     await ctx.reply(getGoalMsg(index, goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     index += 1;
@@ -212,9 +211,8 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const buttons = [];
   buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
 
-  if (bot.getEnv().WHO_CAN_SET_GOALS === 'any' || (bot.getEnv().WHO_CAN_SET_GOALS === 'admin' && Number(user.id) === Number(process.env.ADMIN_ID))) {
+  if (bot.getEnv().WHO_CAN_SET_GOALS === 'any' || (bot.getEnv().WHO_CAN_SET_GOALS === 'admin' && Number(user.id) === Number(process.env.ADMIN_ID)))
     buttons.push(Markup.button.callback('Создать цель', `creategoal ${hostname}`));
-  }
 
   buttons.push(Markup.button.callback('Пополнить силу голоса', `burn ${hostname}`));
 

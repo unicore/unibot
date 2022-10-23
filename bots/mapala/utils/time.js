@@ -21,9 +21,10 @@ module.exports.timestampToDHMS = (timestampOriginal) => {
   const timestamp = Number(timestampOriginal);
   const parts = Object.keys(EXTRACT_TIMESTAMP_RULES).map((timeWord) => {
     const timePart = EXTRACT_TIMESTAMP_RULES[timeWord](timestamp);
-    if (timePart) {
+
+    if (timePart)
       return `${timePart} ${timeWord}`;
-    }
+
     return null;
   }).filter(Boolean);
 

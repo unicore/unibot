@@ -2,7 +2,7 @@ const { Markup } = require('telegraf');
 const eosjsAccountName = require('eosjs-account-name');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
 const { saveUser, getUserByEosName } = require('./db');
-const {notify} = require('./notifier')
+const { notify } = require('./notifier')
 
 async function getVotesCount(bot, hostname, username) {
   let votes = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'votes');
@@ -19,6 +19,7 @@ async function fetchHost(bot, hostname) {
   const hosts = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'hosts');
   return hosts[0]
 }
+
 async function fetchGoal(bot, hostname, goalId) {
   console.log('fetchGoal: ', hostname, goalId)
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'goals', goalId, goalId, 1);
@@ -38,7 +39,9 @@ async function fetchTask(bot, hostname, taskId) {
 
 async function fetchUPower(bot, hostname, username) {
   const goals = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'power3', username, username, 1);
+
   if (goals[0]) return goals[0].power;
+
   return 0;
 }
 
@@ -46,17 +49,14 @@ async function fetchConditions(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'conditions');
   // eslint-disable-next-line array-callback-return
   conditions.map((cond, index) => {
-    if (cond.key_string === 'condaddgoal') {
+    if (cond.key_string === 'condaddgoal')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condaddtask') {
+    if (cond.key_string === 'condaddtask')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
 
-    if (cond.key_string === 'condjoinhost') {
+    if (cond.key_string === 'condjoinhost')
       conditions[index].value = eosjsAccountName.uint64ToName(cond.value);
-    }
   });
 
   return conditions;
@@ -72,10 +72,9 @@ function getGoalMsg(goal) {
 async function disableButtons(bot, ctx, up) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
 
-  if (up)
-    keyboard[0][0].text = 'ожидание'
-  else
-    keyboard[0][1].text = 'ожидание'
+  if (up) keyboard[0][0].text = 'ожидание'
+  else keyboard[0][1].text = 'ожидание'
+
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
   } catch (e) {
@@ -87,10 +86,8 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
   let keyboard = ctx.update.callback_query.message.reply_markup.inline_keyboard
   let report = await fetchReport(bot, hostname, reportId);
 
-  if (up)
-    keyboard[0][0].text = `👍 (${report.voters.length})`
-  else
-    keyboard[0][1].text = 'ожидание'
+  if (up) keyboard[0][0].text = `👍 (${report.voters.length})`
+  else keyboard[0][1].text = 'ожидание'
 
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: keyboard });
@@ -100,10 +97,10 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 }
 
 async function constructGoalMessage(bot, hostname, goal, goalId) {
-  if (!goal && goalId)
-    goal = await fetchGoal(bot, hostname, goalId);
+  if (!goal && goalId) goal = await fetchGoal(bot, hostname, goalId);
 
   console.log('GOAL ON FETHC: ', goal, hostname, goalId)
+
   if (goal) {
     console.log('GOAL MATCH2: ', goal.id)
 
@@ -126,24 +123,21 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
       coordinator = (user.username && user.username !== '') ? '@' + user.username : goal.benefactor
     }
 
-    if (goal.benefactor !== '')
-      text += `Координатор: ${goal.benefactor === '' ? 'не установлен' : coordinator}\n`
+    if (goal.benefactor !== '') text += `Координатор: ${goal.benefactor === '' ? 'не установлен' : coordinator}\n`
 
     text += `Голоса: ${goal.positive_votes} POWER`
 
     // text += `Консенсус: ${parseFloat((goal.positive_votes - goal.negative_votes) / total_shares * 100).toFixed(2)}%`
-    if (parseFloat(goal.available) > 0)
-      text += `\nСобрано: ${goal.available}`
-    if (parseFloat(goal.withdrawed) > 0)
-      text += `\nПолучено: ${goal.withdrawed}`
+    if (parseFloat(goal.available) > 0) text += `\nСобрано: ${goal.available}`
+
+    if (parseFloat(goal.withdrawed) > 0) text += `\nПолучено: ${goal.withdrawed}`
 
     return text
   } else return ''
 }
 
 async function constructTaskMessage(bot, hostname, task, taskId) {
-  if (!task && taskId)
-    task = await fetchTask(bot, hostname, taskId);
+  if (!task && taskId) task = await fetchTask(bot, hostname, taskId);
 
   let text = ''
   let level = task.priority === (0 || 1) ? '10 $/час' : (task.priority === 2 ? '20 $/час' : '40 $/час')
@@ -159,8 +153,7 @@ async function constructTaskMessage(bot, hostname, task, taskId) {
 }
 
 async function constructReportMessage(bot, hostname, report, reportId) {
-  if (!report && reportId)
-    report = await fetchReport(bot, hostname, reportId);
+  if (!report && reportId) report = await fetchReport(bot, hostname, reportId);
 
   if (report) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
@@ -175,9 +168,10 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`
     text += `${report.data}\n\n`
 
-    if (bot.octokit) {
+    if (bot.octokit)
       try {
         const githubPullRequestUrl = report.data.match(/https:\/\/github.com\/.*\/pull\/\d+/);
+
         if (githubPullRequestUrl) {
           const prData = await bot.octokit.pulls.get({
             owner: githubPullRequestUrl[0].split('/')[3],
@@ -191,6 +185,7 @@ async function constructReportMessage(bot, hostname, report, reportId) {
           text += `\tстроки: +${prData.data.additions} -${prData.data.deletions}\n`;
         } else {
           const githubCommitUrl = report.data.match(/https:\/\/github.com\/.*\/commit\/\w+/);
+
           if (githubCommitUrl) {
             const commitData = await bot.octokit.repos.getCommit({
               owner: githubCommitUrl[0].split('/')[3],
@@ -212,7 +207,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       } catch (e) {
         console.log('github error', e);
       }
-    }
 
     text += `Одобрен: ${report.approved === '1' ? '🟢' : '🟡'}\n`
     text += `Затрачено: ${parseFloat(report.duration_secs / 60).toFixed(0)} мин\n`
@@ -222,16 +216,14 @@ async function constructReportMessage(bot, hostname, report, reportId) {
       // text += `Голоса: ${}%\n`
       bonus = `${(report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? report.positive_votes : goal.second_circuit_votes) * goal.total_power_on_distribution} POWER\n`
       bonus = parseFloat(bonus).toFixed(2) + ' POWER'
-    } else {
-      // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
+    } else
+    // votes = parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === 0 ? 1 : goal.second_circuit_votes  ) * 100).toFixed(2)
 
-      // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
-      if (report.positive_votes === 0) {
-        bonus = parseFloat(0).toFixed(2) + ' POWER'
-      } else {
-        bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
-      }
-    }
+    // text += `Голоса: ${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes === report.positive_votes ? 1 : goal.second_circuit_votes + report.positive_votes  ) * 100).toFixed(2)}%\n`
+    if (report.positive_votes === 0)
+      bonus = parseFloat(0).toFixed(2) + ' POWER'
+    else
+      bonus = `${parseFloat((report.positive_votes - report.negative_votes) / (goal.second_circuit_votes + report.positive_votes) * (goal.total_power_on_distribution + (parseFloat(report.requested) * 0.1))).toFixed(2) } POWER\n`
 
     text += `Подарок: ${report.requested} + ${bonus}\n`
 
@@ -258,9 +250,8 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   const columnsCount = 2;
 
   buttons = keyboard.reduce((curr, next, index) => {
-    if (index % columnsCount === 0) {
+    if (index % columnsCount === 0)
       curr.push([]);
-    }
 
     const [row] = curr.slice(-1);
 
@@ -273,8 +264,7 @@ async function editGoalMsg(bot, ctx, user, hostname, goalId, skip) {
   // console.log(ctx.update.callback_query.message.reply_to_message.message_id)
   // await ctx.
   //
-  if (!skip)
-    await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
+  if (!skip) await ctx.editMessageReplyMarkup({ inline_keyboard: buttons });
 
   console.log(ctx.update.callback_query.message.reply_to_message)
   let message_id = ctx.update.callback_query.message.reply_to_message.forward_from_message_id
@@ -316,6 +306,7 @@ async function editReportMsg(bot, ctx, user, hostname, reportId) {
 
   console.log('1: ', chat_id)
   console.log('2: ', message_id)
+
   try {
     await bot.telegram.editMessageText(chat_id, message_id, null, new_text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   } catch (e) {
@@ -411,7 +402,7 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
   let report = await fetchReport(bot, hostname, reportId);
   let actions = []
 
-  if (user.eosname === host.architect && report.approved === 0) {
+  if (user.eosname === host.architect && report.approved === 0)
     actions.push({
       account: 'unicore',
       name: 'approver',
@@ -425,7 +416,6 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
         comment: '',
       },
     })
-  }
 
   actions.push({
     account: 'unicore',
@@ -457,10 +447,11 @@ async function rvoteAction(bot, ctx, user, hostname, reportId, up) {
     // await editGoalMsg(bot, ctx, user, hostname, reportId);
   } catch (e) {
     console.log('on error: ')
-    if (e.message === 'assertion failure with message: You dont have shares for voting process') {
-      ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id});
-    } else {
-      let msg_id = (await ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id})).message_id;
+
+    if (e.message === 'assertion failure with message: You dont have shares for voting process')
+      ctx.reply('Ошибка: У вас нет силы голоса для управления отчётами.', { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id });
+    else {
+      let msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
       setTimeout(() => ctx.deleteMessage(msg_id), 5000)
     }
 
@@ -475,6 +466,7 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
   await disableButtons(bot, ctx, up)
 
   console.log('on VOTE ACTION')
+
   try {
     await eos.transact({
       actions: [{
@@ -498,10 +490,10 @@ async function voteAction(bot, ctx, user, hostname, goalId, up) {
 
     await editGoalMsg(bot, ctx, user, hostname, goalId);
   } catch (e) {
-    if (e.message === 'assertion failure with message: You dont have shares for voting process') {
+    if (e.message === 'assertion failure with message: You dont have shares for voting process')
       ctx.reply('Ошибка: У вас нет силы голоса для управления целями.');
-    } else {
-      let msg_id = (await ctx.reply(e.message, {reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id})).message_id;
+    else {
+      let msg_id = (await ctx.reply(e.message, { reply_to_message_id: ctx.update.callback_query.message.reply_to_message.message_id })).message_id;
       setTimeout(() => ctx.deleteMessage(msg_id), 5000)
     }
 
@@ -536,11 +528,13 @@ async function burnNow(bot, ctx, user) {
     const buttons = [];
 
     buttons.push(Markup.button.callback('Показать все цели', `showgoals ${user.burn.hostname} `));
+
     try {
       ctx.editMessageText('Сила голоса успешно пополнена.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     } catch (e) {
       console.log('same message!')
     }
+
     // eslint-disable-next-line no-param-reassign
     user.burn = {};
     await saveUser(bot.instanceName, user);
@@ -582,8 +576,8 @@ async function editGoal(bot, ctx, user, goal) {
 async function createGoal(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   let res
-  if (!user.create_goal)
-    user.create_goal = {}
+
+  if (!user.create_goal) user.create_goal = {}
 
   try {
     res = await eos.transact({
@@ -627,7 +621,7 @@ async function createGoal(bot, ctx, user, goal) {
     await saveUser(bot.instanceName, user);
     return goalId
   } catch (e) {
-    ctx.reply(e.message, {reply_to_message_id: ctx.update.message.message_id});
+    ctx.reply(e.message, { reply_to_message_id: ctx.update.message.message_id });
 
     console.error(e);
   }
@@ -639,15 +633,16 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   let upower = await fetchUPower(hostname, user.eosname);
 
   let index = 1;
+
   // eslint-disable-next-line no-restricted-syntax
   for (const goal of goals) {
     const buttons = [];
 
-    if (goal.voters.find((el) => user.eosname === el)) {
+    if (goal.voters.find((el) => user.eosname === el))
       buttons.push(Markup.button.callback('Снять голос', `voteup ${hostname} ${goal.id}`));
-    } else if (goal.status !== 'filled') {
+    else if (goal.status !== 'filled')
       buttons.push(Markup.button.callback('Проголосовать ЗА', `voteup ${hostname} ${goal.id}`));
-    }
+
     // eslint-disable-next-line no-await-in-loop,max-len
     await ctx.reply(getGoalMsg(goal), Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     index += 1;
@@ -656,9 +651,8 @@ async function printGoalsMenu(bot, ctx, user, hostname) {
   const buttons = [];
   buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
 
-  if (bot.getEnv().WHO_CAN_SET_GOALS === 'any' || (bot.getEnv().WHO_CAN_SET_GOALS === 'admin' && Number(user.id) === Number(process.env.ADMIN_ID))) {
+  if (bot.getEnv().WHO_CAN_SET_GOALS === 'any' || (bot.getEnv().WHO_CAN_SET_GOALS === 'admin' && Number(user.id) === Number(process.env.ADMIN_ID)))
     buttons.push(Markup.button.callback('Создать цель', `creategoal ${hostname}`));
-  }
 
   buttons.push(Markup.button.callback('Пополнить силу голоса', `burn ${hostname}`));
 

@@ -50,6 +50,7 @@ async function delOrder(bot, orderId, username) {
   const user = await getUserByEosName(bot.instanceName, username);
 
   const eos = await bot.uni.getEosPassInstance(user.wif);
+
   try {
     await eos.transact({
       actions: [{
@@ -107,6 +108,7 @@ async function decryptMessage(bot, wif, from, message) {
       console.log(e2.message);
     }
   }
+
   return '';
 }
 
@@ -136,7 +138,7 @@ async function getOrdersAndCheckThem(bot) {
   const orders = await getOrders(bot);
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const user of users) {
+  for (const user of users)
     if (user.active_order) {
       const order = orders.find((o) => Number(o.id) === Number(user.active_order.id));
 
@@ -205,6 +207,7 @@ async function getOrdersAndCheckThem(bot) {
         if (parentOrder && parentOrder.root_completed === parentOrder.root_quantity) {
           // eslint-disable-next-line no-await-in-loop
           const parentCreator = await getUserByEosName(bot.instanceName, parentOrder.creator);
+
           // eslint-disable-next-line no-await-in-loop
           if (parentCreator) await delOrder(bot, parentOrder.id, parentCreator.eosname);
         }
@@ -221,7 +224,6 @@ async function getOrdersAndCheckThem(bot) {
         // console.log('NOT MODIFY')
       }
     }
-  }
 }
 
 async function cancelOrder(bot, orderId, ctx) {
@@ -232,6 +234,7 @@ async function cancelOrder(bot, orderId, ctx) {
   let creator;
 
   if (order && order.parent_creator !== '') parentCreator = await getUserByEosName(bot.instanceName, order.parent_creator);
+
   if (order) creator = await getUserByEosName(bot.instanceName, order.creator);
 
   console.log('on cancel: ', user.eosname, orderId);
@@ -261,12 +264,11 @@ async function cancelOrder(bot, orderId, ctx) {
     user.orderStatus = '';
     saveUser(bot.instanceName, user).then();
 
-    if (parentCreator) {
+    if (parentCreator)
       await sendMessageToUser(bot, parentCreator, { text: 'Заявка на обмен отменена.' });
-    }
-    if (creator) {
+
+    if (creator)
       await ctx.editMessageText(creator, { text: 'Заявка на обмен отменена.' });
-    }
   } catch (e) {
     console.error(e);
     await backToMainMenu(ctx, `Ошибка: ${e.message}`);
@@ -278,15 +280,18 @@ async function getDetails(suffix, eosname, currency) {
     const db = await loadDB();
     const collection = db.collection(`details_${suffix}`);
     const details = await collection.findOne({ eosname, currency });
+
     if (details) return details.details;
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return '';
 }
 
 async function acceptBuyOrder(bot, orderId, user, isAuto) {
   let outSymbol = 'USDT';
+
   if (!isAuto) outSymbol = user.order_action.data.out_symbol;
 
   const orders = await bot.uni.p2pContract.getOrders();
@@ -321,9 +326,8 @@ async function acceptBuyOrder(bot, orderId, user, isAuto) {
     });
 
     await sendMessageToUser(bot, user, { text: 'Ожидание\n\nОжидаем обработки заявки. Вы получите оповещение, как только обработка будет завершена. В настоящий момент, все заявки обрабатываются полу-автоматически, и этот процесс может занять от нескольких минут до нескольких часов.' });
-  } else {
+  } else
     await sendMessageToUser(bot, user, { text: 'Ордер отменён партнёром и не может быть принят.' });
-  }
 }
 
 async function approveActiveBuyOrder(bot, user, orderId) {
@@ -381,7 +385,7 @@ async function confirmActiveBuyOrder(bot, user, orderId, ctx) {
 
     const bcOrder = await getOrder(bot, orderId);
 
-    if (isOperator) {
+    if (isOperator)
       if (bcOrder) {
         const user2 = await getUserByEosName(bot.instanceName, bcOrder.parent_creator);
 
@@ -391,12 +395,11 @@ async function confirmActiveBuyOrder(bot, user, orderId, ctx) {
         await delOrder(bot, bcOrder.parent_id, bcOrder.parent_creator);
 
         await ctx.editMessageText(user2, { text: 'Вывод подтвержден.' });
-      } else {
+      } else
         console.log('ORDER ALREADY CONFIRMED');
-      }
-    } else {
+
+    else
       await ctx.editMessageText(user, { text: 'Ожидание\n\nОжидаем несколько подтверждений от сети и дарим цветочки..' });
-    }
   }
 }
 
@@ -495,6 +498,7 @@ async function createOrder(bot, user, ctx) {
         await backToMainMenu(ctx, 'Заявка на обмен закрыта партнёром. Начните процесс заново.');
         return;
       }
+
       if (parseFloat(parentOrder.root_remain) < parseFloat(rootQuantity)) {
         // Если расхождение больше одного процента - отмена.
         if (
@@ -505,6 +509,7 @@ async function createOrder(bot, user, ctx) {
           await backToMainMenu(ctx, 'Условия обмена в заявке изменились. Начните процесс заново.');
           return;
         }
+
         rootQuantity = parentOrder.root_remain;
       }
     } else if (user.order_action.data.type === 'sell') {
@@ -512,6 +517,7 @@ async function createOrder(bot, user, ctx) {
     }
 
     const actions = [];
+
     if (user.order_action.data.type === 'sell') {
       outQuantity2 = outQuantity;
       outQuantity = `${(0).toFixed(4)} ${user.order_action.data.out_symbol}`;
@@ -571,8 +577,7 @@ async function createOrder(bot, user, ctx) {
     }).then(async (data) => {
       let cons;
 
-      if (order.type === 'sell') cons = data.processed.action_traces[1].console;
-      else cons = data.processed.action_traces[0].console;
+      if (order.type === 'sell') cons = data.processed.action_traces[1].console; else cons = data.processed.action_traces[0].console;
 
       const [, orderId] = cons.split('ORDER_ID:');
 
@@ -595,11 +600,10 @@ async function createOrder(bot, user, ctx) {
       } else if (user.order_action.data.type === 'sell') {
         const buttons = [];
 
-        if (user.order_action.data.out_symbol === bot.getEnv().GATEWAY_SYMBOL) {
+        if (user.order_action.data.out_symbol === bot.getEnv().GATEWAY_SYMBOL)
           await startAutoChange(bot, order);
-        } else {
+        else
           buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${orderId}`));
-        }
 
         await ctx.editMessageText(user, { text: `Заявка создана\n\nЗаявка на получение помощи создана на сумму ${outQuantity2}.` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
       }

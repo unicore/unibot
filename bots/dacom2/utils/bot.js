@@ -29,7 +29,9 @@ async function backToMainMenu(ctx, text) {
 
   const icomeMenu = Markup.keyboard(mainButtons, { columns: 2 }).resize();
   let t = 'Добро пожаловать в глобальную кассу взаимопомощи Двойная Спираль.';
+
   if (text) t = text;
+
   await ctx.replyWithHTML(t, icomeMenu);
 }
 

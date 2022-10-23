@@ -113,6 +113,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   };
 
   console.log('referer on register: ', params.referer, 'username: ', generatedAccount.name, 'ref: ', ref);
+
   try {
     const message = await axios.get(
       `${bot.getEnv().REGISTRATOR}/set`,
@@ -120,10 +121,11 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
         params,
       },
     );
-    if (message.data) {
+
+    if (message.data)
       // TODO set partner info
       await saveUser(bot.instanceName, user);
-    } else {
+    else {
       await saveUser(bot.instanceName, user);
       console.error(message);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
@@ -164,6 +166,7 @@ async function finishEducation(ctx) {
 
 async function pushEducation(ctx, currentSlideIndex) {
   const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
+
   if (!slide) {
     try {
       await ctx.editMessageText('Ознакомление завершено');
@@ -184,26 +187,24 @@ async function pushEducation(ctx, currentSlideIndex) {
 
     buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
 
-    if (currentSlideIndex + 1 === education.length) buttons.push(Markup.button.callback('Начать с начала', `pusheducation ${0}`));
-    else { buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`)); }
+    if (currentSlideIndex + 1 === education.length) buttons.push(Markup.button.callback('Начать с начала', `pusheducation ${0}`)); else buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
     buttons.push(Markup.button.callback('Пропустить', `pusheducation ${education.length}`));
 
     let text = '';
     text += `\n\n${slide.text}`;
 
-    if (currentSlideIndex === 0) {
+    if (currentSlideIndex === 0)
       // eslint-disable-next-line max-len
       await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
-    } else {
+    else {
       await ctx.deleteMessage();
 
-      if (slide.img.length > 0) {
+      if (slide.img.length > 0)
         // eslint-disable-next-line max-len
         await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
-      } else {
+      else
         await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-      }
     }
   }
 }
@@ -351,6 +352,7 @@ module.exports.init = async (botModel, bot) => {
 
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
+
       if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
         user = ctx.update.message.from;
         user.app = bot.getEnv().APP;
@@ -377,17 +379,17 @@ module.exports.init = async (botModel, bot) => {
 
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
     await checkForExistBCAccount(bot, ctx);
 
-    if (ctx.update.message.chat.type === 'private') {
+    if (ctx.update.message.chat.type === 'private')
       await printWallet(bot, user);
-    } else {
+    else
       await printWallet(bot, user, ctx);
       // ctx.reply(`Для доступа к вашему кошельку перейдите в бота: @${(await bot.telegram.getMe()).username}`)
-    }
   });
 
   // ___________
@@ -409,7 +411,8 @@ module.exports.init = async (botModel, bot) => {
       const buttons = [];
 
       let text = `У вас есть активная заявка на сумму ${outQuantity}`;
-      if (childOrders.length > 0) {
+
+      if (childOrders.length > 0)
         if (childOrders[0].status === 'finish') {
           text += '\nСтатус: завершена';
           buttons.push(Markup.button.callback('Очистить заявку', `delorder ${order.id}`));
@@ -421,7 +424,7 @@ module.exports.init = async (botModel, bot) => {
 
           ctx.reply(text);
         }
-      } else {
+      else {
         text += '\nСтатус: ожидание';
         text += '\n\nОтменить заявку?';
         buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${order.id}`));
@@ -439,17 +442,15 @@ module.exports.init = async (botModel, bot) => {
     const myOrders = await bot.uni.p2pContract.getOrders(user.eosname);
     const buyOrders = myOrders.filter((el) => el.type === 'buy');
 
-    if (user.state === 'giveHelp') {
-      if (buyOrders.length === 0) setBuyMenu(ctx);
-      else {
+    if (user.state === 'giveHelp')
+      if (buyOrders.length === 0) setBuyMenu(ctx); else {
         const buyOrder = buyOrders[0];
         const buttons2 = [];
         buttons2.push(Markup.button.callback('Отменить заявку', `cancelorder ${buyOrder.id}`));
         ctx.reply(`У вас уже есть активная заявка на оказание помощи на сумму ${buyOrder.out_quantity}. `, Markup.inlineKeyboard(buttons2, { columns: 1 }).resize());
       }
-    } else if (user.state === 'getHelp') {
+    else if (user.state === 'getHelp')
       await setSellMenu(bot, ctx, user);
-    }
   }
 
   async function checkSponsor(bot, username, sponsor, contract) {
@@ -466,6 +467,7 @@ module.exports.init = async (botModel, bot) => {
 
   async function depositAction(bot, ctx, user) {
     const helix = await getHelixParams(bot, user.deposit_action.hostname);
+
     try {
       const eos = await bot.uni.getEosPassInstance(user.wif);
 
@@ -506,6 +508,7 @@ module.exports.init = async (botModel, bot) => {
 
   async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
     const eos = await bot.uni.getEosPassInstance(user.wif);
+
     try {
       await eos.transact({
         actions: [{
@@ -556,8 +559,7 @@ module.exports.init = async (botModel, bot) => {
       return Markup.button.callback(`до ${outQuantity} - партнёр ${order.creator.toUpperCase()}`, `orderid ${order.id}`);
     });
 
-    if (orders.length > 0) ctx.reply('Если у вас нет USDT, воспользуйтесь инструкцией для их покупки: \n\nПосле чего, выберите заявку и нажмите на неё:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-    else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
+    if (orders.length > 0) ctx.reply('Если у вас нет USDT, воспользуйтесь инструкцией для их покупки: \n\nПосле чего, выберите заявку и нажмите на неё:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize()); else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
   });
 
   bot.hears('🎫 выбрать квест', async (ctx) => {
@@ -587,7 +589,9 @@ module.exports.init = async (botModel, bot) => {
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
-  };
+  }
+
+  ;
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -691,10 +695,9 @@ module.exports.init = async (botModel, bot) => {
 
     // eslint-disable-next-line array-callback-return
     quiz.answers.map((el, index) => {
-      if (index === quiz.current_quiz) {
+      if (index === quiz.current_quiz)
         // eslint-disable-next-line no-param-reassign
         el.answer = ctx.update.message.contact;
-      }
     });
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -731,17 +734,17 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🌀 касса', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
     await checkForExistBCAccount(bot, ctx);
 
-    if (user.is_demo) await printHelixWallet(bot, ctx, user, bot.getEnv().DEMO_HOST);
-    else if (bot.getEnv().MODE === 'community') {
+    if (user.is_demo) await printHelixWallet(bot, ctx, user, bot.getEnv().DEMO_HOST); else if (bot.getEnv().MODE === 'community')
       await printHelixWallet(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
-    }
   });
 
   bot.action('skipdemo', async (ctx) => {
@@ -784,9 +787,8 @@ module.exports.init = async (botModel, bot) => {
     if (isAdminUser && message) {
       const count = await sendMessageToAll(bot, { text: message });
       await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
-    } else {
+    } else
       await ctx.replyWithHTML('Недостаточно прав');
-    }
   });
 
   bot.action('cancelsendtoall', async (ctx) => {
@@ -798,8 +800,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action(/select (\w+)/gi, async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -833,12 +837,15 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action(/deposit (\w+)/gi, async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
     let contract;
+
     if (user.is_demo) contract = 'faketoken';
 
     const hostname = ctx.match[1];
@@ -852,8 +859,8 @@ module.exports.init = async (botModel, bot) => {
 
     if (maxDeposit > 0) {
       const currentDeposit = await getCurrentUserDeposit(bot, hostname, user.eosname);
-      if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER`);
-      else {
+
+      if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER`); else {
         user.state = 'set_deposit_amount';
         user.deposit_action = { hostname };
         await saveUser(bot.instanceName, user);
@@ -861,20 +868,19 @@ module.exports.init = async (botModel, bot) => {
         const max2 = `${((maxDeposit / 10000) - parseFloat(currentDeposit)).toFixed(4)} FLOWER`;
 
         // eslint-disable-next-line max-len
-        if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain)) {
+        if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain))
           max = liquidBal;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) >= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain))
           max = params.currentPool.remain;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) >= parseFloat(params.currentPool.remain))
           // eslint-disable-next-line max-len
           max = parseFloat(max2) >= parseFloat(params.currentPool.remain) ? params.currentPool.remain : max2;
           // eslint-disable-next-line max-len
-        } else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain)) {
+        else if (parseFloat(max2) <= parseFloat(liquidBal) && parseFloat(liquidBal) <= parseFloat(params.currentPool.remain))
           // eslint-disable-next-line max-len
           max = parseFloat(max2) >= parseFloat(params.currentPool.remain) ? params.currentPool.remain : max2;
-        }
 
         await ctx.reply(`Введите сумму взноса до ${max}.`);
       }
@@ -944,8 +950,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action(/mybalances (\w+)\s(\w+)?/gi, async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1007,19 +1015,19 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const to = ctx.match[1];
     const hostname = ctx.match[2];
-    if (to === 'helixs') await printHelixs(bot, ctx, user, null, hostname);
 
-    else if (to === 'helix') {
+    if (to === 'helixs') await printHelixs(bot, ctx, user, null, hostname); else if (to === 'helix')
       await printHelixWallet(bot, ctx, user, hostname);
-    } else if (to === 'wallet') {
+    else if (to === 'wallet')
       await printWallet(bot, user);
-    }
   });
 
   bot.action(/showexp (\w+)?/gi, async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1029,10 +1037,13 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🌀 кассы', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
+
     // console.log("user", user)
     await checkForExistBCAccount(bot, ctx);
     await printHelixs(bot, ctx, user);
@@ -1040,18 +1051,22 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🎯 цели', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
-    if (user.is_demo) await printGoalsMenu(bot, ctx, user, bot.getEnv().DEMO_HOST);
-    else if (bot.getEnv().MODE === 'community') await printGoalsMenu(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
+
+    if (user.is_demo) await printGoalsMenu(bot, ctx, user, bot.getEnv().DEMO_HOST); else if (bot.getEnv().MODE === 'community') await printGoalsMenu(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
   });
 
   bot.hears('🏁 завершить демо', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
@@ -1066,8 +1081,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action('startdemo', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1076,14 +1093,15 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
     const userHasRequest = await hasRequest(bot, user.eosname, 'faketoken');
 
-    if (!userHasRequest) await requestPromoBudgetAction(bot, user, 'eosio');
-    else await continueDemo(bot, user, 'eosio');
+    if (!userHasRequest) await requestPromoBudgetAction(bot, user, 'eosio'); else await continueDemo(bot, user, 'eosio');
   });
 
   bot.action('cancelfinish', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1094,8 +1112,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action('finishdemo', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
@@ -1168,8 +1188,10 @@ module.exports.init = async (botModel, bot) => {
     buttons.push(Markup.button.url('Новости', 'https://t.me/helix_news'));
 
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
@@ -1198,8 +1220,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('⬆️ оказать помощь', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
@@ -1212,8 +1236,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('⬇️ получить помощь', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.message.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.message.from.id);
     }
 
@@ -1280,12 +1306,15 @@ module.exports.init = async (botModel, bot) => {
     // TODO cancel order
     const hostname = ctx.match[1];
     let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     if (!user) {
       if (await restoreAccount(bot, ctx, ctx.update.callback_query.from) === false) return;
+
       user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     }
 
     let subscribedNow = false;
+
     if (!user.subscribed_to) user.subscribed_to = [];
 
     if (user.subscribed_to.includes(hostname)) {
@@ -1312,17 +1341,15 @@ module.exports.init = async (botModel, bot) => {
 
     buttons.push(Markup.button.callback('Совершить взнос', `deposit ${hostname}`));
 
-    if (subscribedNow) buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`));
-    else buttons.push(Markup.button.callback('✅ Подписка на обновления', `subscribe ${hostname}`));
+    if (subscribedNow) buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`)); else buttons.push(Markup.button.callback('✅ Подписка на обновления', `subscribe ${hostname}`));
 
     const keyboard = buttons;
 
     const columnsCount = 2;
 
     buttons = keyboard.reduce((curr, next, index) => {
-      if (index % columnsCount === 0) {
+      if (index % columnsCount === 0)
         curr.push([]);
-      }
 
       const [row] = curr.slice(-1);
 
@@ -1345,9 +1372,8 @@ module.exports.init = async (botModel, bot) => {
     if (balances.priorityBalances.length > 0) {
       buttons.push(Markup.button.callback('Перевложить убыточные', `priority ${hostname}`));
       buttons.push(Markup.button.callback('Забрать убыточные', `withdrlose ${hostname}`));
-    } else {
+    } else
       await printHelixWallet(bot, ctx, user, hostname);
-    }
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [buttons] });
 
@@ -1364,11 +1390,10 @@ module.exports.init = async (botModel, bot) => {
 
     const buttons = [];
 
-    if (balances.winBalances.length > 0) {
+    if (balances.winBalances.length > 0)
       buttons.push(Markup.button.callback('Забрать прибыльные', `withdrallwin ${hostname}`));
-    } else {
+    else
       await printHelixWallet(bot, ctx, user, hostname);
-    }
 
     await ctx.editMessageReplyMarkup({ inline_keyboard: [buttons] });
 
@@ -1450,20 +1475,18 @@ module.exports.init = async (botModel, bot) => {
 
     const buttons = [];
 
-    if (balances.winBalances.length > 0) {
+    if (balances.winBalances.length > 0)
       buttons.push(Markup.button.callback('Забрать прибыльные', `withdrallwin ${hostname}`));
-    } else {
+    else
       await printHelixWallet(bot, ctx, user, hostname);
-    }
 
     ctx.editMessageReplyMarkup({ inline_keyboard: [buttons] });
 
     try {
       // eslint-disable-next-line no-restricted-syntax
-      for (const balance of balances.priorityBalances) {
+      for (const balance of balances.priorityBalances)
         // eslint-disable-next-line no-await-in-loop
         await priorityAction(bot, user, hostname, balance.id);
-      }
     } catch (e) {
       console.log('error on priority: ', e);
     }
@@ -1523,6 +1546,7 @@ module.exports.init = async (botModel, bot) => {
     user.state = '';
     user.add_promo_budget = '0.0000 FLOWER';
     await saveUser(bot.instanceName, user);
+
     try {
       await addPromoBudgetAction(bot, ctx, user, budget);
     } catch (e) {
@@ -1594,6 +1618,7 @@ module.exports.init = async (botModel, bot) => {
     const orders = await bot.uni.p2pContract.getOrders();
 
     const order = orders.find((itr) => Number(itr.id) === Number(parentId));
+
     // TODO check amount не больше своей суммы в кошельке.
     if (order) {
       const currency = user.order_action.data.out_symbol;
@@ -1606,9 +1631,8 @@ module.exports.init = async (botModel, bot) => {
       user.order_action.data.parent_id = parentId;
       user.state = 'set_order_amount';
       await saveUser(bot.instanceName, user);
-    } else {
+    } else
       ctx.editMessageText('Ордер не найден');
-    }
   });
 
   bot.action(/transfer/gi, async (ctx) => {
@@ -1630,7 +1654,7 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log('catch user', user);
 
-    if (user) {
+    if (user)
       if (ctx.update.message.chat.type !== 'private') {
         let { text } = ctx.update.message;
 
@@ -1681,9 +1705,8 @@ module.exports.init = async (botModel, bot) => {
 
           user.state = null;
           await saveUser(bot.instanceName, user);
-        } else {
+        } else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       } else {
         const quiz = await getQuiz(bot.instanceName, user.id);
         let { text } = ctx.update.message;
@@ -1691,10 +1714,9 @@ module.exports.init = async (botModel, bot) => {
         if (quiz && !quiz.is_finish) {
           // eslint-disable-next-line array-callback-return
           quiz.answers.map((el, index) => {
-            if (index === quiz.current_quiz) {
+            if (index === quiz.current_quiz)
               // eslint-disable-next-line no-param-reassign
               el.answer = text;
-            }
           });
 
           await saveQuiz(bot.instanceName, user, quiz);
@@ -1711,8 +1733,7 @@ module.exports.init = async (botModel, bot) => {
 
             await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
-            if (user.sins_count >= 100)
-              await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!')
+            if (user.sins_count >= 100) await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!')
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 
@@ -1760,9 +1781,8 @@ module.exports.init = async (botModel, bot) => {
                 const output = await generateTaskOutput(tasks[0]);
                 // eslint-disable-next-line max-len
                 await ctx.replyWithHTML(output, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-              } else {
+              } else
                 await ctx.replyWithHTML('Доступных заданий пока нет. Приходите позже. ');
-              }
             }).catch((e) => {
               user.state = '';
 
@@ -1776,9 +1796,9 @@ module.exports.init = async (botModel, bot) => {
               const currency = user.order_action.data.out_symbol;
               const outUsdRate = await bot.uni.p2pContract.getUsdRate(currency, 4);
 
-              if (parseFloat(order.quote_remain) / outUsdRate < parseFloat(text)) {
+              if (parseFloat(order.quote_remain) / outUsdRate < parseFloat(text))
                 await ctx.replyWithHTML(`Сумма вашей заявки больше остатка в заявке партнёра. В заявке партнёра остался запрос на ${order.quote_remain}. Введите сумму от 10 до ${order.quote_remain}: `);
-              } else {
+              else {
                 const buttons = [];
                 buttons.push(Markup.button.callback('Да', 'createorder'));
                 const corePrecision = 4;
@@ -1801,7 +1821,7 @@ module.exports.init = async (botModel, bot) => {
                 await ctx.replyWithHTML(`Внимание!\nВы уверены, что хотите оказать помощь партнёру ${order.creator.toUpperCase()} на сумму: ${text} ${user.order_action.data.out_symbol}? Вы получите ${rootQuantity} по курсу ${parseFloat(quoteRate).toFixed(8)} USD/FLOWER. \n\nВы также подтверждаете, что находитесь в здравом уме и добровольно оказываете безвозмездную финансовую помощь без гарантий возврата или обещаний получения прибыли.`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
                 await saveUser(bot.instanceName, user);
               }
-            } else if (user.order_action.data.type === 'sell') {
+            } else if (user.order_action.data.type === 'sell')
               if (parseFloat(text) > 0) { // TODO check balance
                 const buttons = [];
                 buttons.push(Markup.button.callback('Да', 'createorder'));
@@ -1823,10 +1843,8 @@ module.exports.init = async (botModel, bot) => {
                 user.order_action.data.out_quantity = parseFloat(text);
                 user.state = '';
                 saveUser(bot.instanceName, user).then();
-              } else {
+              } else
                 await ctx.replyWithHTML('Сумма вашей заявки больше вашего баланса цифровых цветков. Пожалуйста, введите сумму заново: ');
-              }
-            }
           } else if (user.state === 'set_order_details') {
             user.state = 'set_order_amount';
             const currency = user.order_action.data.out_symbol;
@@ -1840,10 +1858,10 @@ module.exports.init = async (botModel, bot) => {
             const min = `${(2 / parseFloat(outUsdRate)).toFixed(0)} ${currency}`;
             const max = `${((parseFloat(liquidBal) * parseFloat(coreUsdRate)) / parseFloat(outUsdRate)).toFixed(0)} ${currency}`;
 
-            if (parseFloat(max) >= parseFloat(min)) ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму получения помощи от ${min} до ${max} цифрами.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-            else {
+            if (parseFloat(max) >= parseFloat(min))
+              ctx.reply(`Введите сумму!\n\n Пожалуйста, введите сумму получения помощи от ${min} до ${max} цифрами.`);
+            else
               ctx.reply(`Доступная сумма получения помощи меньше минимальной. Доступная вам сумма: ${max}. Минимальная сумма для создания заявки: ${min}.`); // , Markup.inlineKeyboard(buttons, {columns: 1}).resize()
-            }
 
             saveUser(bot.instanceName, user).then();
           } else if (user.state === 'transfer_to') {
@@ -1857,9 +1875,8 @@ module.exports.init = async (botModel, bot) => {
               user.transfer_action.data.to = text;
               saveUser(bot.instanceName, user).then();
               await ctx.replyWithHTML('Введите сумму перевода');
-            } else {
+            } else
               await ctx.replyWithHTML('Аккаунт получателя не существует. Проверьте имя аккаунта и повторите попытку.');
-            }
           } else if (user.state === 'transfer_amount') {
             const amount = `${parseFloat(text).toFixed(4)} FLOWER`;
 
@@ -1892,17 +1909,15 @@ module.exports.init = async (botModel, bot) => {
 
             if (maxDeposit > 0) {
               const currentDeposit = await getCurrentUserDeposit(bot, hostname, user.eosname);
-              if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER, ваш текущий взнос: ${currentDeposit}`);
-              else {
+
+              if (parseFloat(currentDeposit) >= parseFloat(maxDeposit) / 10000) await ctx.reply(`Вы достигли предела взносов в этой кассе. Максимальный предел: ${(parseFloat(maxDeposit) / 10000).toFixed(4)} FLOWER, ваш текущий взнос: ${currentDeposit}`); else
                 depositNow = true;
-              }
-            } else if (parseFloat(amount) > parseFloat(liquidBal)) {
+            } else if (parseFloat(amount) > parseFloat(liquidBal))
               await ctx.reply(`Недостаточный баланс для совершения взноса. Ваш баланс: ${liquidBal}. Введите сумму заново.`);
-            } else if (parseFloat(amount) > parseFloat(helix.currentPool.remain)) {
+            else if (parseFloat(amount) > parseFloat(helix.currentPool.remain))
               await ctx.reply(`Максимальный взнос, который может принять этот стол #${helix.currentPool.pool_num}: ${helix.currentPool.remain}. Введите сумму заново.`);
-            } else {
+            else
               depositNow = true;
-            }
 
             if (depositNow) {
               user.state = '';
@@ -1968,11 +1983,9 @@ module.exports.init = async (botModel, bot) => {
 
             ctx.reply(`Вы уверены, что хотите сотворить добро в кассе ${user.burn.hostname} на сумму ${user.burn.amount}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
           }
-        } else {
+        } else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       }
-    }
   });
 
   return null;

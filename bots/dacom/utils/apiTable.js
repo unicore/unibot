@@ -1,5 +1,6 @@
 async function lazyFetchAllTableInternal(api, code, scope, table, lower_bound, upper_bound, limit, index_position, key_type) {
   if (!limit) limit = 100;
+
   if (!lower_bound) lower_bound = 0;
 
   const data = await api.getTableRows({
@@ -13,6 +14,7 @@ async function lazyFetchAllTableInternal(api, code, scope, table, lower_bound, u
     result = [...result, ...redata];
     return result;
   }
+
   return result;
 }
 

@@ -115,6 +115,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   };
 
   console.log('referer on register: ', params.referer, 'username: ', generatedAccount.name, 'ref: ', ref);
+
   try {
     const message = await axios.get(
       `${bot.getEnv().REGISTRATOR}/set`,
@@ -122,10 +123,11 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
         params,
       },
     );
-    if (message.data) {
+
+    if (message.data)
       // TODO set partner info
       await saveUser(bot.instanceName, user);
-    } else {
+    else {
       await saveUser(bot.instanceName, user);
       console.error(message);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
@@ -169,16 +171,15 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
 
-  let id = await sendMessageToUser(bot, {id : bot.getEnv().CV_CHANNEL}, { text: text });
+  let id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text: text });
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
   user.state = 'chat'
   user.request_channel_id = id
 
-  if (!user.eosname) {
+  if (!user.eosname)
     user.eosname = await generateAccount(bot, ctx, false, user.ref);
-  }
 
   await saveUser(bot.instanceName, user)
 
@@ -294,9 +295,9 @@ module.exports.init = async (botModel, bot) => {
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    if (ctx.update.message.chat.type === 'private') {
+
+    if (ctx.update.message.chat.type === 'private')
       await printWallet(bot, user);
-    }
   });
 
   bot.hears('🆕 cоздать запрос', async (ctx) => {
@@ -321,9 +322,10 @@ module.exports.init = async (botModel, bot) => {
 
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     // console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
-    if (user) {
+    if (user)
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         let { text } = ctx.update.message;
 
@@ -338,24 +340,23 @@ module.exports.init = async (botModel, bot) => {
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
-        } else {
+        } else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       } else { // Если это диалог пользователя с ботом
         // проверяем не квиз ли
         let { text } = ctx.update.message;
 
-        if (user.state) {
+        if (user.state)
           // SEND FROM USER IN BOT TO PUB CHANNEL
           // console.log("\n\non here2")
-          if (user.state === 'newrequest') {
+          if (user.state === 'newrequest')
             // console.log("HERE 1")
             await catchRequest(bot, user, ctx, text)
-          } else if (user.state === 'chat') {
+          else if (user.state === 'chat') {
             // console.log("user: ", user)
             // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
 
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id : user.request_chat_id});
+            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -375,39 +376,35 @@ module.exports.init = async (botModel, bot) => {
 
             // await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
           }
-        } else {
+        else
           await insertMessage(bot.instanceName, user, 'user', text);
-        }
       }
-    } else {
-      if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-        if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
-          if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
-            user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
+    else
+    if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
+      if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) // если словили пересылку из прикрепленного канала
+        if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+          user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id)
 
-            if (user && !user.request_chat_id) {
-              // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
-              user.request_chat_id = ctx.update.message.message_id
-              await saveUser(bot.instanceName, user);
-            }
+          if (user && !user.request_chat_id) {
+            // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+            user.request_chat_id = ctx.update.message.message_id
+            await saveUser(bot.instanceName, user);
           }
         }
-      } else {
-        if (ctx.update.message.chat.type === 'private') { // Если надо обновить меню пользователя после миграции
-          const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
+    } else
+    if (ctx.update.message.chat.type === 'private') { // Если надо обновить меню пользователя после миграции
+      const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-          await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
+      await ctx.reply('Институт Коллективного Разума решает запросы любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите адекватный ответ.', request)
 
-          const buttons = [];
-          buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
+      const buttons = [];
+      buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
 
-          buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
+      buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
 
-          await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-        }
-        // ?
-      }
+      await ctx.reply('\n\nПримеры запросов:\n-Мой бизнес стал убыточен, как сохранить его и улучшить позиции?.\n-Я застрял в развитии и нахожусь в условиях жизни, которые меня не устраивают. Что делать?\n\nПри необходимости, Институт соберёт Совет и пригласит вас к участию в нём. ', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
+    // ?
   });
 
   bot.action('createrequest', async (ctx) => {
@@ -433,9 +430,8 @@ module.exports.init = async (botModel, bot) => {
     if (isAdminUser && message) {
       const count = await sendMessageToAll(bot, { text: message });
       await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
-    } else {
+    } else
       await ctx.replyWithHTML('Недостаточно прав');
-    }
   });
 
   return null;

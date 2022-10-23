@@ -12,6 +12,7 @@ async function canRestoreAccount(user) {
   const exist = data.find((el) => el.telegram === user.username);
 
   if (exist) return exist.username;
+
   return false;
 }
 
@@ -27,15 +28,17 @@ async function restoreAccount(bot, ctx, user, is_register) {
   user.app = bot.getEnv().APP;
   await saveUser(bot.instanceName, user);
   let eos;
+
   try {
     eos = await bot.uni.getEosPassInstance(bot.getEnv().REGISTRATOR_WIF);
   } catch (e) {
     console.error(e);
     return false;
   }
+
   const username = await canRestoreAccount(user);
 
-  if (username) {
+  if (username)
     try {
       const generatedAccount = await generateUniAccount();
 
@@ -78,7 +81,7 @@ async function restoreAccount(bot, ctx, user, is_register) {
       await saveUser(bot.instanceName, user);
       return false;
     }
-  } else {
+  else {
     if (!is_register) {
       // TODO set REPAIR MENU
       const generatedAccount = await generateUniAccount();
@@ -93,7 +96,9 @@ async function restoreAccount(bot, ctx, user, is_register) {
 
       setSupportMenu(ctx);
       return false;
-    } return false;
+    }
+
+    return false;
   }
 }
 

@@ -12,6 +12,7 @@ async function getUserHelixBalance(suffix, username) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -95,7 +96,7 @@ async function saveQuiz(suffix, user, quiz) {
 }
 
 async function addUserHelixBalance(suffix, username, balance) {
-  if (balance) {
+  if (balance)
     try {
       const db = await loadDB();
 
@@ -112,7 +113,6 @@ async function addUserHelixBalance(suffix, username, balance) {
     } catch (e) {
       console.log('error: ', e.message);
     }
-  }
 }
 
 async function delUserHelixBalance(suffix, username, balanceId) {
@@ -136,6 +136,7 @@ async function getUserByEosName(suffix, eosname) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -148,6 +149,7 @@ async function getUserByResumeChannelId(suffix, resume_channel_id) {
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return null;
 }
 
@@ -158,9 +160,8 @@ async function getNicknameByEosName(suffix, eosname) {
 
     const user = await collection.findOne({ eosname });
 
-    if (user !== null) {
+    if (user !== null)
       return `${user.first_name} ${user.last_name}`;
-    }
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -174,10 +175,12 @@ async function getTelegramByEosName(suffix, eosname) {
     const collection = db.collection(`dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ eosname });
+
     if (user) return `@${user.username}`;
   } catch (e) {
     console.log('error: ', e.message);
   }
+
   return 'не определён';
 }
 
@@ -217,7 +220,7 @@ const getRestoredUserFromAnyBots = async (currentBotName, id) => {
   const botsModes = ['dacom', 'helix'];
 
   // eslint-disable-next-line no-restricted-syntax
-  for (const botMode of botsModes) {
+  for (const botMode of botsModes)
     // eslint-disable-next-line no-restricted-syntax
     for (const bot of bots) {
       // eslint-disable-next-line no-await-in-loop,no-use-before-define
@@ -229,14 +232,13 @@ const getRestoredUserFromAnyBots = async (currentBotName, id) => {
         return;
       }
     }
-  }
 
   // eslint-disable-next-line no-use-before-define
   const user = await getUser(null, id, 'users', true);
-  if (user) {
+
+  if (user)
     // eslint-disable-next-line no-await-in-loop
     await saveUser(currentBotName, user);
-  }
 };
 
 async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
@@ -246,9 +248,10 @@ async function getUser(suffix, id, collectionName, disableRestoreFromAnyBots) {
     const collection = db.collection(collectionName || `dacomUsers_${suffix}`);
 
     const user = await collection.findOne({ id });
-    if (user) {
+
+    if (user)
       return user;
-    }
+
     if (!disableRestoreFromAnyBots) {
       await getRestoredUserFromAnyBots(suffix, id);
       return await getUser(suffix, id, null, true);
@@ -282,8 +285,7 @@ async function getSubscribers(bot, hostname) {
     let users;
 
     // eslint-disable-next-line max-len
-    if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray();
-    else users = await collection.find({ subscribed_to: hostname }).toArray();
+    if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray(); else users = await collection.find({ subscribed_to: hostname }).toArray();
 
     return users;
   } catch (e) {
@@ -361,7 +363,7 @@ async function closeRequest(suffix, message_id) {
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
       { message_id: message_id },
-      { $set: {closed: true} },
+      { $set: { closed: true } },
       { upsert: false },
     );
   } catch (e) {

@@ -25,9 +25,11 @@ const work = async (bot) => {
 
 const worker = async () => {
   await mongoose.connect(process.env.MONGODB_URI);
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     console.log('Helix worker start');
+
     try {
       // eslint-disable-next-line no-await-in-loop
       const bots = await Bot.find({ isActive: true, mode: 'helix' });
@@ -37,6 +39,7 @@ const worker = async () => {
     } catch (e) {
       console.error(e);
     }
+
     console.log('Helix worker wait...');
     // eslint-disable-next-line no-await-in-loop
     await new Promise((resolve) => {

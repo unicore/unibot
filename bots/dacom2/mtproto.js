@@ -2,7 +2,7 @@ const path = require('path');
 
 const { TelegramClient, Api } = require('telegram')
 const { StringSession } = require('telegram/sessions')
-const {insertUnion, getProjectsCount} = require('./db')
+const { insertUnion, getProjectsCount } = require('./db')
 
 const { createReadStream } = require('fs');
 const { TGCalls, Stream } = require('tgcalls-next');
@@ -20,8 +20,7 @@ async function connect() {
 }
 
 async function createChat(bot, user, hostname, unionName, type, is_private) {
-  if (!is_private)
-    is_private = false
+  if (!is_private) is_private = false
 
   const client = await connect()
   // await client.sendMessage('me', { message: 'Hello!' });
@@ -161,7 +160,9 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
   })
   console.log('GOALS CHANNEL: ', result)
 
-  return {chatId, channelId, chatLink, channelLink}
+  return {
+    chatId, channelId, chatLink, channelLink,
+  }
 }
 
 async function checkBotIsAdmin(bot, user, ctx, chatId) {
@@ -171,7 +172,7 @@ async function checkBotIsAdmin(bot, user, ctx, chatId) {
     res = await bot.telegram.getChatAdministrators(chatId)
   } catch (e) {
     ctx.reply(`Ошибка! Бот ${bot.getEnv().BOTNAME} должен быть назначен администратором в новостном канале DAO. Для отмены установки новостного канала вызовите команду /cancel_set_news_channel`)
-    return {status: 'error', message: e.message}
+    return { status: 'error', message: e.message }
   }
 
   let bot_is_admin = false
@@ -179,16 +180,14 @@ async function checkBotIsAdmin(bot, user, ctx, chatId) {
   console.log('admins: ', res)
 
   res.map(u => {
-    if (u.user.username === bot.getEnv().BOTNAME) {
+    if (u.user.username === bot.getEnv().BOTNAME)
       bot_is_admin = true
-    }
 
-    if (u.user.id === user.id) {
+    if (u.user.id === user.id)
       user_is_admin = true
-    }
   })
 
-  return {bot_is_admin, user_is_admin, status: 'ok'}
+  return { bot_is_admin, user_is_admin, status: 'ok' }
 }
 
 async function MigrateChat(bot, chatId) {
@@ -302,7 +301,7 @@ async function makeAdmin(bot, chatId, userId, ctx) {
   let result
 
   try {
-    if (newAdmin) {
+    if (newAdmin)
       await client.invoke(new Api.messages.EditChatAdmin({
         chatId: Math.abs(chatId),
         userId: parseInt(newAdmin.id.value),
@@ -310,32 +309,31 @@ async function makeAdmin(bot, chatId, userId, ctx) {
         isAdmin: true,
       }));
 
-      // await client.invoke(new Api.channels.EditAdmin({
-      //   channel: "1619899041",
-      //   userId: parseInt(newAdmin.id.value),
-      //   accessHash: parseInt(newAdmin.accessHash.value),
-      //   adminRights: new Api.ChatAdminRights({
-      //       changeInfo: true,
-      //       postMessages: true,
-      //       editMessages: true,
-      //       deleteMessages: true,
-      //       banUsers: true,
-      //       inviteUsers: true,
-      //       pinMessages: true,
-      //       addAdmins: true,
-      //       anonymous: true,
-      //       manageCall: true,
-      //       other: true
-      //   }),
-      //   rank: ''
-      // }));
-      // await client.invoke(new Api.messages.EditChatAdmin({
-      //   chatId: Math.abs(1619899041),
-      //   userId: parseInt(newAdmin.id.value),
-      //   accessHash: parseInt(newAdmin.accessHash.value),
-      //   isAdmin: true
-      // }));
-    }
+    // await client.invoke(new Api.channels.EditAdmin({
+    //   channel: "1619899041",
+    //   userId: parseInt(newAdmin.id.value),
+    //   accessHash: parseInt(newAdmin.accessHash.value),
+    //   adminRights: new Api.ChatAdminRights({
+    //       changeInfo: true,
+    //       postMessages: true,
+    //       editMessages: true,
+    //       deleteMessages: true,
+    //       banUsers: true,
+    //       inviteUsers: true,
+    //       pinMessages: true,
+    //       addAdmins: true,
+    //       anonymous: true,
+    //       manageCall: true,
+    //       other: true
+    //   }),
+    //   rank: ''
+    // }));
+    // await client.invoke(new Api.messages.EditChatAdmin({
+    //   chatId: Math.abs(1619899041),
+    //   userId: parseInt(newAdmin.id.value),
+    //   accessHash: parseInt(newAdmin.accessHash.value),
+    //   isAdmin: true
+    // }));
   } catch (e) {
     result = e
     console.log('error: ', e)

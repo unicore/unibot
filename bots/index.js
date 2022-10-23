@@ -27,9 +27,8 @@ const BOTS = {
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {
-  if (!BOTS[name]) {
+  if (!BOTS[name])
     throw new Error(`No bot named ${name}`);
-  }
 
   return BOTS[name].init(botModel, telegrafBot);
 };
