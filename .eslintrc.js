@@ -60,6 +60,7 @@ module.exports = {
     'radix': 'off',
     'no-empty': 'off',
     'no-param-reassign': 'off',
+    'arrow-spacing': 'off',
     'no-else-return': 'off',
     'template-curly-spacing': 'off',
     'space-in-parens': 'off',
@@ -73,6 +74,7 @@ module.exports = {
     'one-var-declaration-per-line': 'off',
     'no-return-await': 'off',
     'space-infix-ops': 'off',
+    'class-methods-use-this': 'off',
     camelcase: 'off',
   },
 };
