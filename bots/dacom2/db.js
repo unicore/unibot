@@ -310,7 +310,13 @@ async function insertMessage(suffix, user, from, message, message_id, type, meta
 
     await collection.insertOne({
       // eslint-disable-next-line camelcase
-      type, message_id, id: user.id, eosname: user.eosname, from, message, time: new Date(),
+      type,
+      message_id,
+      id: user.id,
+      eosname: user.eosname,
+      from,
+      message,
+      time: new Date(),
       ...meta,
     });
   } catch (e) {
