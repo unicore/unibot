@@ -143,6 +143,7 @@ module.exports.changeBotMode = async (req) => {
     mapala: 1,
     dacom2: 1,
     wallet: 1,
+    knouni2: 1
   };
   const {
     name,
