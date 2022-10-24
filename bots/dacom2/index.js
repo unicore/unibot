@@ -2133,7 +2133,9 @@ module.exports.init = async (botModel, bot) => {
           }
         }
 
+        console.log("ON LOOK")
         if (union) { // если словили пересылку из прикрепленного канала
+          console.log('ON IF')
           // eslint-disable-next-line no-constant-condition
           if (true) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             const buttons = [];
@@ -2170,6 +2172,7 @@ module.exports.init = async (botModel, bot) => {
             await insertMessage(bot.instanceName, { id: 'bot' }, 'bot', text, ctx.message.message_id, 'autoforward', { forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id });
           }
         } else {
+          console.log('on ELSE')
           if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
             if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
               if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
