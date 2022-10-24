@@ -2058,6 +2058,7 @@ module.exports.init = async (botModel, bot) => {
             ctx.reply('Ожидаю сообщения');
           } else if (user.state === 'chat' || user.state === '') {
             try {
+              console.log('INSIDE!')
               const text2 = `Партнёр пишет: ${text}`;
               const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, { reply_to_message_id: user.profile_chat_id });
 
@@ -2173,9 +2174,9 @@ module.exports.init = async (botModel, bot) => {
             if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
               if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                 user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
-
+                console.log("find user: ", user)
                 if (user && !user.profile_chat_id) {
-                  // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+                  console.log("catch forwarded messsage to chat: ", ctx.update.message)
                   user.profile_chat_id = ctx.update.message.message_id;
                   await saveUser(bot.instanceName, user);
                 }
