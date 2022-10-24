@@ -135,6 +135,7 @@ const {
   getProjects,
   getMyProjects,
   getGoal,
+  getUsers
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -404,7 +405,7 @@ async function startQuiz(bot, ctx, user) {
 
 async function nextQuiz(bot, user, ctx) {
   const quiz = await getQuiz(bot.instanceName, user.id);
-
+  console.log('next:', user)
   let q;
 
   // eslint-disable-next-line array-callback-return
@@ -424,11 +425,16 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      // await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      await sendMessageToUser(bot, user, { text: q.message }, Markup.keyboard(buttons, { columns: 2 }).resize());
+
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
+      await sendMessageToUser(bot, user, { text: q.message }, {...clearMenu, reply_markup: { remove_keyboard: true }});
+
+
+      // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -476,7 +482,7 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    const id = await ctx.reply('Поздравляю! Вы выполнили первое задание! Мне нужно время, чтобы проверить информацию и подобрать сообщество для вас. Оставайтесь на связи!');
+    const id = await ctx.reply('Поздравляю! Вы выполнили первое задание! Мне нужно время, чтобы проверить информацию и подобрать DAO для вас. Оставайтесь на связи!');
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
@@ -729,6 +735,24 @@ module.exports.init = async (botModel, bot) => {
     const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, '-1001598098546');
+  });
+
+
+  bot.command('send_welcome_to_all', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    console.log(user)
+    if (user.id == 174122419) {
+      console.log(bot.instanceName)
+      let users = await getUsers(bot) 
+      console.log('users: ', users)
+      for (u of users){
+        await startQuiz(bot, ctx, u);  
+      } 
+      
+    }
+    
+
+
   });
 
   bot.command('team', async (ctx) => {

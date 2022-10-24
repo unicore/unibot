@@ -697,6 +697,26 @@ async function getTickets(suffix, user) {
   }
 }
 
+
+async function getUsers(bot) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomUsers_${bot.instanceName}`);
+    let users = [];
+
+    // eslint-disable-next-line max-len
+    users = await collection.find().toArray();
+
+    return users;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return [];
+}
+
+
 module.exports = {
   loadDB,
   getUserHelixBalance,
@@ -742,4 +762,5 @@ module.exports = {
   getUnionByHostType,
   getAllHeadGoalsMessages,
   getGoal,
+  getUsers
 };
