@@ -396,7 +396,7 @@ async function startQuiz(bot, ctx, user) {
 
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('Ты станешь агентом Коллективного Разума и создашь картину мира, в которой хочется жить.\n\nНапиши свой номер телефона для продолжения регистрации:', request);
+  return ctx.reply('Ты станешь агентом Коллективного Разума и получишь доступ к системе заданий.\n\nНапиши свой номер телефона для продолжения регистрации:', request);
 
   // startQuiz()
   // return ctx.reply('', request);
@@ -613,7 +613,7 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-      const t = 'Добро пожаловать.\n\n';
+      const t = 'Добро пожаловать в игру.\n\n';
       await ctx.reply(t, clearMenu);
 
       // TODO запуск WELCOME
