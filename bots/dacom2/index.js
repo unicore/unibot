@@ -588,7 +588,6 @@ module.exports.init = async (botModel, bot) => {
 
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-
         const t = 'Добро пожаловать в игру.\n\n';
 
         await ctx.reply(t, clearMenu);
@@ -1471,32 +1470,32 @@ module.exports.init = async (botModel, bot) => {
 
               await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
             }
-          } else {
-            const project = tags.find((el) => el.tag === 'project');
+          }
 
-            if (project) {
-              if (project.id) {
-                const pr = await getProject(bot.instanceName, project.id);
+          const project = tags.find((el) => el.tag === 'project');
 
-                const goal = tags.find((el) => el.tag === 'goal');
-                if (goal) {
-                  const g = await getGoal(bot.instanceName, goal.id);
-                  if (g) {
-                    if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: g.chat_id }, ctx.update.message, { caption: text, reply_to_message_id: g.chat_message_id }); } else { await sendMessageToUser(bot, { id: g.chat_id }, { text }, { reply_to_message_id: g.chat_message_id }); }
+          if (project) {
+            if (project.id) {
+              const pr = await getProject(bot.instanceName, project.id);
 
-                    await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
-                  }
-                } else {
-                  if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: pr.id }, ctx.update.message, { caption: text }); } else { await sendMessageToUser(bot, { id: pr.id }, { text }); }
+              const goal = tags.find((el) => el.tag === 'goal');
+              if (goal) {
+                const g = await getGoal(bot.instanceName, goal.id);
+                if (g) {
+                  if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: g.chat_id }, ctx.update.message, { caption: text, reply_to_message_id: g.chat_message_id }); } else { await sendMessageToUser(bot, { id: g.chat_id }, { text }, { reply_to_message_id: g.chat_message_id }); }
 
                   await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
                 }
               } else {
-                await ctx.reply('Ошибка! Предоставьте идентификатор проекта.');
-              }
+                if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: pr.id }, ctx.update.message, { caption: text }); } else { await sendMessageToUser(bot, { id: pr.id }, { text }); }
 
-              // todo check project_tag
+                await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
+              }
+            } else {
+              await ctx.reply('Ошибка! Предоставьте идентификатор проекта.');
             }
+
+            // todo check project_tag
           }
         }
       }
