@@ -258,7 +258,7 @@ async function checkForExistBCAccount(bot, ctx) {
 
 const quizDefinition = [
   { message: 'Contacts' },
-  { message: 'Я могу создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе?' },
+  { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе?' },
   // { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
   // { message: 'Люди применяют меня для решения задач развития в сообществах и учёта вкладов в них. Такие игровые сообщества развития они называют DAO.\n\nКаким навыком вы могли бы поделиться с людьми?' },
   // { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
@@ -2133,15 +2133,13 @@ module.exports.init = async (botModel, bot) => {
           }
         }
 
-        console.log("ON LOOK")
         if (union) { // если словили пересылку из прикрепленного канала
-          console.log('ON IF')
           // eslint-disable-next-line no-constant-condition
           if (true) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             const buttons = [];
             if (union.type === 'goalsChannel' || union.type === 'projectChannel') {
               const goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString());
-              console.log('ИНСТРУКЦИЯ:Ж ', goal, ctx.update.message.sender_chat.id);
+              // console.log('ИНСТРУКЦИЯ:Ж ', goal, ctx.update.message.sender_chat.id);
               // console.log("forward fro: ", ctx.update.message)
 
               const goalid = goal ? goal.goal_id : null;
@@ -2172,14 +2170,11 @@ module.exports.init = async (botModel, bot) => {
             await insertMessage(bot.instanceName, { id: 'bot' }, 'bot', text, ctx.message.message_id, 'autoforward', { forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id });
           }
         } else {
-          console.log('on ELSE')
           if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
             if (ctx.update.message.sender_chat.id.toString() === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
               if (ctx.update.message.forward_from_chat.id.toString() === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                 user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
-                console.log("find user: ", user)
                 if (user && !user.profile_chat_id) {
-                  console.log("catch forwarded messsage to chat: ", ctx.update.message)
                   user.profile_chat_id = ctx.update.message.message_id;
                   await saveUser(bot.instanceName, user);
                 }
