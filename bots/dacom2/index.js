@@ -396,7 +396,7 @@ async function startQuiz(bot, ctx, user) {
 
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('Ты станешь агентом Коллективного Разума и получишь доступ к системе заданий.\n\nНапиши свой номер телефона для продолжения регистрации:', request);
+  return ctx.reply('Ты станешь агентом Коллективного Разума и овладеешь его силой.\n\nНапиши свой номер телефона для продолжения регистрации:', request);
 
   // startQuiz()
   // return ctx.reply('', request);
@@ -476,7 +476,7 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    const id = await ctx.reply('Благодарим за ответы! Мы свяжемся с вами в ближайшее время и проведём в ваше первое DAO.');
+    const id = await ctx.reply('Благодарим за выполнение вашего первого задания! Нам нужно время, чтобы проверить информацию. Оставайтесь на связи!');
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
