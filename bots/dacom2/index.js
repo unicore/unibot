@@ -2053,6 +2053,7 @@ module.exports.init = async (botModel, bot) => {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
+          console.log('user.state: ', user.state, user)
           if (user.state === 'set_news_channel') {
             ctx.reply('Ожидаю сообщения');
           } else if (user.state === 'chat' || user.state === '') {
