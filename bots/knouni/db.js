@@ -139,7 +139,6 @@ async function getUserByEosName(suffix, eosname) {
   return null;
 }
 
-
 async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
     const db = await loadDB();
@@ -340,7 +339,6 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
-
 // eslint-disable-next-line camelcase
 async function insertRequest(suffix, user, message_id, message) {
   try {
@@ -349,13 +347,12 @@ async function insertRequest(suffix, user, message_id, message) {
 
     await collection.insertOne({
       // eslint-disable-next-line camelcase
-      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false,
     });
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
 
 async function closeRequest(suffix, message_id) {
   try {
@@ -363,8 +360,8 @@ async function closeRequest(suffix, message_id) {
     const collection = db.collection(`dacomRequests_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
-      { message_id: message_id },
-      { $set: {closed: true} },
+      { message_id },
+      { $set: { closed: true } },
       { upsert: false },
     );
   } catch (e) {
@@ -395,5 +392,5 @@ module.exports = {
   getChat,
   getUserByResumeChannelId,
   insertRequest,
-  closeRequest
+  closeRequest,
 };

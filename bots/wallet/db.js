@@ -15,7 +15,6 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
-
 async function insertRequest(suffix, user, message_id, message) {
   try {
     const db = await loadDB();
@@ -23,7 +22,7 @@ async function insertRequest(suffix, user, message_id, message) {
 
     await collection.insertOne({
       // eslint-disable-next-line camelcase
-      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false
+      message_id, user_id: user.id, eosname: user.eosname, message, time: new Date(), closed: false,
     });
   } catch (e) {
     console.log('error: ', e.message);
@@ -153,7 +152,6 @@ async function getUserByEosName(suffix, eosname) {
   }
   return null;
 }
-
 
 async function getUserByResumeChannelId(suffix, resume_channel_id) {
   try {
@@ -355,20 +353,16 @@ async function getChat(suffix, eosname) {
   return null;
 }
 
-
 async function insertTicket(suffix, user, ticket) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomTickets_${suffix}`);
 
     await collection.insertOne(ticket);
-
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function insertStudent(suffix, user, student) {
   try {
@@ -376,7 +370,6 @@ async function insertStudent(suffix, user, student) {
     const collection = db.collection(`dacomStudents_${suffix}`);
 
     await collection.insertOne(student);
-
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -388,28 +381,23 @@ async function insertGoal(suffix, user, goal) {
     const collection = db.collection(`dacomGoals_${suffix}`);
 
     await collection.insertOne(goal);
-
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function insertWithdraw(suffix, user, withdraw) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
 
-    let res = await collection.insertOne(withdraw);
-    console.log("INSERT RES", res)
-    return res.insertedId
+    const res = await collection.insertOne(withdraw);
+    console.log('INSERT RES', res);
+    return res.insertedId;
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function updateWithdraw(suffix, withdraw_id, status) {
   try {
@@ -417,42 +405,38 @@ async function updateWithdraw(suffix, withdraw_id, status) {
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
     await collection.updateOne(
-      { "_id": mongoose.Types.ObjectId(withdraw_id) },
-      { $set: {
-        status
-      } },
+      { _id: mongoose.Types.ObjectId(withdraw_id) },
+      {
+        $set: {
+          status,
+        },
+      },
       { upsert: false },
     );
-
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
-
 
 async function getWithdraw(suffix, withdraw_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomWithdraws_${suffix}`);
     // eslint-disable-next-line no-param-reassign
-    return await collection.findOne({ "_id":  mongoose.Types.ObjectId(withdraw_id)});
-
+    return await collection.findOne({ _id: mongoose.Types.ObjectId(withdraw_id) });
   } catch (e) {
     console.log('error: ', e.message);
   }
 }
-
 
 async function getTickets(suffix, user) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomTickets_${suffix}`);
 
-    let tickets = await collection.find({eosname: user.eosname}).toArray();
+    const tickets = await collection.find({ eosname: user.eosname }).toArray();
 
-    return tickets
-
+    return tickets;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -487,5 +471,5 @@ module.exports = {
   insertGoal,
   insertWithdraw,
   updateWithdraw,
-  getWithdraw
+  getWithdraw,
 };

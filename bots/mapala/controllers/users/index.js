@@ -46,7 +46,6 @@ module.exports.sendMessage = async (req, res) => {
   };
 };
 
-
 module.exports.payReciever = async (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'origin, content-type, accept');
@@ -54,7 +53,7 @@ module.exports.payReciever = async (req, res) => {
   const {
     botName,
     eosname,
-    amount
+    amount,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'mapala');
@@ -78,7 +77,7 @@ module.exports.payReciever = async (req, res) => {
   }
 
   const user = await getUserByEosName(botName, eosname);
-  let message = "payment is receiverd"
+  const message = 'payment is receiverd';
 
   await insertMessage(botName, user, 'operator', message);
 

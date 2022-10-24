@@ -8,7 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
-  getProjects
+  getProjects,
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -120,10 +120,9 @@ async function getCondition(bot, hostname, key) {
   return 0;
 }
 
-
 async function getDacs(bot, hostname) {
   const conditions = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'dacs');
-  
+
   return conditions;
 }
 
@@ -202,7 +201,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   toPrint += `\n\tНа столе: ${params.currentPool.filled}`;
   toPrint += `\n\tДо заполнения: ${params.currentPool.remain}`;
   toPrint += `\n\tДо перезагрузки: ${params.currentPool.expired_time}`;
-  
+
   // toPrint += `\n\nМаксимальный взнос: ${maxDeposit === 0 ? 'не ограничен' : `${(maxDeposit / 10000).toFixed(4)} FLOWER`}`;
   toPrint += '\n----------------------------------';
 
@@ -216,12 +215,12 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
   toPrint += `\n\t🔗 В очереди: ${myTail.totalUserInTail}`;
   // if (hostname === bot.getEnv().DEMO_HOST) {
-    // contract = 'faketoken';
-    // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
-    // toPrint += `\n\nВаш демо-баланс: ${bal}`;
+  // contract = 'faketoken';
+  // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
+  // toPrint += `\n\nВаш демо-баланс: ${bal}`;
   // } else {
-    // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
-    // toPrint += `\n\nВаш доступный баланс: ${bal}`;
+  // const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+  // toPrint += `\n\nВаш доступный баланс: ${bal}`;
   // }
 
   const buttons = [];
@@ -254,27 +253,24 @@ async function printHelixWallet(bot, ctx, user, hostname) {
     else buttons.push(Markup.button.callback('☑️ Подписка на обновления', `subscribe ${hostname}`));
   }
 
-  let reply_to
-  if (ctx.update.message.reply_to_message)
-    reply_to = ctx.update.message.reply_to_message.message_id
-  
+  let reply_to;
+  if (ctx.update.message.reply_to_message) { reply_to = ctx.update.message.reply_to_message.message_id; }
+
   try {
     if (params.currentPool.expired_time === 'режим ожидания') {
       await ctx.deleteMessage();
       // eslint-disable-next-line max-len
-      
+
       // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-      let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
-
+      const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
     } else {
       await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
   } catch (e) {
     // eslint-disable-next-line max-len
     // await sendMessageToUser(bot, user, { text: toPrint }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    let id = (await ctx.reply(toPrint, {reply_to_message_id: reply_to})).message_id;
-
+    const id = (await ctx.reply(toPrint, { reply_to_message_id: reply_to })).message_id;
   }
 }
 
@@ -357,23 +353,17 @@ async function withdrawAllUserRefBalances(bot, user, ctx) {
   });
   const messagePromises = results.map((id) => {
     const target = refBalances.find((el) => Number(el.id) === Number(id));
-    if (ctx)
-      return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`)
-    else
-    return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` });
+    if (ctx) { return ctx.reply(`Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}`); } else { return sendMessageToUser(bot, user, { text: `Получен подарок ${target.amount} от партнёра ${target.from.toUpperCase()} в кассе ${target.host.toUpperCase()}` }); }
   });
 
   await Promise.all(messagePromises);
 }
 
-
-
-
 async function printHelixStat(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log("ON PRUNT", ctx.update)
+  console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply("Пожалуйста, подождите. Идёт расчёт капитализации.")).message_id
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт капитализации.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -391,26 +381,25 @@ async function printHelixStat(bot, user, hostname, ctx) {
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-    
+
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log("estimateSysIncome", estimateSysIncome)
-    
-    let cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    let dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    
+    console.log('estimateSysIncome', estimateSysIncome);
+
+    const cfund_percent = parseFloat((params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const hfund_percent = parseFloat((params.host.hfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const ref_percent = parseFloat((params.host.referral_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    const dacs_percent = parseFloat((params.host.dacs_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+
     // console.log("royalty: ", royalty)
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000
-    let levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
-    
+    const convert_rate = params.host.sale_shift / 10000;
+    const levels = `${params.host.levels.map((el, index) => `\n|\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
 
     // text += '\n---------------------------------';
     text += `\n| Союз: ${params.host.username} | ${params.host.title}`;
@@ -418,9 +407,9 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n| Взносы: ${estimateSysIncome.free_flow_percent}% FLOWER`;
     // text += `\n| Кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     text += `\n| Интеллектуальная собственность: ${params.host.approved_reports} объектов`;
-    
+
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     // text += `\n| Свободный поток: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     // text += `\n|\t\t\t\t\tЦелевой поток: ${cfund_percent}%`;
     // text += `\n|\t\t\t\t\tФракционный поток: ${hfund_percent}%`;
@@ -429,12 +418,12 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `${levels}`
     // text += `\n| Кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
     // text += `\n| Всего кэшбэк: ${estimateSysIncome.free_flow_percent}% от оборота FLOWER`;
-    
+
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     // text += `\n| Всего фракций: ${totalShares} POWER`;
     // text += `\n|\t\t\t\t\tКурс: ${convert_rate} FLOWER/POWER`;
-    
+
     text += `\n| Капитализация: ${convert_rate * totalShares * outUsdRate} USD`;
     text += `\n|\t\t\t\t\tВсего фракций: ${totalShares} POWER`;
     // text += `\n|\t\t\t\t\tСтоимость: ${convert_rate * totalShares} FLOWER`;
@@ -446,7 +435,7 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n|\t\t\t\t\tФракционный фонд: ${hfund_percent}%`;
     // text += `\n|\t\t\t\t\tКорпоративный фонд: ${dacs_percent}%`;
     // text += `\n|\t\t\t\t\tПартнёрский фонд: ${ref_percent}%`;
-    
+
     // text += `\n|\t\t\t\t\tСтоимость: ${(parseFloat(liquidBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
     // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
     // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
@@ -454,24 +443,24 @@ async function printHelixStat(bot, user, hostname, ctx) {
     // text += `\n| Память: ${ram}`;
 
     text += '\n---------------------------------';
-    text += `\nсообщение будет удалено через 30 секунд`;
+    text += '\nсообщение будет удалено через 30 секунд';
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
-    text += `\nПоказать помощь: /help`
+    text += '\nПоказать помощь: /help';
     // eslint-disable-next-line max-len
-    await ctx.deleteMessage(d)
-    
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    await ctx.deleteMessage(d);
+
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
-        ctx.deleteMessage(ctx.update.message.message_id)
-        ctx.deleteMessage(id)
+        ctx.deleteMessage(ctx.update.message.message_id);
+        ctx.deleteMessage(id);
       },
       30 * 1000,
     );
   } else {
-    ctx.reply("Аккаунт не найден")
-    ctx.deleteMessage(d)
+    ctx.reply('Аккаунт не найден');
+    ctx.deleteMessage(d);
   }
 }
 
@@ -482,8 +471,8 @@ async function printWallet(bot, user, ctx, hostname) {
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
   // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-    buttons.push(Markup.button.callback('вывести', 'withdraw'));
+  // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+  buttons.push(Markup.button.callback('вывести', 'withdraw'));
   // }
 
   if (user && user.eosname) {
@@ -502,28 +491,26 @@ async function printWallet(bot, user, ctx, hostname) {
 
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
-    let userPower
-    let io
-    let convert_rate
-    let params
-    let totalShares
-    let estimateSysIncome
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
+    let userPower;
+    let io;
+    let convert_rate;
+    let params;
+    let totalShares;
+    let estimateSysIncome;
+    let royalty;
 
-    if (hostname){
+    if (hostname) {
       params = await getHelixParams(bot, hostname);
-      convert_rate = params.host.sale_shift / 10000
+      convert_rate = params.host.sale_shift / 10000;
       totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
       userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
-      io = await getUserIntelOwn(bot, hostname, user.eosname)
+      io = await getUserIntelOwn(bot, hostname, user.eosname);
       estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    
-      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-      
+
+      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
     }
 
-
-    
     // text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
     text += `\n| Цветки: ${totalBal}`;
@@ -533,7 +520,7 @@ async function printWallet(bot, user, ctx, hostname) {
     // text += `\n| Память: ${ram}`;
     text += `\n| Курс: ${parseFloat(outUsdRate).toFixed(8)} USD / FLOWER`;
     text += `\n| Стоимость: ${(parseFloat(totalBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
-    
+
     if (hostname) {
       text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
       // text += `\n| Взносы: ${0} FLOWER`;
@@ -548,28 +535,26 @@ async function printWallet(bot, user, ctx, hostname) {
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else {
-      text += `\n\nсообщение будет удалено через 30 секунд`;
-    
-      let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+      text += '\n\nсообщение будет удалено через 30 секунд';
+
+      const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
       setTimeout(
         () => {
-          ctx.deleteMessage(ctx.update.message.message_id)
-          ctx.deleteMessage(id)
+          ctx.deleteMessage(ctx.update.message.message_id);
+          ctx.deleteMessage(id);
         },
-      30 * 1000,
-      )
+        30 * 1000,
+      );
     }
   }
 }
 
-
-
 async function printPublicWallet(bot, user, hostname, ctx) {
   const buttons = [];
-  console.log("ON PRUNT", ctx.update)
+  console.log('ON PRUNT', ctx.update);
 
-  let d = (await ctx.reply("Пожалуйста, подождите. Идёт расчёт роялти.")).message_id
+  const d = (await ctx.reply('Пожалуйста, подождите. Идёт расчёт роялти.')).message_id;
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
@@ -595,24 +580,24 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
 
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate("FLOWER", 4);
+    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
 
     const params = await getHelixParams(bot, hostname);
     const totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-    
+
     const sharesStake = ((100 * userPower.power) / totalShares).toFixed(4);
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
-    console.log("estimateSysIncome", estimateSysIncome)
-    let royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8)
-    console.log("royalty: ", royalty)
+    console.log('estimateSysIncome', estimateSysIncome);
+    const royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+    console.log('royalty: ', royalty);
     let text = '';
     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    let convert_rate = params.host.sale_shift / 10000
-  
-    let io = await getUserIntelOwn(bot, hostname, user.eosname)
-    
+    const convert_rate = params.host.sale_shift / 10000;
+
+    const io = await getUserIntelOwn(bot, hostname, user.eosname);
+
     // text += '\n---------------------------------';
     text += `\n| Аккаунт: ${user.eosname}`;
     text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
@@ -631,26 +616,25 @@ async function printPublicWallet(bot, user, hostname, ctx) {
 
     text += '\n---------------------------------';
     text += `\nСсылка для приглашений: ${link}\n`; //
-    text += `\n\nсообщение будет удалено через 30 секунд.`;
-    
+    text += '\n\nсообщение будет удалено через 30 секунд.';
+
     // eslint-disable-next-line max-len
-    await ctx.deleteMessage(d)
-    
-    let id = (await ctx.reply(text, {reply_to_message_id: ctx.update.message.message_id})).message_id;
+    await ctx.deleteMessage(d);
+
+    const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
 
     setTimeout(
       () => {
-        ctx.deleteMessage(ctx.update.message.message_id)
-        ctx.deleteMessage(id)
+        ctx.deleteMessage(ctx.update.message.message_id);
+        ctx.deleteMessage(id);
       },
       30 * 1000,
     );
   } else {
-    ctx.reply("Аккаунт не найден")
-    ctx.deleteMessage(d)
+    ctx.reply('Аккаунт не найден');
+    ctx.deleteMessage(d);
   }
 }
-
 
 async function transferAction(bot, user, amount, ctx) {
   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
@@ -706,11 +690,6 @@ async function withdrawPartnerRefBalance(bot, username) {
   }
 }
 
-
-
-
-
-
 async function goalWithdraw(bot, ctx, user, goal) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
@@ -731,9 +710,8 @@ async function goalWithdraw(bot, ctx, user, goal) {
   }, {
     blocksBehind: 3,
     expireSeconds: 30,
-  })
+  });
 }
-
 
 async function internalWithdrawAction(bot, user, hostname, balanceId) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
@@ -760,15 +738,13 @@ async function internalWithdrawAction(bot, user, hostname, balanceId) {
   });
 }
 
-
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   return new Promise(async (resolve, reject) => {
-
     eos.transact({
       actions: [{
         account: 'eosio.token',
-        name: "retire",
+        name: 'retire',
         authorization: [{
           actor: user.eosname,
           permission: 'active',
@@ -783,12 +759,11 @@ async function retireAction(bot, user, amount, address) {
       blocksBehind: 3,
       expireSeconds: 30,
     }).then(async () => {
-     resolve()
+      resolve();
     }).catch(async (e) => {
-      reject(e)
+      reject(e);
     });
-
-  })  
+  });
 }
 
 async function massWithdrawAction(bot, user, hostname, balances) {
@@ -805,13 +780,11 @@ async function massWithdrawAction(bot, user, hostname, balances) {
   }
 }
 
- 
 async function getUserIntelOwn(bot, hostname, username) {
   const ios = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'intelown', username, username, 1);
-  
-  return ios[0] || {total_reports: 0, approved_reports: 0}
-}
 
+  return ios[0] || { total_reports: 0, approved_reports: 0 };
+}
 
 async function getHelixsList(bot) {
   let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', 'unicore', 'ahosts');
@@ -1190,7 +1163,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 }
 
 async function printProjects(bot, ctx) {
-  
+
 }
 
 async function exitTailAction(bot, hostname, user, tailid) {
@@ -1256,19 +1229,19 @@ async function exitFromTail(bot, ctx, user, hostname) {
   }
 }
 
-async function getWelcome(){
-  let text = ''
-  text += `Любая цель - это проект, предложенный и утвержденный участниками союза.`
-  text += `Для создания цели напишите ваш запрос с тегом #goal в этот чат.`
-  text += `Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий`
-  text += `Получайте фракции (POWER) `
-  
-  return text
+async function getWelcome() {
+  let text = '';
+  text += 'Любая цель - это проект, предложенный и утвержденный участниками союза.';
+  text += 'Для создания цели напишите ваш запрос с тегом #goal в этот чат.';
+  text += 'Принимайте участие в достижении целей участников, регистрируя свою интеллектуальную собственность при выполнении действий';
+  text += 'Получайте фракции (POWER) ';
+
+  return text;
 }
 
-async function getGoalInstructions(){
-  let text = ""
-  text += `Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.`
+async function getGoalInstructions() {
+  let text = '';
+  text += 'Выполняя действия, участники создают интеллектуальную собственность и получают % от всех взносов в DAO.';
   // text += `\n\n/donate - создать взнос в цель и получить возможность голосовать за цели (минимальный взнос 10 USDT)`
   // text += `\n/about - о союзе`
   // text += `\n/set_coordinator @username - установить координатора цели (доступно только архитектору)`
@@ -1276,37 +1249,34 @@ async function getGoalInstructions(){
   // text += `\nсообщение с тегом #task или кнопка "создать действие" - создаёт действие в рамках цели`
   // text += `\nсообщение с тегом #report как ответ на созданное действие, или кнопка "создать отчёт" - создаёт отчёт для опубликованного ранее действия.`
 
-  return text
+  return text;
 }
-
-
 
 async function addToTeam(bot, ctx, user, hostname, dac, title) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'adddac',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          username: dac,
-          host: hostname,
-          weight: 1,
-          limit_type: "",
-          income_limit: "0.0000 FLOWER",
-          title: title,
-          descriptor: ""
-        },
+  await eos.transact({
+    actions: [{
+      account: 'unicore',
+      name: 'adddac',
+      authorization: [{
+        actor: user.eosname,
+        permission: 'active',
       }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
-
+      data: {
+        username: dac,
+        host: hostname,
+        weight: 1,
+        limit_type: '',
+        income_limit: '0.0000 FLOWER',
+        title,
+        descriptor: '',
+      },
+    }],
+  }, {
+    blocksBehind: 3,
+    expireSeconds: 30,
+  });
 }
 
 module.exports = {
@@ -1337,5 +1307,5 @@ module.exports = {
   getGoalInstructions,
   printProjects,
   getDacs,
-  addToTeam
+  addToTeam,
 };

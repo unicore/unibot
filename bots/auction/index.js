@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log("generate", ctx)
+  console.log('generate', ctx);
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -129,7 +129,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Попробуйте позже.', Markup.removeKeyboard());
     }
   } catch (e) {
-    console.log("error: ", e.message)
+    console.log('error: ', e.message);
 
     await saveUser(bot.instanceName, user);
     return user.eosname;
@@ -366,7 +366,6 @@ const quizDefinition = [
   { message: 'Мы ищем свой путь в новой реальности и планируем своё будущее, объединяя людей в сообщества и проекты по интересам и компетенциям. Вы готовы взять свою ответственность за своё будущее?', buttons: ['Готов', 'Отмена'] },
 ];
 
-
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
 
@@ -384,7 +383,6 @@ async function startQuiz(bot, ctx, user) {
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   return ctx.reply('Меня зовут @DACombot, я робот и ваш проводник в мир сообществ Коллективного Разума.\n\nПожалуйста, поделитесь своим контактом для продолжения знакомства.', request);
-
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -492,8 +490,7 @@ module.exports.init = async (botModel, bot) => {
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
 
-   let user = await getUser(bot.instanceName, ctx.update.message.from.id, null, true);
-   
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id, null, true);
 
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
@@ -506,15 +503,12 @@ module.exports.init = async (botModel, bot) => {
 
       await ctx.deleteMessage(msg2.message_id);
       await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
-    
     }
 
-    const buttons = ["🎫 спонсировать"];
+    const buttons = ['🎫 спонсировать'];
     const request = Markup.keyboard(buttons, { columns: 1 }).resize();
 
     return ctx.reply('Добро пожаловать в комнату спонсоров Института Коллективного Разума.\n\n', request);
-
-
   });
 
   bot.hears('🪙 кошелёк', async (ctx) => {
@@ -537,35 +531,29 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-
   async function buyTicket(bot, user, ctx, currency) {
-    try{
-
-      let params = {
+    try {
+      const params = {
         username: user.eosname,
-        currency: currency
-      }
-      let path = `${bot.getEnv().PAY_GATEWAY}/generate`
-      
+        currency,
+      };
+      const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
+
       const result = await axios.post(
         path,
-        params
+        params,
       );
-      
-      if (result.data.status === 'ok')
-        ctx.reply(`address: ${result.data.address}`)
-      else ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
 
-    } catch(e){
-      ctx.reply("Произошла ошибка на получении адреса. Попробуйте позже. ")
+      if (result.data.status === 'ok') { ctx.reply(`address: ${result.data.address}`); } else ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
+    } catch (e) {
+      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     }
-    
   }
 
   bot.action(/buywith (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const currency = ctx.match[1];
-    
+
     user.order_action = {
       name: 'createorder',
       data: {
@@ -589,12 +577,11 @@ module.exports.init = async (botModel, bot) => {
     else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
   });
 
-
   bot.hears('🎫 спонсировать', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    console.log("купить билет")
+    console.log('купить билет');
     // await setBuyMenu(ctx)
-    buyTicket(bot, user, ctx, "USDT.TRC20")
+    buyTicket(bot, user, ctx, 'USDT.TRC20');
     // ctx.reply('покупаю!')
   });
 

@@ -4,12 +4,12 @@ const DacomBot = require('./dacom');
 const LotoBot = require('./loto');
 const AuctionBot = require('./auction');
 const ManBot = require('./man');
-const VacBot = require('./vac')
-const KnouniBot = require('./knouni')
-const SeBot = require('./se')
-const MapalaBot = require('./mapala')
-const Dacom2Bot = require('./dacom2')
-const WalletBot = require('./wallet')
+const VacBot = require('./vac');
+const KnouniBot = require('./knouni');
+const SeBot = require('./se');
+const MapalaBot = require('./mapala');
+const Dacom2Bot = require('./dacom2');
+const WalletBot = require('./wallet');
 
 const BOTS = {
   base: BaseBot,
@@ -23,7 +23,7 @@ const BOTS = {
   se: SeBot,
   mapala: MapalaBot,
   dacom2: Dacom2Bot,
-  wallet: WalletBot
+  wallet: WalletBot,
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {

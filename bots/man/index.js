@@ -86,7 +86,7 @@ const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
 async function generateAccount(bot, ctx, isAdminUser, ref) {
-  console.log("generate", ctx)
+  console.log('generate', ctx);
   const user = ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
@@ -223,7 +223,6 @@ const quizDefinition = [
   { message: 'Мы ищем свой путь в новой реальности и планируем своё будущее, объединяя людей в сообщества и проекты по интересам и компетенциям. Вы готовы взять свою ответственность за своё будущее?', buttons: ['Готов', 'Отмена'] },
 ];
 
-
 async function startQuiz(bot, ctx, user) {
   await getQuiz(bot.instanceName, user.id);
 
@@ -241,7 +240,6 @@ async function startQuiz(bot, ctx, user) {
   const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   return ctx.reply('Меня зовут @DACombot, я робот и ваш проводник в мир сообществ Коллективного Разума.\n\nПожалуйста, поделитесь своим контактом для продолжения знакомства.', request);
-
 }
 
 async function nextQuiz(bot, user, ctx) {
@@ -286,12 +284,6 @@ async function nextQuiz(bot, user, ctx) {
     await saveQuiz(bot.instanceName, user, quiz);
   }
 }
-
-
-
-
-
-
 
 module.exports.init = async (botModel, bot) => {
   const protocol = bot.getEnv().PROTOCOL.replace('://', '');
@@ -349,22 +341,17 @@ module.exports.init = async (botModel, bot) => {
   // eslint-disable-next-line no-param-reassign
   bot.eosapi = EosApi(options);
 
-
-
-
-
   bot.start(async (ctx) => {
     ctx.update.message.from.params = getDecodedParams(ctx.update.message.text);
 
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
 
-   let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-   
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (!user) {
       msg2 = await ctx.reply('Пожалуйста, подождите, мы создаём для вас аккаунт в блокчейне.. ⛓');
       if (await restoreAccount(bot, ctx, ctx.update.message.from, true) === false) {
-      
         user = ctx.update.message.from;
         user.app = bot.getEnv().APP;
 
@@ -379,29 +366,9 @@ module.exports.init = async (botModel, bot) => {
     }
 
     await ctx.reply('Добро пожаловать на игровую платформу развития человека от Института Коллективного Разума.\n\n');
-    
-    await printQuests(ctx)
 
+    await printQuests(ctx);
   });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   bot.hears('🪙 кошелёк', async (ctx) => {
     // await checkForExistBCAccount(bot, ctx);
@@ -423,192 +390,153 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
+  // ___________
 
+  async function setSellMenu(bot, ctx, user) {
+    let myOrders = await getMyOrders(bot, user.eosname);
+    myOrders = myOrders.filter((el) => el.parent_creator === '');
 
+    if (myOrders.length > 0) {
+      const order = myOrders[0];
 
+      const childOrders = await getChildOrders(bot, order.id);
 
+      const token = parseTokenString(order.out_quantity);
+      const outRate = await bot.uni.p2pContract.getUsdRate(token.symbol, 4);
 
+      const outQuantity = `${(parseFloat(order.quote_quantity) / parseFloat(outRate)).toFixed(4)} ${token.symbol}`;
 
+      const buttons = [];
 
+      let text = `У вас есть активная заявка на сумму ${outQuantity}`;
+      if (childOrders.length > 0) {
+        if (childOrders[0].status === 'finish') {
+          text += '\nСтатус: завершена';
+          buttons.push(Markup.button.callback('Очистить заявку', `delorder ${order.id}`));
 
+          ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        } else {
+          text += '\nСтатус: в процессе';
+          text += '\n\nОтменить заявку до завершения или отмены обмена партнёром невозможно.';
 
-
-
-//___________
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-async function setSellMenu(bot, ctx, user) {
-  let myOrders = await getMyOrders(bot, user.eosname);
-  myOrders = myOrders.filter((el) => el.parent_creator === '');
-
-  if (myOrders.length > 0) {
-    const order = myOrders[0];
-
-    const childOrders = await getChildOrders(bot, order.id);
-
-    const token = parseTokenString(order.out_quantity);
-    const outRate = await bot.uni.p2pContract.getUsdRate(token.symbol, 4);
-
-    const outQuantity = `${(parseFloat(order.quote_quantity) / parseFloat(outRate)).toFixed(4)} ${token.symbol}`;
-
-    const buttons = [];
-
-    let text = `У вас есть активная заявка на сумму ${outQuantity}`;
-    if (childOrders.length > 0) {
-      if (childOrders[0].status === 'finish') {
-        text += '\nСтатус: завершена';
-        buttons.push(Markup.button.callback('Очистить заявку', `delorder ${order.id}`));
+          ctx.reply(text);
+        }
+      } else {
+        text += '\nСтатус: ожидание';
+        text += '\n\nОтменить заявку?';
+        buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${order.id}`));
 
         ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-      } else {
-        text += '\nСтатус: в процессе';
-        text += '\n\nОтменить заявку до завершения или отмены обмена партнёром невозможно.';
-
-        ctx.reply(text);
       }
     } else {
-      text += '\nСтатус: ожидание';
-      text += '\n\nОтменить заявку?';
-      buttons.push(Markup.button.callback('Отменить заявку', `cancelorder ${order.id}`));
-
-      ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+      const buttons = [];
+      buttons.push(Markup.button.callback('USDT (сеть TRC20)', 'sellwith USDT'));
+      ctx.reply('\n Выберите валюту для получения помощи: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     }
-  } else {
-    const buttons = [];
-    buttons.push(Markup.button.callback('USDT (сеть TRC20)', 'sellwith USDT'));
-    ctx.reply('\n Выберите валюту для получения помощи: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
   }
-}
 
-async function showBuySellMenu(bot, user, ctx) {
-  const myOrders = await bot.uni.p2pContract.getOrders(user.eosname);
-  const buyOrders = myOrders.filter((el) => el.type === 'buy');
+  async function showBuySellMenu(bot, user, ctx) {
+    const myOrders = await bot.uni.p2pContract.getOrders(user.eosname);
+    const buyOrders = myOrders.filter((el) => el.type === 'buy');
 
-  if (user.state === 'giveHelp') {
-    if (buyOrders.length === 0) setBuyMenu(ctx);
-    else {
-      const buyOrder = buyOrders[0];
-      const buttons2 = [];
-      buttons2.push(Markup.button.callback('Отменить заявку', `cancelorder ${buyOrder.id}`));
-      ctx.reply(`У вас уже есть активная заявка на оказание помощи на сумму ${buyOrder.out_quantity}. `, Markup.inlineKeyboard(buttons2, { columns: 1 }).resize());
+    if (user.state === 'giveHelp') {
+      if (buyOrders.length === 0) setBuyMenu(ctx);
+      else {
+        const buyOrder = buyOrders[0];
+        const buttons2 = [];
+        buttons2.push(Markup.button.callback('Отменить заявку', `cancelorder ${buyOrder.id}`));
+        ctx.reply(`У вас уже есть активная заявка на оказание помощи на сумму ${buyOrder.out_quantity}. `, Markup.inlineKeyboard(buttons2, { columns: 1 }).resize());
+      }
+    } else if (user.state === 'getHelp') {
+      await setSellMenu(bot, ctx, user);
     }
-  } else if (user.state === 'getHelp') {
-    await setSellMenu(bot, ctx, user);
   }
-}
 
+  async function checkSponsor(bot, username, sponsor, contract) {
+    const promoBudget = await getPromoBudget(bot, sponsor);
+    const userHasRequest = await hasRequest(bot, username, contract);
+    const partner = await getPartner(bot, username);
 
+    return parseFloat(promoBudget) > 0 && !userHasRequest && partner.referer === sponsor;
+  }
 
+  async function isAdmin(bot, id) {
+    return Number(id) === Number(bot.getEnv().ADMIN_ID);
+  }
 
+  async function depositAction(bot, ctx, user) {
+    const helix = await getHelixParams(bot, user.deposit_action.hostname);
+    try {
+      const eos = await bot.uni.getEosPassInstance(user.wif);
 
-async function checkSponsor(bot, username, sponsor, contract) {
-  const promoBudget = await getPromoBudget(bot, sponsor);
-  const userHasRequest = await hasRequest(bot, username, contract);
-  const partner = await getPartner(bot, username);
+      const data = await eos.transact({
+        actions: [{
+          account: helix.host.root_token_contract,
+          name: 'transfer',
+          authorization: [{
+            actor: user.eosname,
+            permission: 'active',
+          }],
+          data: {
+            from: user.eosname,
+            to: 'unicore',
+            quantity: user.deposit_action.quantity,
+            memo: `100-${user.deposit_action.hostname}-`,
+          },
+        }],
+      }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      });
 
-  return parseFloat(promoBudget) > 0 && !userHasRequest && partner.referer === sponsor;
-}
+      const cons = data.processed.action_traces[0].inline_traces[1].console;
+      const regex = /BALANCE_ID: (\w+);?/gi;
+      const group = regex.exec(cons);
+      const balanceId = group[1];
+      // eslint-disable-next-line max-len
+      const balance = await getOneUserHelixBalance(bot, user.deposit_action.hostname, user.eosname, balanceId);
+      await addUserHelixBalance(user.eosname, balance);
+      await ctx.replyWithHTML('Взнос успешно принят');
+      await printHelixWallet(bot, ctx, user, user.deposit_action.hostname);
+    } catch (e) {
+      await ctx.replyWithHTML(e.message);
+      console.error('ere: ', e);
+    }
+  }
 
-async function isAdmin(bot, id) {
-  return Number(id) === Number(bot.getEnv().ADMIN_ID);
-}
-
-async function depositAction(bot, ctx, user) {
-  const helix = await getHelixParams(bot, user.deposit_action.hostname);
-  try {
+  async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
     const eos = await bot.uni.getEosPassInstance(user.wif);
-
-    const data = await eos.transact({
-      actions: [{
-        account: helix.host.root_token_contract,
-        name: 'transfer',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
+    try {
+      await eos.transact({
+        actions: [{
+          account: 'unicore',
+          name: 'refreshbal',
+          authorization: [{
+            actor: user.eosname,
+            permission: 'active',
+          }],
+          data: {
+            username: user.eosname,
+            balance_id: balanceId,
+            partrefresh: 50,
+          },
         }],
-        data: {
-          from: user.eosname,
-          to: 'unicore',
-          quantity: user.deposit_action.quantity,
-          memo: `100-${user.deposit_action.hostname}-`,
-        },
-      }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
-
-    const cons = data.processed.action_traces[0].inline_traces[1].console;
-    const regex = /BALANCE_ID: (\w+);?/gi;
-    const group = regex.exec(cons);
-    const balanceId = group[1];
-    // eslint-disable-next-line max-len
-    const balance = await getOneUserHelixBalance(bot, user.deposit_action.hostname, user.eosname, balanceId);
-    await addUserHelixBalance(user.eosname, balance);
-    await ctx.replyWithHTML('Взнос успешно принят');
-    await printHelixWallet(bot, ctx, user, user.deposit_action.hostname);
-  } catch (e) {
-    await ctx.replyWithHTML(e.message);
-    console.error('ere: ', e);
+      }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      });
+      // NOTIFY user
+      await printUserBalances(bot, ctx, user, hostname, currentIndex, true);
+    } catch (e) {
+      await ctx.replyWithHTML(e.message);
+      console.error(e);
+    }
   }
-}
-
-async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) {
-  const eos = await bot.uni.getEosPassInstance(user.wif);
-  try {
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'refreshbal',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
-        }],
-        data: {
-          username: user.eosname,
-          balance_id: balanceId,
-          partrefresh: 50,
-        },
-      }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
-    // NOTIFY user
-    await printUserBalances(bot, ctx, user, hostname, currentIndex, true);
-  } catch (e) {
-    await ctx.replyWithHTML(e.message);
-    console.error(e);
-  }
-}
-
-
-
-
 
   bot.action(/buywith (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const currency = ctx.match[1];
-    
+
     user.order_action = {
       name: 'createorder',
       data: {
@@ -632,45 +560,40 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     else ctx.reply('На данный момент в системе нет билетов. Возвращайтесь позже.');
   });
 
-
   bot.hears('🎫 выбрать квест', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+
     // await setBuyMenu(ctx)
-    printQuests(ctx)
+    printQuests(ctx);
     // ctx.reply('покупаю!')
   });
 
+  async function printQuests(ctx) {
+    let text = 'ОСТРОВ ВЕРЫ 🏝\n\n';
 
-  async function printQuests(ctx){
-    let text = "ОСТРОВ ВЕРЫ 🏝\n\n"
-
-    text += `Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n`
-    text += `1. Покаяние и стыд\n`
-    text += `2. Доверие\n`
-    text += `3. Выбор\n`
-    text += `4. Милосердие\n`
-    text += `5. Что людям знать не дано\n`
-    text += `6. Любовь в людях\n`
-    text += `7. Вера и терпение\n`
-    text += `\nПосле прохождения семи зон, вы увидите, как просто устроен мир.`
+    text += 'Квест-ретрит состоит из семи зон для раскрытия вашего внутреннего потенциала:\n';
+    text += '1. Покаяние и стыд\n';
+    text += '2. Доверие\n';
+    text += '3. Выбор\n';
+    text += '4. Милосердие\n';
+    text += '5. Что людям знать не дано\n';
+    text += '6. Любовь в людях\n';
+    text += '7. Вера и терпение\n';
+    text += '\nПосле прохождения семи зон, вы увидите, как просто устроен мир.';
     const buttons = [];
 
     // buttons.push(Markup.button.callback('следующий [0]', `nextquest`));
     // buttons.push(Markup.button.callback('предыдущий [0]', 'nextquest'));
     buttons.push(Markup.button.callback('начать', 'startquest faith_island'));
 
-
     await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }));
-
-  };
-
+  }
 
   bot.action(/startquest (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const quest = ctx.match[1];
-    
-    let text = ""
+
+    let text = '';
     // text = `Локация: кафе у моря\n\n`
     text += `Пришедший не откуда
 Идущий в никуда
@@ -742,23 +665,20 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
 Узнав как всё устроено
 Увидя белый свет.
 Всё сам поймёшь наверное
-А может быть и нет.`
+А может быть и нет.`;
 
-    await ctx.reply(text)
+    await ctx.reply(text);
 
-    text = ""
-    text = `Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n `
-    
-    user.state = "quest"
-    user.quest = "faith_island"
+    text = '';
+    text = 'Будьте честны с собой! Признайтесь в грехе или пошутите над своей неловкостью не менее 100 раз.\n\nВсе признания анонимно публикуются здесь: @uniman_sins \n\n ';
 
-    await saveUser(bot.instanceName, user)
+    user.state = 'quest';
+    user.quest = 'faith_island';
 
-    await ctx.replyWithHTML(text)
-  
-  })
+    await saveUser(bot.instanceName, user);
 
-
+    await ctx.replyWithHTML(text);
+  });
 
   bot.hears('Вступить', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -823,7 +743,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
       await printHelixWallet(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
     }
   });
-
 
   bot.action('skipdemo', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -1707,8 +1626,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     await transferAction(bot, user, amount, ctx);
   });
 
-
-
   bot.on('message', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log('catch user', user);
@@ -1716,7 +1633,7 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
     if (user) {
       if (ctx.update.message.chat.type !== 'private') {
         let { text } = ctx.update.message;
-        
+
         if (ctx.update.message.reply_to_message) {
           // eslint-disable-next-line max-len
           const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id);
@@ -1783,20 +1700,18 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-          if (user.state === "quest") {
+          if (user.state === 'quest') {
             const id = await sendMessageToUser(bot, { id: bot.getEnv().SIN_CHANNEL }, { text });
 
             await insertMessage(bot.instanceName, user, bot.getEnv().SIN_CHANNEL, text, id, 'question');
-            
-            user.sins_count ? user.sins_count += 1 : user.sins_count = 1
+
+            user.sins_count ? user.sins_count += 1 : user.sins_count = 1;
 
             await saveUser(bot.instanceName, user);
 
             await ctx.reply(`Принято ${user.sins_count} из ${100}`);
 
-            if (user.sins_count >= 100)
-              await ctx.reply("Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!")
-
+            if (user.sins_count >= 100) { await ctx.reply('Сообщение со следующей локацией будет доставлено к вам в ближайшее время, а пока - продолжайте!'); }
           } else if (user.state === 'suggestion') {
             text += '\n\n #предложения';
 

@@ -1,19 +1,19 @@
 const {
-  getUserByEosName, insertMessage, insertTicket,getGoalByChatMessage
+  getUserByEosName, insertMessage, insertTicket, getGoalByChatMessage,
 } = require('../../db');
 const { sendMessageToUser } = require('../../messages');
 
 const { getHelixParams, printWallet } = require('../../core');
-const {constructGoalMessage} = require('../../goals');
+const { constructGoalMessage } = require('../../goals');
 
 const { getBotByNameAndType } = require('../../../../common/getBotByNameAndType');
-const {mainButtons} = require('../../utils/bot')
+const { mainButtons } = require('../../utils/bot');
 const { Markup } = require('telegraf');
 
 module.exports.payReciever = async (req, res) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'origin, content-type, accept');
-  console.log('req.body', req.body)
+  console.log('req.body', req.body);
   const {
     botName,
     eosname,
@@ -22,7 +22,7 @@ module.exports.payReciever = async (req, res) => {
     trx_id,
     chat,
     type,
-    meta
+    meta,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'dacom2');
@@ -45,43 +45,41 @@ module.exports.payReciever = async (req, res) => {
     };
   }
 
-  if (type == "donate" && !meta){
+  if (type === 'donate' && !meta) {
     res.code(401);
     return {
       ok: false,
-      message: "metadata for donate type is not accepted"
-    }
+      message: 'metadata for donate type is not accepted',
+    };
   }
 
-
   const user = await getUserByEosName(botName, eosname);
-  let sender = (user.username && user.username != "") ? '@' + user.username : user.eosname
-  let message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`
+  const sender = (user.username && user.username !== '') ? '@' + user.username : user.eosname;
+  const message = `Поступил взнос в размере ${amount} от ${sender} в цель #${meta.goal_id}`;
 
-  await insertMessage(botName, {id: chat.union_chat_id}, 'operator', message);
-  
-  await sendMessageToUser(bot, {id: chat.union_chat_id}, { text: message });
+  await insertMessage(botName, { id: chat.union_chat_id }, 'operator', message);
 
-  let message2 = `Поступил взнос в размере ${amount} от ${sender}`
+  await sendMessageToUser(bot, { id: chat.union_chat_id }, { text: message });
 
-  await insertMessage(botName, {id: chat.reply_to_message_chat_id}, 'operator', message, {reply_to_message_id: chat.reply_to_message_id});
-  
-  await sendMessageToUser(bot, {id: chat.reply_to_message_chat_id}, { text: message2 }, {reply_to_message_id: chat.reply_to_message_id});
-  
-  let goal = await getGoalByChatMessage(bot.instanceName, "core", chat.goal_message_id)
+  const message2 = `Поступил взнос в размере ${amount} от ${sender}`;
 
-  if (type == "donate"){
-    let text = await constructGoalMessage(bot, hostname, null, meta.goal_id)
+  await insertMessage(botName, { id: chat.reply_to_message_chat_id }, 'operator', message, { reply_to_message_id: chat.reply_to_message_id });
 
-     try{
+  await sendMessageToUser(bot, { id: chat.reply_to_message_chat_id }, { text: message2 }, { reply_to_message_id: chat.reply_to_message_id });
+
+  const goal = await getGoalByChatMessage(bot.instanceName, 'core', chat.goal_message_id);
+
+  if (type === 'donate') {
+    const text = await constructGoalMessage(bot, hostname, null, meta.goal_id);
+
+    try {
       await bot.telegram.editMessageText(chat.goal_channel_id, chat.goal_message_id, null, text);
-    } catch(e){
-      console.log("same message!", e)
+    } catch (e) {
+      console.log('same message!', e);
     }
     // await editGoalMsg(bot, ctx, user, hostname, meta.goal_id, true)
   }
-  
-  
+
   return {
     ok: true,
   };

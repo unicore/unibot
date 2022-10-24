@@ -413,7 +413,6 @@ async function nextQuiz(bot, user, ctx) {
 
     await saveQuiz(bot.instanceName, user, quiz);
   } else {
-    
     const menu = Markup // , "цели", "действия"
       .keyboard(['🪙 кошелёк', '🌀 касса', '🙋‍♂️ задать вопрос', '🆕 создать предложение', '📒 открыть журнал'], { columns: 2 }).resize();
 
@@ -953,7 +952,6 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-  
   bot.action('skip', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
@@ -967,7 +965,7 @@ module.exports.init = async (botModel, bot) => {
 
     await sendMessageToUser(bot, user, { text: t }, menu);
   });
-  
+
   bot.action('skipdemo', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
@@ -1861,7 +1859,6 @@ module.exports.init = async (botModel, bot) => {
       ctx.editMessageText('Ордер не найден');
     }
   });
-
 
   bot.action(/transfer/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);

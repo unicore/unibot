@@ -4,11 +4,9 @@ const { mainButtons } = require('./utils/bot');
 const { loadDB } = require('./db');
 
 async function sendMessageToUser(bot, user, message, extra) {
-  try{
-
-
+  try {
     let id = {};
-    console.log("MESSAGE ON CREATE: ", id)
+    console.log('MESSAGE ON CREATE: ', id);
 
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id);
@@ -25,11 +23,10 @@ async function sendMessageToUser(bot, user, message, extra) {
       // eslint-disable-next-line max-len
       id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude);
     }
-    
-    return id.message_id;
 
-  } catch(e){
-    console.error("ERROR ON SEND MESSAGE: ", e)
+    return id.message_id;
+  } catch (e) {
+    console.error('ERROR ON SEND MESSAGE: ', e);
   }
 }
 

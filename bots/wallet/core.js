@@ -8,7 +8,7 @@ const {
   getDbHost,
   saveDbHost,
   loadDB,
-  getTickets
+  getTickets,
 } = require('./db');
 const { sendMessageToUser } = require('./messages');
 const { getPartner } = require('./partners');
@@ -62,7 +62,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
   let totalWhiteBalances = '0.0000 FLOWER';
   let totalBlackBalances = '0.0000 FLOWER';
   let totalBalances = '0.0000 FLOWER';
-  let totalPurchaseAmount = "0.0000 FLOWER"
+  let totalPurchaseAmount = '0.0000 FLOWER';
 
   const priorityBalances = [];
   const winBalances = [];
@@ -73,7 +73,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
 
   balances.forEach((balance) => {
     if (helix) {
-      balance.is_refreshed = balance.last_recalculated_win_pool_id == helix.host.current_pool_id
+      balance.is_refreshed = balance.last_recalculated_win_pool_id === helix.host.current_pool_id;
     }
 
     if (balance.pool_color === 'white') {
@@ -87,7 +87,6 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     }
 
     totalPurchaseAmount = `${(parseFloat(totalPurchaseAmount) + parseFloat(balance.purchase_amount)).toFixed(4)} FLOWER`;
-  
 
     if (hostname) {
       if (parseFloat(balance.available) < parseFloat(balance.purchase_amount)) {
@@ -118,7 +117,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     totalWhiteBalances,
     totalBlackBalances,
     totalBalances,
-    totalPurchaseAmount
+    totalPurchaseAmount,
   };
 }
 
@@ -222,8 +221,8 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   //   const bal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
   //   toPrint += `\n\nВаш демо-баланс: ${bal}`;
   // } else {
-    const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().TARGET);
-    toPrint += `\n\nВаш доступный баланс: ${bal}`;
+  const bal = await getLiquidBalance(bot, user.eosname, bot.getEnv().TARGET);
+  toPrint += `\n\nВаш доступный баланс: ${bal}`;
   // }
 
   const buttons = [];
@@ -355,50 +354,45 @@ async function withdrawAllUserRefBalances(bot, user) {
   await Promise.all(messagePromises);
 }
 
-async function cantBuyTicket(bot, user) {
-
+async function cantBuyTicket(ctx, bot, user) {
   const params = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
-  ctx.reply(`Покупка билетов станет доступа через: ${10} секунд`)
+  ctx.reply(`Покупка билетов станет доступа через: ${10} секунд`);
   // }
 }
 
 async function printWallet(bot, user, ctx) {
   const buttons = [];
 
-    // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
-    // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+  // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
+  // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
-    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-    
+  // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+
   if (user && user.eosname) {
     // const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
-    await refreshAllBalances(bot, bot.getEnv().CORE_HOST, user, true)
+    await refreshAllBalances(bot, bot.getEnv().CORE_HOST, user, true);
 
     const balances = await getUserHelixBalances(bot, bot.getEnv().CORE_HOST, user.eosname);
-
-
 
     // let tickets = await getTickets(bot.instanceName, user)
     // let currentTicket = tickets[0]
 
     // buttons.push(Markup.button.callback('⬇️ вывести', `withdraw`));
-    
-    // if (balances.length == 0)
-      buttons.push(Markup.button.callback('🎫 купить лицензию', `buyticket`));
-    // else
-      // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
 
-    buttons.push(Markup.button.callback('🔁 обновить', `refreshwallet`));
-    
+    // if (balances.length === 0)
+    buttons.push(Markup.button.callback('🎫 купить лицензию', 'buyticket'));
+    // else
+    // buttons.push(Markup.button.callback('⛔️ купить билет', `cantbuyticket`));
+
+    buttons.push(Markup.button.callback('🔁 обновить', 'refreshwallet'));
 
     const refStat = await getRefStat(bot, user.eosname, bot.getEnv().SYMBOL);
     const liquidBal = await getLiquidBalance(bot, user.eosname, bot.getEnv().SYMBOL);
 
     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    
     const helix = await getHelixParams(bot, bot.getEnv().CORE_HOST);
 
     const assetBlockedNow = balances.totalBalances;
@@ -425,8 +419,8 @@ async function printWallet(bot, user, ctx) {
     // text += `\n| Память: ${ram}`;
     // text += `\n| Билет: ${currentTicket._id.toString().substring(0, 6) }`;
     text += '\n---------------------------------';
-    text += `\n| До итогов: ${helix.currentPool.expired_time}`
-    
+    text += `\n| До итогов: ${helix.currentPool.expired_time}`;
+
     text += `\n\nДля приглашения партнёров используйте ссылку: ${link}\n`; //
     // eslint-disable-next-line max-len
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
@@ -434,7 +428,6 @@ async function printWallet(bot, user, ctx) {
   }
 
   // await printTickets(bot, user, ctx);
-
 }
 
 async function transferAction(bot, user, amount, ctx) {
@@ -481,16 +474,13 @@ async function transferAction(bot, user, amount, ctx) {
   }
 }
 
-
-
 async function retireAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
   return new Promise(async (resolve, reject) => {
-
     eos.transact({
       actions: [{
         account: 'eosio.token',
-        name: "retire",
+        name: 'retire',
         authorization: [{
           actor: user.eosname,
           permission: 'active',
@@ -505,14 +495,12 @@ async function retireAction(bot, user, amount, address) {
       blocksBehind: 3,
       expireSeconds: 30,
     }).then(async () => {
-     resolve()
+      resolve();
     }).catch(async (e) => {
-      reject(e)
+      reject(e);
     });
-
-  })  
+  });
 }
-
 
 async function withdrawPartnerRefBalance(bot, username) {
   const partner = await getPartner(bot, username);
@@ -569,11 +557,10 @@ async function getHelixsList(bot) {
   return helixs;
 }
 
-
 async function depositAction(bot, ctx, user) {
   const helix = await getHelixParams(bot, user.deposit_action.hostname);
   try {
-    console.log("deposit: ", user.eosname)
+    console.log('deposit: ', user.eosname);
     const eos = await bot.uni.getEosPassInstance(user.wif);
 
     const data = await eos.transact({
@@ -640,7 +627,6 @@ async function refreshAction(bot, ctx, user, hostname, balanceId, currentIndex) 
   }
 }
 
-
 async function internalRefreshAction(bot, balance, username) {
   const eos = await bot.uni.getEosPassInstance(bot.getEnv().REFRESHER_WIF);
 
@@ -664,7 +650,7 @@ async function internalRefreshAction(bot, balance, username) {
       blocksBehind: 3,
       expireSeconds: 30,
     });
-    console.log("success update bal", balance.id)
+    console.log('success update bal', balance.id);
   } catch (e) {
     console.log('ERROR ON REFRESH BALANCE: ', e.message);
     return e.message;
@@ -1098,5 +1084,5 @@ module.exports = {
   exitFromTail,
   cantBuyTicket,
   depositAction,
-  retireAction
+  retireAction,
 };
