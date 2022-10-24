@@ -259,8 +259,10 @@ async function checkForExistBCAccount(bot, ctx) {
 const quizDefinition = [
   { message: 'Contacts' },
   { message: 'Как вас зовут?' },
-  // { message: 'В чём хотели бы развиваться?' },
-  { message: 'Расскажите о себе и/или пришлите профиль в любой соцсети' },
+  { message: 'Чем вы зарабатываете?' },
+  { message: 'Чем вы могли бы быть полезны?' },
+  { message: 'Какие потребности у вас есть на текущий момент?' },
+  { message: 'Расскажите о себе в свободной форме' },
 ];
 
 async function welcome(bot, ctx) {
