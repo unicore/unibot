@@ -2042,9 +2042,9 @@ module.exports.init = async (botModel, bot) => {
             const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
             console.log('cant find current chat, skip');
 
-            if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) { console.log('should works', ctx.chat); }
+            if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) { console.log('should works', ctx.chat); }
 
-            if ((ctx.chat.id).toString() === bot.getEnv().CHAT_CHANNEL) {
+            if ((ctx.chat.id).toString() == bot.getEnv().CHAT_CHANNEL) {
               // const msg = await getMessage(bot.instanceName, ctx.chat.id, ctx.update.message.reply_to_message.forward_from_message_id  || ctx.update.message.reply_to_message.message_id);
               const target = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
 
@@ -2193,8 +2193,8 @@ module.exports.init = async (botModel, bot) => {
           }
         } else {
           if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-            if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
-              if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+            if (ctx.update.message.sender_chat.id.toString() == bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
+              if (ctx.update.message.forward_from_chat.id.toString() == bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                 user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
 
                 if (user && !user.member_chat_id) {
