@@ -135,6 +135,7 @@ const {
   getProjects,
   getMyProjects,
   getGoal,
+  getUsers
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -258,10 +259,10 @@ async function checkForExistBCAccount(bot, ctx) {
 
 const quizDefinition = [
   { message: 'Contacts' },
-  { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе, и мы расскажем вам, как DAO может быть в нём полезно?' },
-  // { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
-  // { message: 'Люди применяют меня для решения задач развития в сообществах и учёта вкладов в них. Такие игровые сообщества развития они называют DAO.\n\nКаким навыком вы могли бы поделиться с людьми?' },
-  // { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
+  { message: 'Меня зовут Коллективный Разум, я - гибридный интеллект людей и машин, готовый к службе для вашей пользы.\n\nА как вас зовут?' },
+  { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
+  { message: 'Люди применяют меня для решения задач развития в сообществах и учёта вкладов в них. Такие игровые сообщества развития они называют DAO.\n\nКаким навыком вы могли бы поделиться с людьми?' },
+  { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
   // { message: 'Какая главная проблема или задача развития стоит перед вами сейчас? Я помогу ' },
 ];
 
@@ -404,7 +405,7 @@ async function startQuiz(bot, ctx, user) {
 
 async function nextQuiz(bot, user, ctx) {
   const quiz = await getQuiz(bot.instanceName, user.id);
-
+  console.log('next:', user)
   let q;
 
   // eslint-disable-next-line array-callback-return
@@ -424,11 +425,16 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      // await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      await sendMessageToUser(bot, user, { text: q.message }, Markup.keyboard(buttons, { columns: 2 }).resize());
+
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
+      await sendMessageToUser(bot, user, { text: q.message }, {...clearMenu, reply_markup: { remove_keyboard: true }});
+
+
+      // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -476,14 +482,14 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
 
-    const id = await ctx.reply('Нам нужно время, чтобы создать предложение для вас. Оставайтесь на связи!');
+    const id = await ctx.reply('Поздравляю! Вы выполнили первое задание! Мне нужно время, чтобы проверить информацию и подобрать DAO для вас. Оставайтесь на связи!');
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
     await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
 
     user.state = 'chat';
-    user.profile_channel_id = id3;
+    user.member_channel_id = id3;
 
     await saveUser(bot.instanceName, user);
     console.log('after all');
@@ -567,8 +573,8 @@ module.exports.init = async (botModel, bot) => {
 
           await saveUser(bot.instanceName, user);
         } else {
-          user.profile_chat_id = null;
-          user.profile_channel_id = null;
+          user.member_chat_id = null;
+          user.member_channel_id = null;
         }
 
         if (!user.eosname) {
@@ -590,7 +596,7 @@ module.exports.init = async (botModel, bot) => {
 
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        const t = 'Добро пожаловать.\n\n';
+        const t = 'Добро пожаловать в игру.\n\n';
 
         await ctx.reply(t, clearMenu);
 
@@ -613,7 +619,7 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-      const t = 'Добро пожаловать.\n\n';
+      const t = 'Добро пожаловать в игру.\n\n';
       await ctx.reply(t, clearMenu);
 
       // TODO запуск WELCOME
@@ -729,6 +735,24 @@ module.exports.init = async (botModel, bot) => {
     const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
 
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, '-1001598098546');
+  });
+
+
+  bot.command('send_welcome_to_all', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    console.log(user)
+    if (user.id == 174122419) {
+      console.log(bot.instanceName)
+      let users = await getUsers(bot) 
+      console.log('users: ', users)
+      for (u of users){
+        await startQuiz(bot, ctx, u);  
+      } 
+      
+    }
+    
+
+
   });
 
   bot.command('team', async (ctx) => {
@@ -2053,14 +2077,12 @@ module.exports.init = async (botModel, bot) => {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-          console.log('user.state: ', user.state, user)
           if (user.state === 'set_news_channel') {
             ctx.reply('Ожидаю сообщения');
           } else if (user.state === 'chat' || user.state === '') {
             try {
-              console.log('INSIDE!')
               const text2 = `Партнёр пишет: ${text}`;
-              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, { reply_to_message_id: user.profile_chat_id });
+              const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, { reply_to_message_id: user.member_chat_id });
 
               await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
@@ -2139,7 +2161,7 @@ module.exports.init = async (botModel, bot) => {
             const buttons = [];
             if (union.type === 'goalsChannel' || union.type === 'projectChannel') {
               const goal = await getGoalByChatMessage(bot.instanceName, union.host, ctx.update.message.forward_from_message_id, ctx.update.message.sender_chat.id.toString());
-              // console.log('ИНСТРУКЦИЯ:Ж ', goal, ctx.update.message.sender_chat.id);
+              console.log('ИНСТРУКЦИЯ:Ж ', goal, ctx.update.message.sender_chat.id);
               // console.log("forward fro: ", ctx.update.message)
 
               const goalid = goal ? goal.goal_id : null;
@@ -2171,11 +2193,13 @@ module.exports.init = async (botModel, bot) => {
           }
         } else {
           if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-            if (ctx.update.message.sender_chat.id.toString() === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
-              if (ctx.update.message.forward_from_chat.id.toString() === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+            if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
+              if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
                 user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
-                if (user && !user.profile_chat_id) {
-                  user.profile_chat_id = ctx.update.message.message_id;
+
+                if (user && !user.member_chat_id) {
+                  // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+                  user.member_chat_id = ctx.update.message.message_id;
                   await saveUser(bot.instanceName, user);
                 }
               }

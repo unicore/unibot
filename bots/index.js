@@ -11,6 +11,8 @@ const MapalaBot = require('./mapala');
 const Dacom2Bot = require('./dacom2');
 const WalletBot = require('./wallet');
 const Knouni2Bot = require('./knouni2')
+const fractionBot = require('./fraction')
+const unicodeBot = require('./unicode')
 
 const BOTS = {
   base: BaseBot,
@@ -25,7 +27,9 @@ const BOTS = {
   mapala: MapalaBot,
   dacom2: Dacom2Bot,
   wallet: WalletBot,
-  knouni2: Knouni2Bot
+  knouni2: Knouni2Bot,
+  fraction: fractionBot,
+  unicode: unicodeBot
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {
