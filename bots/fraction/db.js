@@ -15,6 +15,50 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
+
+async function insertWithdraw(suffix, user, withdraw) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+
+    const res = await collection.insertOne(withdraw);
+    console.log('INSERT RES', res);
+    return res.insertedId.toString();
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function updateWithdraw(suffix, withdraw_id, status) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    await collection.updateOne(
+      { _id: mongoose.Types.ObjectId(withdraw_id) },
+      {
+        $set: {
+          status,
+        },
+      },
+      { upsert: false },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function getWithdraw(suffix, withdraw_id) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomWithdraws_${suffix}`);
+    // eslint-disable-next-line no-param-reassign
+    return await collection.findOne({ _id: mongoose.Types.ObjectId(withdraw_id) });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 async function saveUser(suffix, user) {
   try {
     const db = await loadDB();
@@ -84,13 +128,57 @@ async function getNicknameByEosName(suffix, eosname) {
     const user = await collection.findOne({ eosname });
 
     if (user !== null) {
-      return `${user.first_name} ${user.last_name}`;
+      return `${user.first_name ? user.first_name : ""} ${user.last_name ? user.last_name : ""}`;
     }
   } catch (e) {
     console.log('error: ', e.message);
   }
 
-  return 'никнейм не определен';
+  return '-';
+}
+
+
+async function getQuiz(suffix, id) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    return await collection.findOne({ id });
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
+async function getAllQuizzes(suffix) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    return await collection.find({});
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return null;
+}
+
+async function saveQuiz(suffix, user, quiz) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomQuiz_${suffix}`);
+
+    await collection.updateOne(
+      { id: quiz.id },
+      { $set: quiz },
+      { upsert: true },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
 }
 
 async function getTelegramByEosName(suffix, eosname) {
@@ -99,11 +187,11 @@ async function getTelegramByEosName(suffix, eosname) {
     const collection = db.collection(`helixUsers_${suffix}`);
 
     const user = await collection.findOne({ eosname });
-    if (user) return `@${user.username}`;
+    if (user) return `${user.username ? '@' + user.username : '-'}`;
   } catch (e) {
     console.log('error: ', e.message);
   }
-  return 'не определён';
+  return '-';
 }
 
 async function getDbHost(suffix, hostname) {
@@ -194,7 +282,7 @@ async function getSubscribers(bot, hostname) {
 
     // eslint-disable-next-line max-len
     if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray();
-    else users = await collection.find({ subscribed_to: hostname }).toArray();
+    else users = await collection.find().toArray(); //{ subscribed_to: hostname }
 
     return users;
   } catch (e) {
@@ -217,4 +305,10 @@ module.exports = {
   getDbHost,
   saveDbHost,
   getSubscribers,
+  insertWithdraw,
+  updateWithdraw,
+  getWithdraw,
+  getQuiz,
+  getAllQuizzes,
+  saveQuiz,
 };

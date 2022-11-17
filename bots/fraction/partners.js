@@ -4,6 +4,9 @@ const { Markup } = require('telegraf');
 const {
   saveUser, getUserHelixBalance, getNicknameByEosName, getTelegramByEosName,
 } = require('./db');
+
+const {getAllHelixBalances, getHelixsList} = require('./core')
+
 const { mainButtons } = require('./utils/bot');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
 
@@ -32,14 +35,16 @@ function getMyPartners(bot, username) {
   return lazyFetchAllTableInternal(bot.eosapi, 'part', 'part', 'partners2', username, username, 1000, 2, 'i64');
 }
 
-async function loadStructure(bot, partnerBase) {
+async function loadStructure(bot, partnerBase, level) {
+  
   const partners = [];
-
+  console.log("level:" , level)
   const line = await getMyPartners(bot, partnerBase);
   // eslint-disable-next-line no-restricted-syntax
   for (const row of line) {
     // eslint-disable-next-line no-await-in-loop
-    row.partners = await loadStructure(bot, row.username);
+    row.partners = await loadStructure(bot, row.username, level + 1);
+    row.level = level
     partners.push(row);
   }
 
@@ -52,6 +57,9 @@ async function loadStructure(bot, partnerBase) {
       for (const row of partner.partners) {
         if (row.username) {
           row.username = `+${row.username}`;
+          if (!row.level) row.level = level
+
+          // row.level = level
           str.push(row);
         }
       }
@@ -60,12 +68,23 @@ async function loadStructure(bot, partnerBase) {
   return str;
 }
 
-async function getStructure(bot, baseUsername) {
-  const structure = await loadStructure(bot, baseUsername);
+async function getStructure(bot, baseUsername, hosts) {
+ 
+  const structure = await loadStructure(bot, baseUsername, 1);
 
   const newStr = [];
 
   let k = 1;
+  let balances = []
+  
+  for (host of hosts) {
+    console.log("HOST.username: ", host)
+    let balances2 = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', host.username, 'balance4');
+    balances = balances.concat(balances2)
+  }
+
+  console.log("BALANCES: ", balances)
+  
   // eslint-disable-next-line no-restricted-syntax
   for (const row of structure) {
     if (row.username) {
@@ -77,30 +96,36 @@ async function getStructure(bot, baseUsername) {
 
       if (username) {
         // eslint-disable-next-line no-await-in-loop
-        const [balances, nickname, telegram] = await Promise.all([
-          getUserHelixBalance(username),
+        const [nickname, telegram] = await Promise.all([
+          // getUserHelixBalance(username),
           getNicknameByEosName(bot.instanceName, username),
           getTelegramByEosName(bot.instanceName, username),
         ]);
 
         let totalWhite = '0.0000 FLOWER';
         let totalBlack = '0.0000 FLOWER';
+        let total = '0.0000 FLOWER'
 
         if (balances) {
           // eslint-disable-next-line no-restricted-syntax
-          for (const bal of balances) {
-            if (bal.pool_color === 'white') totalWhite = `${parseFloat(totalWhite) + parseFloat(bal.available)} FLOWER`;
-            else totalBlack = `${parseFloat(totalBlack) + parseFloat(bal.available)} FLOWER`;
+          let user_balances = balances.filter(el => el.owner == username)
+
+          for (const bal of user_balances) {
+            total = (parseFloat(total) + parseFloat(bal.compensator_amount)).toFixed(4) + ' FLOWER'
+            // if (bal.pool_color === 'white') totalWhite = `${parseFloat(totalWhite) + parseFloat(bal.available)} FLOWER`;
+            // else totalBlack = `${parseFloat(totalBlack) + parseFloat(bal.available)} FLOWER`;
           }
         }
-
+        
         newStr.push({
           '#': k,
           'Системное имя': row.username,
-          // Никнейм: nickname,
-          // Телеграм: telegram,
-          'На белых столах': totalWhite,
-          'На чёрных столах': totalBlack,
+          Уровень: row.level,
+          Никнейм: nickname,
+          Телеграм: telegram,
+          Фракции: total.replace('FLOWER', 'FLOWER')
+          // 'На белых столах': totalWhite,
+          // 'На чёрных столах': totalBlack,
         });
 
         k += 1;
@@ -112,11 +137,12 @@ async function getStructure(bot, baseUsername) {
     newStr.push({
       '#': 0,
       'Системное имя': 'партнёров нет',
+      Уровень: '-',
       Никнейм: '-',
       Телеграм: '-',
-      'Ликвидные цветки': '-',
-      'На белых столах': '-',
-      'На чёрных столах': '-',
+      'Фракции': '-',
+      // 'На белых столах': '-',
+      // 'На чёрных столах': '-',
     });
   }
   return newStr;
@@ -131,24 +157,76 @@ async function sendStructureFileToUser(bot, user, data) {
   });
 }
 
-async function printPartners(bot, user) {
+async function printPartners(bot, ctx, user) {
   const me = await getPartner(bot, user.eosname);
-  const ref = await getNicknameByEosName(bot.instanceName, me.referer) || ' не определен';
+  const ref = await getNicknameByEosName(bot.instanceName, me.referer) || 'не определен';
   const telegram = await getTelegramByEosName(bot.instanceName, me.referer);
-  const promoBudget = await getPromoBudget(bot, user.eosname);
+  // const promoBudget = await getPromoBudget(bot, user.eosname);
 
   // eslint-disable-next-line no-param-reassign
-  user.promo_budget = parseFloat(promoBudget);
-  await saveUser(bot.instanceName, user);
+  // user.promo_budget = parseFloat(promoBudget);
+
+  if (!user.ref_count)
+    user.ref_count = 0
 
   const buttons = [];
-  buttons.push(Markup.button.callback('Пополнить спонсорский бюджет', 'startpromotion'));
+  
+  // buttons.push(Markup.button.callback('Пополнить спонсорский бюджет', 'startpromotion'));
+  // let text2 = `В вашей структуре: ${user.ref_count} партнёров`
+  let text = `Пожалуйста, подождите, идёт подсчет..`
 
-  await sendMessageToUser(bot, user, { text: `Ваш старший партнёр\n\t\t\tНикнейм:${ref}\n\t\t\tСистемное имя: ${me.referer}\n\t\t\tТелеграм: ${telegram}\n\nВаш рекламный бюджет: ${promoBudget}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+  let message_id = await sendMessageToUser(bot, user, { text: text });//, Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+  let hosts =  await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
 
-  await getStructure(bot, user.eosname).then(async (structure) => {
+  await getStructure(bot, user.eosname, hosts).then(async (structure) => {
+    // console.log(structure)
+    
+    console.log("user.ref_count: ", user.ref_count)
+    
+    user.ref_count = structure.length
+    console.log("structure: ", structure)
+    console.log("structure.length: ", structure.length)
+    let text1 = `Ваш старший партнёр: ${me.referer.toUpperCase()}\n\t\t\tИмя: ${ref}\n\t\t\tТелеграм: ${telegram}`
+  
+    let text3 = `\n\nВ вашей структуре ${structure.length} партнёров:`
+
+    let l1 = structure.filter(row => row["Уровень"] == 1)
+    let l2 = structure.filter(row => row["Уровень"] == 2)
+    let l3 = structure.filter(row => row["Уровень"] == 3)
+    let l4 = structure.filter(row => row["Уровень"] == 4)
+    let l5 = structure.filter(row => row["Уровень"] == 5)
+    let l6 = structure.filter(row => row["Уровень"] == 6)
+    let l7 = structure.filter(row => row["Уровень"] == 7)
+
+    console.log("L1", l1)
+
+    if(l1.length > 0)
+      text3 += `\n\t\t\tуровень 1: ${l1.length} чел.`
+    if(l2.length > 0)
+      text3 += `\n\t\t\tуровень 2: ${l2.length} чел.`
+    if(l3.length > 0)
+      text3 += `\n\t\t\tуровень 3: ${l3.length} чел.`
+    if(l4.length > 0)
+      text3 += `\n\t\t\tуровень 4: ${l4.length} чел.`
+    if(l5.length > 0)
+      text3 += `\n\t\t\tуровень 5: ${l5.length} чел.`
+    if(l6.length > 0)
+      text3 += `\n\t\t\tуровень 6: ${l6.length} чел.`
+    if(l7.length > 0)
+      text3 += `\n\t\t\tуровень 7: ${l7.length} чел.`
+    
+
+
+    await ctx.deleteMessage(message_id)
+    await sendMessageToUser(bot, user, { text: text1 + text3 });//, Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+    await saveUser(bot.instanceName, user);
+  
+
     await sendStructureFileToUser(bot, user, structure);
-  });
+    
+  }).catch(e => {
+    ctx.reply(`Ошибка на подсчёте. Пожалуйста, обратитесь в поддержку с сообщением: ${e.message}`)
+  })
 }
 
 async function addPromoBudgetAction(bot, ctx, user, budget) {
@@ -178,7 +256,7 @@ async function addPromoBudgetAction(bot, ctx, user, budget) {
   user.promo_budget = parseFloat(budget);
   await saveUser(bot.instanceName, user);
   await ctx.editMessageText(user, { text: 'Спонсорский бюджет пополнен' });
-  await printPartners(bot, user);
+  await printPartners(bot, ctx, user);
 }
 
 async function continueDemo(bot, user, from) {
@@ -236,7 +314,7 @@ async function requestPromoBudgetAction(bot, user, from) {
 }
 
 async function prepareSpreadAction(bot, user, ctx) {
-  const structure = await loadStructure(bot, user.eosname);
+  const structure = await loadStructure(bot, user.eosname, 1);
 
   const regex = /([a-z]+)/gi;
   const nullUsers = structure.filter((u) => parseFloat(u['Ликвидные цветки']) === 0 && parseFloat(u['На белых столах'] === 0 && parseFloat(u['На чёрных столах']))).map((u) => {
