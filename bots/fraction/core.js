@@ -488,8 +488,8 @@ async function printWallet(bot, user) {
 
   } else {
     buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-    buttons.push(Markup.button.callback('получить благо ⤵️', 'prewithdrawbalance'));
-    buttons.push(Markup.button.callback('подарить благо ➡️', 'transfer'));
+    buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
+    buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
     buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
     buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 

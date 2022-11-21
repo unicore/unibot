@@ -135,6 +135,10 @@ const {
   getProjects,
   getMyProjects,
   getGoal,
+  hideProject,
+  delProject,
+  showProject,
+  renameProject
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -590,11 +594,11 @@ module.exports.init = async (botModel, bot) => {
 
         // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        const t = 'Добро пожаловать.\n\n';
+        const t = 'Добро пожаловать.\n\nЭто робот для создания DAO в Цифровом Кооперативе. Для полного доступа, пожалуйста, станьте пайщиком: @digital_earth_bot';
 
         await ctx.reply(t, clearMenu);
 
-        await startQuiz(bot, ctx, user);
+        // await startQuiz(bot, ctx, user);
 
         // TODO UNCOMMENT IT
         // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
@@ -787,7 +791,7 @@ module.exports.init = async (botModel, bot) => {
       const gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
 
       const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
-      text += `Проекты DAO ${current_chat.unionName}:\n`;
+      text += `Проекты ${current_chat.unionName}:\n`;
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`;
       }
@@ -815,6 +819,8 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
     await ctx.reply('Теперь все новые проекты в этом DAO будут публичны.');
   });
+
+
 
   bot.command('create_dao', async (ctx) => {
     // finishEducation(bot, ctx)
@@ -1314,6 +1320,54 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
+
+  bot.command('set_priority', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    if (!current_chat) {
+      ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
+      return;
+    }
+
+    const text = ctx.update.message.text;
+    const entities = ctx.update.message.entities;
+    let priority = 0;
+
+    entities.map((entity) => {
+      if (entity.type === 'bot_command') { priority = parseInt((text.substr(entity.offset + entity.length, text.length).replace(' ', ''))); }
+    });
+
+    // TODO get task from message
+    // if not task - return
+    const task = await getTaskByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.message_id);
+
+    if (!task) {
+      ctx.reply('Действие не найдено. Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.', { reply_to_message_id: ctx.update.message.message_id });
+    } else {
+      if (!priority) {
+        ctx.reply('Для установки приоритета воспользуйтесь командой /set_coordinator PRIORITY_NUM, где PRIORITY_NUM - число от 1 до 3. Сообщение должно быть ответом на действие, приоритет которого изменяется.', { reply_to_message_id: ctx.update.message.message_id });
+      } else {
+        const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+
+        if (current_chat && task) {
+          try {
+            // await setBenefactor(bot, ctx, user, current_chat.host, goal.goal_id, curator_object.eosname)
+            await setTaskPriority(bot, ctx, user, current_chat.host, task.task_id, priority);
+            await ctx.deleteMessage(ctx.update.message.message_id);
+            const tprior = (priority === 0 || priority === 1) ? '10 $/час' : ((priority === 2) ? '20 $/час' : '40 $/час');
+            await ctx.reply(`Координатор установил ставку действия: ${tprior}`, { reply_to_message_id: ctx.update.message.reply_to_message.message_id });
+          } catch (e) {
+            console.log(e);
+            await ctx.reply(`Ошибка: ${e.message}`, { reply_to_message_id: ctx.update.message.reply_to_message.message_id });
+          }
+        } else {
+
+        }
+      }
+    }
+  });
+
   bot.command('set_coordinator', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -1474,6 +1528,9 @@ module.exports.init = async (botModel, bot) => {
             }
           }
 
+
+
+
           const project = tags.find((el) => el.tag === 'project');
 
           if (project) {
@@ -1502,6 +1559,34 @@ module.exports.init = async (botModel, bot) => {
         }
       }
 
+      if (tag.tag === 'delete') {
+        if (tag.id) {
+          const pr = await delProject(bot.instanceName, tag.id);
+          ctx.reply('Проект удален',{ reply_to_message_id: ctx.update.message.message_id })
+        }      
+      }
+  
+      if (tag.tag === 'rename') {
+        if (tag.id) {
+          const pr = await renameProject(bot.instanceName, tag.id, text);
+          ctx.reply('Проект переименован',{ reply_to_message_id: ctx.update.message.message_id })
+        }
+      }
+
+      if (tag.tag === 'hide') {
+        if (tag.id){
+          const pr = await hideProject(bot.instanceName, tag.id, text);
+          ctx.reply('Проект скрыт',{ reply_to_message_id: ctx.update.message.message_id })
+        }
+      }
+      
+      if (tag.tag === 'show') {
+        if (tag.id) {
+          const pr = await showProject(bot.instanceName, tag.id);
+          ctx.reply('Проект показан',{ reply_to_message_id: ctx.update.message.message_id })
+        }
+      }
+      
       if (tag.tag === 'project') {
         const gexist = tags.find((el) => el.tag === 'goal');
         const logexist = tags.find((el) => el.tag === 'log');

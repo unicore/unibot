@@ -607,7 +607,7 @@ async function getProjects(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    const projects = await collection.find({ type: 'projectChannel', is_private: false }).toArray();
+    const projects = await collection.find({ type: 'projectChannel', is_private: false, deleted: {$exists: false} }).toArray();
 
     return projects;
   } catch (e) {
@@ -620,7 +620,7 @@ async function getMyProjects(suffix, host) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    const projects = await collection.find({ type: 'projectChannel', host }).toArray();
+    const projects = await collection.find({ type: 'projectChannel', host, deleted: {$exists: false} }).toArray();
 
     return projects;
   } catch (e) {
@@ -633,9 +633,71 @@ async function getProject(suffix, number) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    const project = await collection.findOne({ type: 'projectChannel', projectCount: Number(number) });
+    const project = await collection.findOne({ type: 'projectChannel', projectCount: Number(number), deleted: {$exists: false} });
 
     return project;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function delProject(suffix, number) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    const project = await collection.updateOne({ type: 'projectChannel', projectCount: Number(number) }, {$set: {deleted: true}});
+
+    // return project;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function renameProject(suffix, number, text) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    const project = await collection.updateOne({ type: 'projectChannel', projectCount: Number(number) }, {$set: {
+      unionName: text
+    }});
+
+    // return project;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function hideProject(suffix, number) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    const project = await collection.updateOne({ type: 'projectChannel', projectCount: Number(number) }, {$set: {
+      is_private: true
+    }});
+
+    // return project;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function showProject(suffix, number) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    const project = await collection.updateOne({ type: 'projectChannel', projectCount: Number(number) }, {$set: {
+      is_private: false
+    }});
+
+    // return project;
   } catch (e) {
     console.log('error: ', e.message);
   }
@@ -742,4 +804,8 @@ module.exports = {
   getUnionByHostType,
   getAllHeadGoalsMessages,
   getGoal,
+  hideProject,
+  delProject,
+  showProject,
+  renameProject
 };
