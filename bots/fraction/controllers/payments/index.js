@@ -3,7 +3,7 @@ const {
 } = require('../../db');
 const { sendMessageToUser } = require('../../messages');
 
-const { getHelixParams, printWallet } = require('../../core');
+const { getHelixParams, printWallet, getPartnerStatus } = require('../../core');
 
 const { getBotByNameAndType } = require('../../../../common/getBotByNameAndType');
 const { mainButtons } = require('../../utils/bot');
@@ -18,6 +18,7 @@ module.exports.payReciever = async (req, res) => {
     eosname,
     amount,
     trx_id,
+    message
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'fraction');
@@ -43,10 +44,17 @@ module.exports.payReciever = async (req, res) => {
   const user = await getUserByEosName(botName, eosname);
   let amount2 = parseFloat(amount).toFixed(4) + " USDT"
 
-  const message = `Поступил взнос в размере ${amount2}`;
 
+  // let message2 = message.replace("FLOWER", "USDT")
+
+  // let status = await getPartnerStatus(bot, "core", eosname)
+  // let extra = {}
+  
+  // if status.status != 'гость'
+  //   extra = 
 
   await sendMessageToUser(bot, user, { text: message });
+  await printWallet(bot, user)
 
   return {
     ok: true,

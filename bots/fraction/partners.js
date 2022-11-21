@@ -187,8 +187,8 @@ async function printPartners(bot, ctx, user) {
     console.log("structure: ", structure)
     console.log("structure.length: ", structure.length)
     let text1 = `Ваш старший партнёр: ${me.referer.toUpperCase()}\n\t\t\tИмя: ${ref}\n\t\t\tТелеграм: ${telegram}`
-  
-    let text3 = `\n\nВ вашей структуре ${structure.length} партнёров:`
+    
+    let text3 = `\n\nВ вашей структуре ${structure.length == 1 && structure[0]['Системное имя'] == 'партнёров нет'? 'нет' : structure.length} фракционеров`
 
     let l1 = structure.filter(row => row["Уровень"] == 1)
     let l2 = structure.filter(row => row["Уровень"] == 2)
@@ -198,24 +198,25 @@ async function printPartners(bot, ctx, user) {
     let l6 = structure.filter(row => row["Уровень"] == 6)
     let l7 = structure.filter(row => row["Уровень"] == 7)
 
+
     console.log("L1", l1)
 
     if(l1.length > 0)
-      text3 += `\n\t\t\tуровень 1: ${l1.length} чел.`
+      text3 += `\n\t\t\tуровень 1: ${l1.length}`
     if(l2.length > 0)
-      text3 += `\n\t\t\tуровень 2: ${l2.length} чел.`
+      text3 += `\n\t\t\tуровень 2: ${l2.length}`
     if(l3.length > 0)
-      text3 += `\n\t\t\tуровень 3: ${l3.length} чел.`
+      text3 += `\n\t\t\tуровень 3: ${l3.length}`
     if(l4.length > 0)
-      text3 += `\n\t\t\tуровень 4: ${l4.length} чел.`
+      text3 += `\n\t\t\tуровень 4: ${l4.length}`
     if(l5.length > 0)
-      text3 += `\n\t\t\tуровень 5: ${l5.length} чел.`
+      text3 += `\n\t\t\tуровень 5: ${l5.length}`
     if(l6.length > 0)
-      text3 += `\n\t\t\tуровень 6: ${l6.length} чел.`
+      text3 += `\n\t\t\tуровень 6: ${l6.length}`
     if(l7.length > 0)
-      text3 += `\n\t\t\tуровень 7: ${l7.length} чел.`
+      text3 += `\n\t\t\tуровень 7: ${l7.length}`
     
-
+    text3 += `\n\nДля приглашения фракционеров в вашу структуру используйте ссылку из кошелька.`
 
     await ctx.deleteMessage(message_id)
     await sendMessageToUser(bot, user, { text: text1 + text3 });//, Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
