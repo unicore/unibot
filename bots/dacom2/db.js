@@ -594,9 +594,9 @@ async function getProjectsCount(suffix) {
     const db = await loadDB();
     const collection = db.collection(`dacomUnions_${suffix}`);
 
-    const tickets = await collection.find({ type: 'projectChannel' }).toArray();
+    const tickets = await collection.find({ type: 'projectChannel' }).sort({age:-1}).limit(1)
 
-    return tickets.length;
+    return tickets.projectCount + 1;
   } catch (e) {
     console.log('error: ', e.message);
   }
