@@ -480,20 +480,20 @@ async function printWallet(bot, user) {
 
   const status = await getPartnerStatus(bot, "core", user.eosname)
 
-  if(status.level == -1) {
+  // if(status.level == -1) {
 
-    buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
     // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
     // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
-  } else {
+  // } else {
     buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
     buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
     buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
     buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
     buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
-  }
+  // }
   
 
   
@@ -555,7 +555,7 @@ async function printWallet(bot, user) {
       text += '\n---------------------------------';
       text += `\n\nДля приглашения фракционеров используйте реферальную ссылку: ${link}\n`; //
       // eslint-disable-next-line max-len
-      await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      await sendMessageToUser(bot, user, { text }, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
     } else await sendMessageToUser(bot, user, { text: "Кооперативные участки не найдены" }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
   }
@@ -1366,14 +1366,14 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
-    toPrint += `\n\nЭтап вкладов: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
+    toPrint += `\n\nЭтап: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
     
-    toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
-    toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
-    // toPrint += `\nДо следующего этапа: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
+    // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
+    // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
+    toPrint += `\nДо следующего этапа: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
     
-    toPrint += `\n\nПрогноз расширения: `;
-    toPrint += `\n\t\t\t +${params.incomeStep}% за этап;`;
+    toPrint += `\n\nПрогноз дохода: `;
+    toPrint += `\n\t\t\t +${params.incomeStep}% за полный этап;`;
     toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 

@@ -23,7 +23,7 @@ async function lazyFetchAllTableInternal(api, code, scope, table, lower_bound, u
     json: true, code, scope, table, lower_bound, upper_bound, limit, index_position, key_type,
   });
   let result = data.rows;
-  console.log("table: ", table, data.more, data.next_key)
+  // console.log("table: ", table, data.more, data.next_key)
   // console.log(uint64ToName(data.next_key))
   if (data.more === true) {
     // eslint-disable-next-line max-len

@@ -382,13 +382,14 @@ async function pushEducation(ctx, currentSlideIndex) {
 
     const buttons = [];
 
-    buttons.push(Markup.button.callback('⬅️ Назад', `pusheducation ${currentSlideIndex - 1}`));
+    // buttons.push(Markup.button.callback('⬅️ Назад', `pusheducation ${currentSlideIndex - 1}`));
 
     if (currentSlideIndex + 1 === education.length){
-      buttons.push(Markup.button.callback('🔄 Начать с начала', `pusheducation ${0}`))
+      // buttons.push(Markup.button.callback('🔄 Начать с начала', `pusheducation ${0}`))
+      buttons.push(Markup.button.callback('⏺ Регистрация', `finisheducation`));      
     } else { buttons.push(Markup.button.callback('Продолжить ➡️', `pusheducation ${currentSlideIndex + 1}`)); }
 
-    buttons.push(Markup.button.callback('⏺ Завершить ознакомление', `finisheducation`));      
+    // buttons.push(Markup.button.callback('⏺ Завершить', `finisheducation`));      
     
     // buttons.push(Markup.button.callback('⏺ Пропустить ознакомление', `pusheducation ${education.length - 1}`));
 
@@ -607,7 +608,7 @@ module.exports.init = async (botModel, bot) => {
 
     
     // await ctx.reply('Купи фракцию телеграм-канала с доходностью до 100%. Стоимость фракции растёт за счёт продаж рекламы и спроса на фракции у новых фракционеров.', clearMenu, { reply_markup: { remove_keyboard: true } });
-    await ctx.reply('Добро пожаловать в Цифровой Кооператив!', clearMenu);
+    await ctx.reply('Добро пожаловать!', clearMenu);
 
 
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -684,7 +685,7 @@ async function startQuiz(bot, ctx, user) {
 
   // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('\n\nПоделитесь или напишите ваш номер телефона:', request);
+  return ctx.reply('\n\nВведите ваш номер телефона:', request);
   // await nextQuiz(bot, user, ctx)
   // startQuiz()
   // return ctx.reply('', request);
@@ -786,18 +787,25 @@ async function nextQuiz(bot, user, ctx) {
     user.profile_channel_id = id3;
 
     await saveUser(bot.instanceName, user);
-    console.log('after all');
-
+    
     const menu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
 
 
     // await pushEducation(ctx, 0);
 
-    await ctx.reply('Добро пожаловать в Цифровой Кооператив! Для активации аккаунта и всех возможностей, пожалуйста, оплатите минимальный регистрационный и паевый взносы цифрового кооператива.\n\nРегистрационный взнос: 10 USDT\nПаевый взнос: 10 USDT или больше.\n\nРегистрационный взнос будет удержан в момент поступления средств, паевый взнос отобразится на вашем лицевом счете.', menu)
+    await ctx.reply(`Регистрация завершена.`, menu)
+    let btns = []
+
+    btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+
+    await ctx.reply(`Для активации лицевого счёта, оплатите минимальный регистрационный взнос и паевый взнос на ваше усмотрение.\n\nРегистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса. \n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
+
+
+
     // await ctx.reply('Регистрационный взнос будет ', menu)
     
-    await printWallet(bot, user);
+    // await printWallet(bot, user);
     // await ctx.reply('Краткое ознакомление:')
     
     
@@ -1498,7 +1506,7 @@ bot.hears('❓ справка', async (ctx) => {
     else if (bot.getEnv().MODE === 'community') await printHelixWallet(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
   });
 
-  bot.hears('🛑 затребовать FLOWER', async (ctx) => {
+  bot.hears('🛑 требовать FLOWER', async (ctx) => {
 
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
@@ -1647,7 +1655,7 @@ bot.hears('❓ справка', async (ctx) => {
       );
 
       if (result.data.status === 'ok') {
-        await ctx.replyWithHTML('Взносы принимаются в USDT (сеть TRON - TRC20). <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">Инструкция</a>. Адрес для совершения взноса поступит следующим сообщением.');
+        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">инструкцию</a> и отправьте USDT на ваш персональный адрес:', {disable_web_page_preview: true });
         await ctx.reply(`${result.data.address}`);
       } else {
         ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
