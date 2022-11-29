@@ -383,6 +383,7 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
           if (ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
+            console.log("before catch: ", user)
             
             if (user && !user.request_chat_id) {
               console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
