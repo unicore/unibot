@@ -322,7 +322,7 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
-    if (user) {
+    if (user && user.id != 777000) {
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
         const { text } = ctx.update.message;
 
@@ -384,7 +384,7 @@ module.exports.init = async (botModel, bot) => {
           if (ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
             console.log("before catch: ", user)
-            
+
             if (user && !user.request_chat_id) {
               console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
               user.request_chat_id = ctx.update.message.message_id;
