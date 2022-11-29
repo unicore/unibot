@@ -256,8 +256,8 @@ module.exports.init = async (botModel, bot) => {
 
           await saveUser(bot.instanceName, user);
         } else {
-          user.request_chat_id = null;
-          user.request_channel_id = null;
+          user.request_chat_id = false;
+          user.request_channel_id = false;
         }
 
         await saveUser(bot.instanceName, user);
@@ -311,8 +311,8 @@ module.exports.init = async (botModel, bot) => {
     const menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 2 }).resize();
 
     user.state = null;
-    user.request_chat_id = null;
-    
+    user.request_chat_id = false;
+
     await saveUser(bot.instanceName, user);
 
     ctx.reply('Ваш запрос закрыт. Вы всегда можете создать новый.', menu);
