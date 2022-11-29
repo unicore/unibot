@@ -164,7 +164,7 @@ const quizDefinition = [
 ];
 
 async function catchRequest(bot, user, ctx, text) {
-  const reply = 'Благодарим за запрос! Вы получите ответ в ближайшее время.\n\nЕсли хотите дополнить свой запрос, просто напишите сообщение здесь:';
+  const reply = 'Я получил запрос, мне нужно время подумать! Для дополнения запроса, напишите сообщение ниже:';
   const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); // , '🪙 кошелёк'
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
@@ -267,8 +267,8 @@ module.exports.init = async (botModel, bot) => {
         const buttons = [];
         buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
 
-        await ctx.reply('Добро пожаловать!', request);
-        await ctx.reply('Коллективный Разум ищет ответы на запросы людей любой сложности и неопределенности. Попробуйте! Оставьте свой запрос и получите релевантный ответ:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        await ctx.reply('Меня зовут КНО, я ваш персональный помощник. 🧙🏻‍♂️', request);
+        await ctx.reply('Я помогу принять сложное решение в любой жизненной ситуации.\n\nПопробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         
       }
     } else {
@@ -351,7 +351,7 @@ module.exports.init = async (botModel, bot) => {
             await catchRequest(bot, user, ctx, text);
           } else if (user.state === 'chat') {
             // console.log("user: ", user)
-            // console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
+            console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
 
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
 
@@ -364,7 +364,7 @@ module.exports.init = async (botModel, bot) => {
             // console.log("HERE 3")
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
 
-            await ctx.reply('Коллективный Разум решает запросы любой сложности и неопределенности за счёт синергии малых групп людей. Оставьте свой запрос и получите ответ от Коллективного Разума.', request);
+            await ctx.reply('Оставьте свой текстовый запрос и получите разумный ответ:', request);
 
             const buttons = [];
             buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -379,12 +379,12 @@ module.exports.init = async (botModel, bot) => {
       }
     } else {
       if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-        if (ctx.update.message.sender_chat.id === bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
-          if (ctx.update.message.forward_from_chat.id === bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
+        if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
+          if (ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
-
+            
             if (user && !user.request_chat_id) {
-              // console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+              console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
               user.request_chat_id = ctx.update.message.message_id;
               await saveUser(bot.instanceName, user);
             }
@@ -397,8 +397,11 @@ module.exports.init = async (botModel, bot) => {
           const buttons = [];
           buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
 
-          await ctx.reply('Добро пожаловать!', request);
-          await ctx.reply('Коллективный Разум ищет ответы на запросы людей любой сложности и неопределенности. Попробуйте! Оставьте свой запрос на решение вашей задачи развития и получите релевантный ответ:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          await ctx.reply('Меня зовут КНО, я ваш персональный помощник. 🧙🏻‍♂️', request);
+          await ctx.reply('Я помогу принять сложное решение в любой жизненной ситуации.\n\nПопробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        
+          // await ctx.reply('Добро пожаловать!', request);
+          // await ctx.reply('Коллективный Разум ищет ответы на запросы людей любой сложности и неопределенности. Попробуйте! Оставьте свой запрос на решение вашей задачи развития и получите релевантный ответ:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
           
           // buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
 
