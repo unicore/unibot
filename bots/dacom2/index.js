@@ -2010,7 +2010,7 @@ module.exports.init = async (botModel, bot) => {
                 title: text,
                 description: '',
                 target: '0.0000 FLOWER',
-                parent_id: 0,
+                parent_id: pr.goal_id,
               };
 
               console.log('goal: ', goal);
