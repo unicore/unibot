@@ -592,11 +592,12 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        await ctx.reply(`Добро пожаловать в DAO.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        const t = 'Добро пожаловать.\n\nЭто робот для создания DAO в Цифровом Кооперативе. Для полного доступа, пожалуйста, станьте пайщиком: @digital_earth_bot';
+        const t = 'Этот робот предназначен для создания закрытых клубов с цифровыми копилками.\n\nДля получения полного доступа, пожалуйста, станьте пайщиком Цифрового Кооператива и нажмите кнопку "обновить": @digital_earth_bot';
+        buttons.push(Markup.button.callback('🔄 обновить', `newsunion`));
 
-        await ctx.reply(t, clearMenu);
+        await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
         // await startQuiz(bot, ctx, user);
 
@@ -986,7 +987,7 @@ module.exports.init = async (botModel, bot) => {
         await ctx.reply('DAO уже активно в этом чате. Показать команды: /help');
       } else {
         const user = await checkAccountForExist(bot, ctx, ctx.from);
-
+        console.log("USER ON HOST: ", user)
         if (user) {
           const type = 'union';
           const chat = await ctx.getChat();
@@ -1538,18 +1539,45 @@ module.exports.init = async (botModel, bot) => {
               const pr = await getProject(bot.instanceName, project.id);
 
               const goal = tags.find((el) => el.tag === 'goal');
+              let g
               if (goal) {
-                const g = await getGoal(bot.instanceName, goal.id);
+                g = await getGoal(bot.instanceName, goal.id);
                 if (g) {
+                  console.log("GOAL ON SEND: ", g)
+                  console.log("reply_to_message_id: g.chat_message_id", g.chat_id, g.chat_message_id)
                   if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: g.chat_id }, ctx.update.message, { caption: text, reply_to_message_id: g.chat_message_id }); } else { await sendMessageToUser(bot, { id: g.chat_id }, { text }, { reply_to_message_id: g.chat_message_id }); }
 
+
                   await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
+                  
                 }
               } else {
                 if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: pr.id }, ctx.update.message, { caption: text }); } else { await sendMessageToUser(bot, { id: pr.id }, { text }); }
 
                 await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
               }
+
+              const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+             
+              if (newsChannel) {
+
+                  let news_text = ``
+                  if (goal){
+                    if (g)
+                      news_text += `новый комментарий в #ЦЕЛЬ_${g.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                  
+                  } else {
+                    news_text += `новый комментарий к <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                    
+                  }
+
+                  news_text += `${text}`;
+                  if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
+
+                  // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
+                
+              }
+
             } else {
               await ctx.reply('Ошибка! Предоставьте идентификатор проекта.');
             }
@@ -1733,6 +1761,25 @@ module.exports.init = async (botModel, bot) => {
                   await sendMessageToUser(bot, { id: task.chat_id }, { text: new_text }, { reply_to_message_id: reply_to, ...request });
                 }
 
+                const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+            
+                if (newsChannel) {
+                  const g = await getGoal(bot.instanceName, task.goal_id);
+                  
+                  let pr = await getUnion(bot.instanceName, (g.channel_id).toString())
+                  if (pr) {
+                    let news_text = ``
+
+                    news_text += `новое действие в #ЦЕЛЬ_${task.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                    news_text += `${data}\n\n`;
+                    
+                    // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
+                    if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
+
+                  }
+              }
+
+
                 // await sendMessageToUser(bot, {id: current_chat.id}, { text });
 
                 // let goal
@@ -1830,7 +1877,24 @@ module.exports.init = async (botModel, bot) => {
 
             const chat_message_id = (await ctx.reply(task_text, { reply_to_message_id: ctx.update.message.message_id, ...request })).message_id; //
 
-            await sendMessageToBrothers(bot, user, goal, task_text, 'task', request);
+            const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+             
+            if (newsChannel) {
+              let pr = await getUnion(bot.instanceName, (goal.channel_id).toString())
+          
+              if (pr) {
+                let news_text = ``
+
+                news_text += `новая задача в #ЦЕЛЬ_${goal.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                news_text += `${text}\n\n`;
+                
+                // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
+                if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
+
+              }
+            }
+
+            // await sendMessageToBrothers(bot, user, goal, task_text, 'task', request);
 
             await insertTask(bot.instanceName, {
               host: current_chat.host,
@@ -1972,6 +2036,20 @@ module.exports.init = async (botModel, bot) => {
                 channel_message_id: projectMessageId,
                 channel_id: projectChannelId,
               });
+
+              const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+             
+              if (newsChannel) {
+                let text = ``
+
+                text += `новая #ЦЕЛЬ_${goal.goalId} в <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                text += `${goal.title}\n\n`;
+                
+                const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: text });  
+             
+              }
+              
+
             } else {
               await ctx.reply('Проект не найден');
             }
@@ -2239,7 +2317,6 @@ module.exports.init = async (botModel, bot) => {
                 const iid = (await ctx.reply(instructions, { reply_to_message_id: ctx.message.message_id, ...request })).message_id;
 
                 await insertMessage(bot.instanceName, { id: 'bot' }, 'goalInstruction', text, iid, 'autoforward', { forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id });
-
                 await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id, ctx.message.chat.id, goal.channel_id);
               }
             } else if (union.type === 'reportsChannel') {

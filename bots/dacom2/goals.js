@@ -96,13 +96,10 @@ async function enableReportButtons(bot, ctx, up, hostname, reportId) {
 async function constructGoalMessage(bot, hostname, goal, goalId) {
   if (!goal && goalId) { goal = await fetchGoal(bot, hostname, goalId); }
 
-  console.log('GOAL ON FETHC: ', goal, hostname, goalId);
   if (goal) {
-    console.log('GOAL MATCH2: ', goal.id);
-
+  
     const host = await fetchHost(bot, hostname);
     const total_shares = host.total_shares;
-    console.log('total_shares: ', total_shares, goal.positive_votes, goal.negative_votes);
     const user = await getUserByEosName(bot.instanceName, goal.creator);
     const from = (user.username && user.username !== '') ? '@' + user.username : goal.creator;
 
@@ -149,8 +146,9 @@ async function constructTaskMessage(bot, hostname, task, taskId) {
 
 async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId) { report = await fetchReport(bot, hostname, reportId); }
-
-  if (report) {
+  const user = await getUserByEosName(bot.instanceName, report.username);
+    
+  if (report && user) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
     console.log('report: ', report);
@@ -158,7 +156,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let bonus;
     let votes;
 
-    const user = await getUserByEosName(bot.instanceName, report.username);
     
     const from = (user.username && user.username !== '') ? '@' + user.username : report.username;
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`;

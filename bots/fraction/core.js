@@ -916,7 +916,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     // toPrint += `\nВзнос на ${currentBalance.pool_num} ${currentBalance.pool_color === 'white' ? '⚪️ белый' : '⚫️ чёрный'} стол ${currentBalance.cycle_num} цикла:`;
     // toPrint += `\n\t\t${currentBalance.purchase_amount}`;
     
-    toPrint += `\nУчасток тDAO #${currentBalance.id}`//${hostname.toUpperCase()}
+    toPrint += `\nКлуб тDAO #${currentBalance.id}`//${hostname.toUpperCase()}
 
     let forecast = await getForecast(bot, hostname, params)
       
@@ -931,7 +931,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     if (parseFloat(currentBalance.available) >= parseFloat(currentBalance.purchase_amount)) {
       toPrint += `\n🟢 входящее предложение`
       toPrint += '\n------------------------------';
-      toPrint += `\nЭтап вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+      toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
       
       toPrint += `\nДоступно: ${currentBalance.available.replace("FLOWER", "FLOWER")}`;
       toPrint += `\nДоход: +${income}%`;
@@ -939,7 +939,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.available) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
       
       toPrint += '\n------------------------------';
-      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего этапа распределения фракций.`
+      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего стола распределения фракций.`
       
       
       // toPrint += `\nПрогноз дохода: +${params.incomeStep}% через ${timestampToDHMS(forecast.forecastedTimeForRotate)} секунд`;
@@ -952,7 +952,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
         toPrint += `\n🔴 на замещении`
         last_print = `Ваша фракция находится на обмене с фракционерами. Вы можете выводить блага из баланса заложенной фракции по мере их поступления.`
         toPrint += '\n------------------------------';
-        toPrint += `\nЭтап вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
+        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
         toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
         
@@ -961,7 +961,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       if (currentBalance.status == "solded") {
         toPrint += `\n🔵 замещение завершено`
         toPrint += '\n------------------------------';
-        toPrint += `\nЭтап вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
         toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
         // toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
@@ -974,7 +974,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       if (currentBalance.status == "process") {
         toPrint += `\n🟡 фракции в обороте`
         toPrint += '\n------------------------------';
-        toPrint += `\nЭтап вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
         
         toPrint += `\nДоступно: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nДоход: +${income}%`;
@@ -1020,7 +1020,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     const buttons = [];
     // buttons.push(Markup.button.callback('Назад', `backto helixs`));
     // if (nextIndex > 0)
-      await ctx.reply(`У вас нет прав требования фракций. Для получения прав, заложите фракцию.`); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+      await ctx.reply(`У вас нет прав требования FLOWER. Для получения прав, заложите FLOWER в любой клуб.`); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
     // await printHelixs(bot, ctx, user);
   }
 }
@@ -1139,7 +1139,7 @@ async function notifyNewTable(bot, hostname) {
   const users = await getSubscribers(bot, hostname);
   
   const params = await getHelixParams(bot, hostname);
-  let text = `Внимание! Открыт новый этап распределения фракций ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
+  let text = `Внимание! Открыт новый стол распределения фракций ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
 
   const balances = await getAllHelixBalances(bot, hostname);
     
@@ -1359,21 +1359,21 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     let current_step = params.currentPool.pool_num
     
     let toPrint = '';
-    toPrint += `\nУчасток ${currentHelix.username.toUpperCase()}`;
+    toPrint += `\nКлуб ${currentHelix.username.toUpperCase()}`;
     
     toPrint += '\n------------------------------';
     // toPrint += `\n${currentHelix.title}`;
     toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
-    toPrint += `\n\nЭтап: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
+    toPrint += `\n\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
     
     // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
     // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
-    toPrint += `\nДо следующего этапа: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
+    toPrint += `\nДо следующего стола: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
     
     toPrint += `\n\nПрогноз дохода: `;
-    toPrint += `\n\t\t\t +${params.incomeStep}% за полный этап;`;
+    toPrint += `\n\t\t\t +${params.incomeStep}% за полный стол;`;
     toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 

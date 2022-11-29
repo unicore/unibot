@@ -164,7 +164,7 @@ const quizDefinition = [
 ];
 
 async function catchRequest(bot, user, ctx, text) {
-  const reply = 'Я получил запрос, мне нужно время подумать! Для дополнения запроса, напишите сообщение ниже:';
+  const reply = 'Я получил запрос, мне нужно время на подготовку ответа! Для дополнения запроса, напишите сообщение ниже:';
   const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); // , '🪙 кошелёк'
 
   await sendMessageToUser(bot, user, { text: reply }, menu);
@@ -253,23 +253,33 @@ module.exports.init = async (botModel, bot) => {
           user = ctx.update.message.from;
           user.app = bot.getEnv().APP;
           user.ref = ref;
-
+          user.requests_count = 3
           await saveUser(bot.instanceName, user);
         } else {
+
           user.request_chat_id = false;
           user.request_channel_id = false;
+          // if (!user.requests_count)
+            user.requests_count = 3
+          
+          await saveUser(bot.instanceName, user);
         }
 
-        await saveUser(bot.instanceName, user);
-
-         const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
-
+        const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
         const buttons = [];
-        buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
-
-        await ctx.reply('Меня зовут КНО, я ваш персональный помощник. 🧙🏻‍♂️', request);
-        await ctx.reply('Я помогу вам принять решение в любой жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         
+        if (user.requests_count > 0) {
+          await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', request);
+          buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
+          await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        } else {
+          const clearMenu = Markup.removeKeyboard();
+          buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
+          
+          await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
+          await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
+          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+        }
       }
     } else {
       const clearMenu = Markup.removeKeyboard();
@@ -308,14 +318,29 @@ module.exports.init = async (botModel, bot) => {
 
     await closeRequest(bot.instanceName, user.request_channel_id);
 
-    const menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 2 }).resize();
+
 
     user.state = null;
     user.request_chat_id = false;
+    user.requests_count -= 1;
 
     await saveUser(bot.instanceName, user);
+    let menu 
 
-    ctx.reply('Ваш запрос закрыт. Вы всегда можете создать новый.', menu);
+    if (user.requests_count > 0) {
+      
+      menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
+      await ctx.reply(`Ваш запрос закрыт. Осталось запросов: ${user.requests_count}.\n\nДля пополнения запросов станьте пайщиком Цифрового Кооператива: @digital_earth_bot`, menu);
+
+    } else {
+        const clearMenu = Markup.removeKeyboard();
+        await ctx.reply(`Ваш запрос закрыт.`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        let buttons = []
+        buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
+          
+        await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+    }
+  
   });
 
   bot.on('message', async (ctx) => {
@@ -399,8 +424,8 @@ module.exports.init = async (botModel, bot) => {
           const buttons = [];
           buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
 
-          await ctx.reply('Меня зовут КНО, я ваш персональный помощник. 🧙🏻‍♂️', request);
-          await ctx.reply('Я помогу вам принять решение в любой жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', request);
+          await ctx.reply('Мой искусственный интеллект помогает принять решение в любой жизненной ситуации. Попробуйте! Опишите вашу жизненную ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         
           // await ctx.reply('Добро пожаловать!', request);
           // await ctx.reply('Коллективный Разум ищет ответы на запросы людей любой сложности и неопределенности. Попробуйте! Оставьте свой запрос на решение вашей задачи развития и получите релевантный ответ:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
