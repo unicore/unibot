@@ -320,7 +320,7 @@ module.exports.init = async (botModel, bot) => {
 
   bot.on('message', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    // console.log('catch user', user);
+    console.log('catch user', user);
     // console.log("message: ", ctx.update.message)
     if (user) {
       if (ctx.update.message.chat.type !== 'private') { // CATCH MESSAGE ON ANY PUBLIC CHAT WHERE BOT IS ADMIN
