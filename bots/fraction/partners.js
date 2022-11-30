@@ -188,7 +188,7 @@ async function printPartners(bot, ctx, user) {
     console.log("structure.length: ", structure.length)
     let text1 = `Ваш старший партнёр: ${me.referer.toUpperCase()}\n\t\t\tИмя: ${ref}\n\t\t\tТелеграм: ${telegram}`
     
-    let text3 = `\n\nВ вашей структуре ${structure.length == 1 && structure[0]['Системное имя'] == 'партнёров нет'? 'нет' : structure.length} фракционеров`
+    let text3 = `\n\nВ вашей структуре ${structure.length == 1 && structure[0]['Системное имя'] == 'партнёров нет'? 'нет' : structure.length} партнеров`
 
     let l1 = structure.filter(row => row["Уровень"] == 1)
     let l2 = structure.filter(row => row["Уровень"] == 2)

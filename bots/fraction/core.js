@@ -1359,8 +1359,8 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     let current_step = params.currentPool.pool_num
     
     let toPrint = '';
-    toPrint += `\n${currentHelix.title} {${currentHelix.username.toUpperCase()}}`;
-    toPrint += `\nПрограмма: ${currentHelix.purpose}`;
+    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username.toUpperCase()}}`;
+    toPrint += `\nпрограмма: ${currentHelix.purpose}`;
     
     toPrint += '\n------------------------------';
     // toPrint += `\n\n`;
