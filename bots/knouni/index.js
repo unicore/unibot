@@ -293,6 +293,27 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
   }
 
+
+
+
+  bot.command('restart_all', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    const isAdminUser = isAdmin(bot, user.id);
+    
+    const text = ctx.update.message.text;
+    const entities = ctx.update.message.entities;
+    let to_send = 'Внимание! Для получения советов в сложных жизненных ситуациях, пожалуйста, перезапустите Персонального Помощника командой /start';
+
+    
+    if (isAdminUser) {
+      const count = await sendMessageToAll(bot, { text: to_send });
+      await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
+    } else {
+      await ctx.replyWithHTML('Недостаточно прав');
+    }
+  });
+
   bot.hears('🏫 Об Институте', async (ctx) => {
     await getUser(bot.instanceName, ctx.update.message.from.id);
     await checkForExistBCAccount(bot, ctx);
@@ -448,23 +469,6 @@ module.exports.init = async (botModel, bot) => {
     await printPartners(bot, user);
   });
 
-  bot.action('sendtoall', async (ctx) => {
-    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-
-    const isAdminUser = isAdmin(bot, user.id);
-    const message = user.message_to_send;
-
-    user.message_to_send = null;
-
-    await saveUser(bot.instanceName, user);
-
-    if (isAdminUser && message) {
-      const count = await sendMessageToAll(bot, { text: message });
-      await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
-    } else {
-      await ctx.replyWithHTML('Недостаточно прав');
-    }
-  });
 
   return null;
 };
