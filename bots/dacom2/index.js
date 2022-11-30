@@ -792,7 +792,7 @@ module.exports.init = async (botModel, bot) => {
       const gl = await getUnion(bot.instanceName, bot.getEnv().GOALS_CHANNEL_ID.toString());
 
       const exist = await getUnionByHostType(bot.instanceName, current_chat.host, 'goalsChannel');
-      text += `Проекты ${current_chat.unionName}:\n`;
+      text += `${current_chat.unionName}:\n`;
       for (const project of projects) {
         text += `#${project.projectCount}: <a href='${project.link}'>${project.unionName}</a>\n`;
       }
