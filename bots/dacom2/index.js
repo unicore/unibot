@@ -138,7 +138,8 @@ const {
   hideProject,
   delProject,
   showProject,
-  renameProject
+  renameProject,
+  updateUnion
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -1069,6 +1070,67 @@ module.exports.init = async (botModel, bot) => {
       return;
     }
     if (user) { await printHelixStat(bot, user, current_chat.host, ctx); } else ctx.repy('Пользователь не зарегистрирован');
+  });
+
+
+  bot.command('make_news_private', async (ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    if (!current_chat) {
+      ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
+      return;
+    }
+
+    if (current_chat.ownerEosname !== user.eosname) {
+      await ctx.reply('Вы не создавали это DAO и не можете добавить к нему новостной канал.');
+      return;
+    }
+
+    const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+    console.log('newsChannel', newsChannel);
+
+    if (!newsChannel) {
+      // user.state = 'set_news_channel';
+      // await saveUser(bot.instanceName, user);
+
+      await ctx.reply('Новостной канал не найден');
+    } else {
+      newsChannel.is_public = false
+      await updateUnion(bot.instanceName, newsChannel._id, newsChannel)
+      ctx.reply('Новостной канал теперь НЕ дублирует все сообщения в чате DAO.');
+    }
+  });
+
+  bot.command('make_news_public', async (ctx) => {
+    await checkForExistBCAccount(bot, ctx);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    const current_chat = await getUnion(bot.instanceName, (ctx.update.message.chat.id).toString());
+    if (!current_chat) {
+      ctx.reply('Чат не является DAO. Для запуска нажмите кнопку: /start');
+      return;
+    }
+
+    if (current_chat.ownerEosname !== user.eosname) {
+      await ctx.reply('Вы не создавали это DAO и не можете добавить к нему новостной канал.');
+      return;
+    }
+
+    const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+    console.log('newsChannel', newsChannel);
+
+    if (!newsChannel) {
+      // user.state = 'set_news_channel';
+      // await saveUser(bot.instanceName, user);
+
+      await ctx.reply('Новостной канал не найден');
+    } else {
+      newsChannel.is_public = true
+      await updateUnion(bot.instanceName, newsChannel._id, newsChannel)
+      ctx.reply('Новостной канал теперь дублирует все сообщения в чате DAO.');
+    }
   });
 
   bot.command('add_channel', async (ctx) => {
@@ -2237,7 +2299,7 @@ module.exports.init = async (botModel, bot) => {
               const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
               console.log("current_chat: ", current_chat)
 
-              if (newsChannel) {
+              if (newsChannel && newsChannel.is_public == true) {
                 console.log("TEXT: ", !text)
                   if (ctx.update.message.caption || !text) { 
                     await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: ctx.update.message.caption }); 
@@ -2379,7 +2441,7 @@ module.exports.init = async (botModel, bot) => {
                   const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
                   if (!current_chat)                  
                     return
-                  
+
                   console.log("current_chat: ", current_chat)
 
                   const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');

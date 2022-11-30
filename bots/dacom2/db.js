@@ -371,6 +371,25 @@ async function insertUnion(suffix, union) {
   }
 }
 
+
+// eslint-disable-next-line camelcase
+async function updateUnion(suffix, id, union) {
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomUnions_${suffix}`);
+
+    await collection.updateOne(
+      // eslint-disable-next-line camelcase
+      {_id: id},
+      {$set: union},
+      { upsert: false },
+    );
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
 // eslint-disable-next-line camelcase
 async function insertGoal(suffix, goal) {
   try {
@@ -813,5 +832,6 @@ module.exports = {
   hideProject,
   delProject,
   showProject,
-  renameProject
+  renameProject,
+  updateUnion
 };
