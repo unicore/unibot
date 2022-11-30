@@ -1359,7 +1359,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     let current_step = params.currentPool.pool_num
     
     let toPrint = '';
-    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username.toUpperCase()}}`;
+    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username}}`;
     toPrint += `\nпрограмма: ${currentHelix.purpose}`;
     
     toPrint += '\n------------------------------';
@@ -1388,7 +1388,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 
     toPrint += '\n------------------------------';
     // toPrint += `\nВаш вклад: ${totalInHelix}`;
-    toPrint += `\nℹ️ Фактическая доходность может отличаться от прогнозной. Доходность зависит от спроса на фракции и эффективности кооперации.`;
+    toPrint += `\nℹ️ Фактическая доходность может отличаться от прогнозной. Доходность зависит от спроса на фракции и эффективности кооперации в клубе.`;
 
     // TODO если есть опыт - обновить и вывести опытный поток
     // Если что-то начислено - обновить карточку и сообщить отдельным сообщением
