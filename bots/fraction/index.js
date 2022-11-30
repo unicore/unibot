@@ -398,9 +398,9 @@ async function pushEducation(ctx, currentSlideIndex) {
 
     if (currentSlideIndex === 0 && slide.img !== '') {
         if (slide.img.length > 0) {
-          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
-          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+          await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         }
       } else {
         try {
@@ -409,10 +409,10 @@ async function pushEducation(ctx, currentSlideIndex) {
 
         if (slide.img.length > 0) {
           console.log('HERE3!');
-          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
           console.log('HERE4!');
-          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+          await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         }
       }
   }
@@ -608,8 +608,11 @@ module.exports.init = async (botModel, bot) => {
 
     
     // await ctx.reply('Купи фракцию телеграм-канала с доходностью до 100%. Стоимость фракции растёт за счёт продаж рекламы и спроса на фракции у новых фракционеров.', clearMenu, { reply_markup: { remove_keyboard: true } });
-    await ctx.reply('Добро пожаловать!', clearMenu);
+    let first_enter = await ctx.reply('...', clearMenu)
+    // await ctx.deleteMessage(first_enter.message_id);
 
+    // await ctx.reply('Как получать гарантированный пассивный доход?', clearMenu);
+    // await ctx.deleteMessage()
 
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     // console.log("user", ctx.update.message.from)
@@ -677,7 +680,7 @@ async function startQuiz(bot, ctx, user) {
 
   // buttons.push(Markup.button.url('🏫 перейти на сайт', 'https://simply.estate'));
 
-  const request = Markup.keyboard([Markup.button.contactRequest('📱 Поделиться контактом')], { columns: 1 }).resize();
+  const request = Markup.keyboard([Markup.button.contactRequest('📱 Отправить номер')], { columns: 1 }).resize();
 
   // await ctx.reply('Как можно к вам обращаться?');
 
@@ -685,7 +688,7 @@ async function startQuiz(bot, ctx, user) {
 
   // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('\n\nВведите ваш номер телефона:', request);
+  return ctx.reply('\n\nВведите номер телефона:', request);
   // await nextQuiz(bot, user, ctx)
   // startQuiz()
   // return ctx.reply('', request);
@@ -694,7 +697,7 @@ async function startQuiz(bot, ctx, user) {
 
 const quizDefinition = [
   { message: 'Номер телефона:' },
-  { message: 'Введите ФИО:' },
+  { message: 'Введите ФИО или никнейм:' },
   { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">кодекс</a> цифрового кооператива?', buttons: ['Принимаю']},
   // { message: 'Какие потребности благ у вас есть?' },
   // { message: 'Какие возможности по созданию благ у вас есть?' },
@@ -767,7 +770,7 @@ async function nextQuiz(bot, user, ctx) {
     let text = '';
 
     // , //phone
-    text += `@${user.username} [${user.eosname}] +${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}\n`;
+    text += `@${user.username} [${user.eosname}] \n`; //+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}
 
     for (const answer of quiz.answers) {
       if (k > 0) {
@@ -794,12 +797,12 @@ async function nextQuiz(bot, user, ctx) {
 
     // await pushEducation(ctx, 0);
 
-    await ctx.replyWithHTML(`Добро пожаловать в Кооператив. Обязательно ознакомьтесь с вводной <a href="https://dacom.io">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.`, {disable_web_page_preview: true, ...menu})
+    await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.`, {disable_web_page_preview: true, ...menu})
     let btns = []
 
     btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
 
-    await ctx.reply(`Для получения пожизненного статуса фракционер цифрового кооператива, совершите первый взнос.\n\nРегистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого паевого взноса, а FLOWER будут отображены на вашем лицевом счёте в кошельке.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
+    await ctx.reply(`Совершите паевый взнос для получения FLOWER. Обязательный регистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
 
 
 
@@ -1587,6 +1590,8 @@ bot.hears('❓ справка', async (ctx) => {
   });
 
   bot.hears('Начать ознакомление', async (ctx) => {
+
+
     await pushEducation(ctx, 0);
   });
 

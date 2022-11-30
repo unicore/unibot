@@ -50,7 +50,7 @@ async function getPartnerStatus(bot, hostname, username){
   if (guest) {
     return {status: 'гость', icon: "", level: -1}
   } else if (!partner)
-    return {status: 'фракционер', icon: "", level: 0}
+    return {status: 'пайщик', icon: "", level: 0}
   else {
 
     let res = {}
@@ -543,7 +543,7 @@ async function printWallet(bot, user) {
       text += `\n| Фракции: ${totalBal}`;//
       text += `\n|\t\t\t\t\tДоступные: ${liquidBal.replace("FLOWER", "FLOWER")}`;
       // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`;
-      text += `\n|\t\t\t\t\tПоступило от фракционеров: ${refStat.replace("FLOWER", "FLOWER")}`;
+      text += `\n|\t\t\t\t\tПоступило от партнеров: ${refStat.replace("FLOWER", "FLOWER")}`;
       text += `\n|\t\t\t\t\tЗаблокировано по статусу: ${notAccessableRefBalance.replace("FLOWER", "FLOWER")}`;
       
       // text += `\n|\t\t\t\t\tФракции: ${uPower} шт.\n`
@@ -553,7 +553,7 @@ async function printWallet(bot, user) {
       // text += `\n| Ресурс аккаунта: ${ram} RAM`;
 
       text += '\n---------------------------------';
-      text += `\n\nДля приглашения фракционеров используйте реферальную ссылку: ${link}\n`; //
+      text += `\n\nДля приглашения партнеров используйте ссылку: ${link}\n`; //
       // eslint-disable-next-line max-len
       await sendMessageToUser(bot, user, { text }, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
     } else await sendMessageToUser(bot, user, { text: "Кооперативные участки не найдены" }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
@@ -950,7 +950,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
 
       if (currentBalance.status == "onsell"){
         toPrint += `\n🔴 на замещении`
-        last_print = `Ваша фракция находится на обмене с фракционерами. Вы можете выводить блага из баланса заложенной фракции по мере их поступления.`
+        last_print = `Ваша фракция находится на замещении фракционерами. Вы можете выводить баланс FLOWER по мере их поступления.`
         toPrint += '\n------------------------------';
         toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
         toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
@@ -967,7 +967,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
         // toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
         // toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
         
-        last_print = `Ваша фракция замещена. Вы можете вывести блага из баланса фракции, нажав на кнопку "вывести баланс".`
+        last_print = `Ваша фракция замещена. Вы можете вывести баланс FLOWER, нажав на кнопку "вывести баланс".`
         
       }
       
@@ -981,7 +981,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
         toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
         
-        last_print = `Ваша фракция находится в обороте. В случае её требования, блага поступят на баланс, когда фракция будет замещена.`
+        last_print = `Ваша фракция находится в обороте. В случае её требования, FLOWER поступят на баланс, когда фракция будет замещена.`
         
       }
       
@@ -1359,31 +1359,32 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     let current_step = params.currentPool.pool_num
     
     let toPrint = '';
-    toPrint += `\nКлуб ${currentHelix.username.toUpperCase()}`;
+    toPrint += `\n${currentHelix.title} {${currentHelix.username.toUpperCase()}}`;
+    toPrint += `\nПрограмма: ${currentHelix.purpose}`;
     
     toPrint += '\n------------------------------';
+    // toPrint += `\n\n`;
+    // toPrint += `\n\t\t\t`;
+    
     // toPrint += `\n${currentHelix.title}`;
-    toPrint += `\nКлуб фракционеров телеграма`
+    // toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
-    toPrint += `\n\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
+    toPrint += `\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
     
     // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
     // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
-    toPrint += `\nДо следующего стола: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
+    toPrint += `\n\tДо закрытия стола: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
     
-    toPrint += `\n\nПрогноз дохода: `;
-    toPrint += `\n\t\t\t +${params.incomeStep}% за полный стол;`;
+    toPrint += `\n\tПрогноз дохода: `;
+    toPrint += `\n\t\t\t +${params.incomeStep}% за закрытый стол;`;
     toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 
     if (params.host.referral_percent > 0) {
-      toPrint += '\n\nПодарки от партнеров: ';
-      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
+      toPrint += '\n\tПартнёрская программа: ';
+      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\tL${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
     }
-
-    // toPrint += `\n\nОписание: `;
-    // toPrint += `\n\n${currentHelix.purpose}`;
 
     toPrint += '\n------------------------------';
     // toPrint += `\nВаш вклад: ${totalInHelix}`;
@@ -1395,11 +1396,11 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     try{
 
       if (hostname) {
-        await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else if (nextIndex === undefined) {
-        await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+        await ctx.replyWithHTML(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else {
-        await ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       }
     } catch(e){
       console.log('on CATCH!')
