@@ -354,7 +354,7 @@ module.exports.init = async (botModel, bot) => {
         // console.log('tyL: ', ctx.update.message.reply_to_message);
 
         if (ctx.update.message.reply_to_message) { // Если это ответ на чье-то сообщение
-          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id);
+          const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id, bot.getEnv().CV_CHANNEL);
 
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);

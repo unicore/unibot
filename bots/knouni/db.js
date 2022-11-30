@@ -309,7 +309,7 @@ async function insertMessage(suffix, user, from, message, message_id, type) {
 }
 
 // eslint-disable-next-line camelcase
-async function getMessage(suffix, message_id) {
+async function getMessage(suffix, message_id, chat_id) {
   try {
     const db = await loadDB();
     const collection = db.collection(`dacomChats_${suffix}`);
@@ -317,7 +317,7 @@ async function getMessage(suffix, message_id) {
     console.log('find message_id', message_id);
 
     // eslint-disable-next-line camelcase
-    const message = await collection.findOne({ message_id });
+    const message = await collection.findOne({ message_id, from: chat_id });
     console.log("message_id: ", message)
 
     return message;
