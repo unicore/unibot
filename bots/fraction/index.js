@@ -728,11 +728,11 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      await ctx.replyWithHTML(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      await ctx.replyWithHTML(q.message, {disable_web_page_preview: true, ...Markup.keyboard(buttons, { columns: 2 }).resize()});
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.replyWithHTML(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
+      await ctx.replyWithHTML(q.message, clearMenu, { disable_web_page_preview: true, reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
