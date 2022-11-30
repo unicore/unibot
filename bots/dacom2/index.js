@@ -2231,7 +2231,9 @@ module.exports.init = async (botModel, bot) => {
             //TODO send to NEWS from PROJECT
             // if ('video_note' in ctx.update.message || 'voice' in ctx.update.message || 'audio' in ctx.update.message) {
               const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-            
+              if (!current_chat)
+                return
+
               const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
               console.log("current_chat: ", current_chat)
 
@@ -2375,6 +2377,8 @@ module.exports.init = async (botModel, bot) => {
                 if (union.type === 'projectChannel') {
 
                   const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+                  if (!current_chat)                  
+                    return
                   
                   console.log("current_chat: ", current_chat)
 
