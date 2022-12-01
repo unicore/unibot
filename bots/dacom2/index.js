@@ -2324,26 +2324,27 @@ bot.hears('❓ справка', async (ctx) => {
             } else {
               console.log("CATHC RESEND TO NEWS CHANNEL")
               const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-            
-              const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-              console.log("current_chat: ", current_chat)
-              // console.log("NEWSCHANNEL: ", newsChannel)
-              const project = await getProject(bot.instanceName, current_chat.projectCount)
-              console.log("project", project)
-              // const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString());
-              // console.log("GOAL", goal, bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString())
+              if (current_chat){
+                const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+                console.log("current_chat: ", current_chat)
+                // console.log("NEWSCHANNEL: ", newsChannel)
+                const project = await getProject(bot.instanceName, current_chat.projectCount)
+                console.log("project", project)
+                // const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString());
+                // console.log("GOAL", goal, bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString())
 
-              if (newsChannel && project) {
-                let news_text = `` 
+                if (newsChannel && project) {
+                  let news_text = `` 
 
-                news_text += `новый комментарий в <a href="${project.link}">${project.unionName}</a>:\n`;
-                if (ctx.update.message.caption || text)
-                  news_text += ctx.update.message.caption ? ctx.update.message.caption : text
-              
-                if (ctx.update.message.caption || !text) {
-                  
-                  await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); 
-                } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); 
+                  news_text += `новый комментарий в <a href="${project.link}">${project.unionName}</a>:\n`;
+                  if (ctx.update.message.caption || text)
+                    news_text += ctx.update.message.caption ? ctx.update.message.caption : text
+                
+                  if (ctx.update.message.caption || !text) {
+                    
+                    await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); 
+                  } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); 
+                }
               }
 
             }

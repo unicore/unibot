@@ -1262,17 +1262,17 @@ async function getEstimateSystemIncome(bot, hostname) {
 async function printHelixs(bot, ctx, user, nextIndex, hostname) {
   const helixs = await getHelixsList(bot);
   let currentHelix;
-  console.log("on print helix");
+  console.log("on print helix",bot.getEnv().CORE_HOST,  helixs);
   const currentIndex = nextIndex || 0;
 
   currentHelix = helixs[currentIndex];
   console.log("on print helix2", currentHelix);
   if (hostname) {
-    currentHelix = helixs.find((el) => el.username === hostname);
+    currentHelix = helixs.find((el) => el.username == hostname);
   } else {
-    currentHelix = helixs.find((el) => el.username === bot.getEnv().CORE_HOST);
+    currentHelix = helixs.find((el) => el.username == bot.getEnv().CORE_HOST);
   }
-  console.log("on print helix3", currentHelix);
+  console.log("on print helix3", currentHelix, bot.getEnv().CORE_HOST);
 
   if (currentHelix) {
     console.log("inside")
