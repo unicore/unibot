@@ -386,7 +386,7 @@ async function pushEducation(ctx, currentSlideIndex) {
 
     if (currentSlideIndex + 1 === education.length){
       // buttons.push(Markup.button.callback('🔄 Начать с начала', `pusheducation ${0}`))
-      buttons.push(Markup.button.callback('⏺ Регистрация', `finisheducation`));      
+      buttons.push(Markup.button.callback('⏺ Войти', `finisheducation`));  
     } else { buttons.push(Markup.button.callback('Продолжить ➡️', `pusheducation ${currentSlideIndex + 1}`)); }
 
     // buttons.push(Markup.button.callback('⏺ Завершить', `finisheducation`));      
@@ -798,11 +798,11 @@ async function nextQuiz(bot, user, ctx) {
     // await pushEducation(ctx, 0);
 
     await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.`, {disable_web_page_preview: true, ...menu})
-    let btns = []
+    // let btns = []
 
-    btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
 
-    await ctx.reply(`Совершите паевый взнос для получения FLOWER. Обязательный регистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
+    // await ctx.reply(`Совершите паевый взнос для получения FLOWER. Обязательный регистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
 
 
 
@@ -838,10 +838,19 @@ async function nextQuiz(bot, user, ctx) {
 
 
   bot.action("finisheducation", async (ctx) => {
-    // ctx.deleteMessage();
+    ctx.deleteMessage();
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    await startQuiz(bot, ctx, user);
-    // await printWallet(bot, user);
+    // await startQuiz(bot, ctx, user);
+
+    const menu = Markup
+      .keyboard(mainButtons, { columns: 2 }).resize();
+
+
+    // await pushEducation(ctx, 0);
+
+    await ctx.replyWithHTML(`Добро пожаловать в клуб. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> участника.`, {disable_web_page_preview: true, ...menu})
+    
+    await printWallet(bot, user);
     // TO CLIENT
     // await sendMessageToUser(bot, user, { text: `Заявка на вывод ${wobj.amount} успешно обработана` });
 

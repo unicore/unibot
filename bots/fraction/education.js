@@ -36,10 +36,10 @@ module.exports = [
    //  text: 'Блокчейн Цифрового Кооператива ведёт учёт вкладов и распределений.',
    //  img: '',//bots/dacom2/static/double-logo-04.png
    // },
-   {
-    text: 'Пройди регистрацию для просмотра каталога нео-клубов:',
-    img: '',//bots/dacom2/static/double-logo-04.png
-   },
+   // {
+   //  text: 'Пройди регистрацию для просмотра каталога нео-клубов:',
+   //  img: '',//bots/dacom2/static/double-logo-04.png
+   // },
  
  
   // {
