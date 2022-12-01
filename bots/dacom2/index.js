@@ -2333,7 +2333,7 @@ bot.hears('❓ справка', async (ctx) => {
               // const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString());
               // console.log("GOAL", goal, bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString())
 
-              if (newsChannel) {
+              if (newsChannel && project) {
                 let news_text = `` 
 
                 news_text += `новый комментарий в <a href="${project.link}">${project.unionName}</a>:\n`;
