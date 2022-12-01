@@ -1298,9 +1298,8 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     let toPrint = '';
     // toPrint += `\n${currentHelix.title}`;
     toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b>`;//{${currentHelix.username}}
-    
+    toPrint += '\n------------------------------';
     toPrint += `\n${currentHelix.purpose}`;
-    // toPrint += '\n------------------------------';
     // toPrint += `\nСтол: ${params.currentPool.pool_num} ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nДоходность одноцветных: +${params.incomeStep}%`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;

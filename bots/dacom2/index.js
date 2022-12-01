@@ -333,7 +333,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
       if (currentSlideIndex + 1 === education.length) {
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
+      // buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
@@ -344,7 +344,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
+      // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
         // if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       }
@@ -600,7 +600,7 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вашего вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>`, {disable_web_page_preview: true, ...menu});
+        await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>`, {disable_web_page_preview: true, ...menu});
 
         // const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
         // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));   
