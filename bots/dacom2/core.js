@@ -1268,6 +1268,8 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 
   if (hostname) {
     currentHelix = helixs.find((el) => el.username === hostname);
+  } else {
+    currentHelix = helixs.find((el) => el.username === bot.getEnv().CORE_HOST);
   }
 
   if (currentHelix) {
