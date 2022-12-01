@@ -486,7 +486,7 @@ async function nextQuiz(bot, user, ctx) {
     const menu = Markup
           .keyboard(mainButtons, { columns: 1 }).resize();
 
-    const id = await ctx.reply('Наконец-то ты пришёл, Нео!', menu);
+    const id = await ctx.reply('Отлично! Теперь выбери клуб нео-предпринимателей и вступи в него.', menu);
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
@@ -600,9 +600,9 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.reply(`Добро пожаловать в Цифровой Кооператив, Нео.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        await ctx.reply(`Добро пожаловать в Цифровой Кооператив.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        const t = 'Меня зовут Оператор. Через меня ты войдешь в клуб нео-предпринимателей Цифрового Кооператива.';
+        const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
         // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));   
 
         await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
@@ -641,7 +641,7 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-  bot.hears('🌀 каталог нео-клубов', async (ctx) => {
+  bot.hears('🌀 каталог клубов', async (ctx) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
     // await checkForExistBCAccount(bot, ctx);
