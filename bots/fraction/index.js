@@ -698,7 +698,7 @@ async function startQuiz(bot, ctx, user) {
 const quizDefinition = [
   { message: 'Номер телефона:' },
   { message: 'Введите ФИО или никнейм:' },
-  { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">кодекс</a> цифрового кооператива?', buttons: ['Принимаю']},
+  { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> цифрового кооператива?', buttons: ['Принимаю']},
   // { message: 'Какие потребности благ у вас есть?' },
   // { message: 'Какие возможности по созданию благ у вас есть?' },
   
@@ -1162,7 +1162,7 @@ async function nextQuiz(bot, user, ctx) {
           // TO ADMIN
 
           const admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
-          await sendMessageToUser(bot, admin, { text: `Получена новое платежное поручение на сумму:\n${amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
+          await sendMessageToUser(bot, admin, { text: `Получено новое платежное поручение на сумму:\n${amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
           await sendMessageToUser(bot, admin, { text: `${address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
           await updateWithdraw(bot.instanceName, withdraw_id, 'waiting');

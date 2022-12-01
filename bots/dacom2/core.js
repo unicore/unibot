@@ -22,6 +22,8 @@ async function getHelixParams(bot, hostname) {
 
   const [currentPool] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', host[0].current_pool_id, host[0].current_pool_id, 1);
 
+  const [currentRate] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'rate', currentPool.pool_num - 1, currentPool.pool_num - 1, 1);
+  
   const bcinfo = await bot.eosapi.getInfo({});
   const bctime = await new Date(bcinfo.head_block_time);
 
@@ -35,6 +37,8 @@ async function getHelixParams(bot, hostname) {
     currentPool.priority_time = await new Date(currentPool.priority_until);
     // eslint-disable-next-line max-len
     currentPool.priority_time = ((currentPool.priority_time - bctime) / 1000 / 60 / 60).toFixed(2);
+    // console.log("currentPool.remain_quants: ", currentPool.remain_quants, )
+    currentPool.remain = (parseFloat(currentPool.remain_quants) / parseFloat(helix[0].quants_precision) * parseFloat(currentPool.quant_cost)).toFixed(4) + " " + host[0].symbol
   }
 
   const incomeStep = (helix[0].overlap / 100 - 100).toFixed(2);
@@ -42,7 +46,7 @@ async function getHelixParams(bot, hostname) {
   const maxIncome = (incomeStep * Math.floor(helix[0].pool_limit / 2)).toFixed(0);
 
   return {
-    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome,
+    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome, currentRate
   };
 }
 
@@ -464,89 +468,240 @@ async function printHelixStat(bot, user, hostname, ctx) {
   }
 }
 
-async function printWallet(bot, user, ctx, hostname) {
+// async function printWallet(bot, user, ctx, hostname) {
+//   const buttons = [];
+
+//   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
+//   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+
+//   // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
+//   // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+//   buttons.push(Markup.button.callback('вывести', 'withdraw'));
+//   // }
+
+//   if (user && user.eosname) {
+//     // const account = await bot.uni.readApi.getAccount(user.eosname);
+//     await withdrawAllUserRefBalances(bot, user);
+//     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
+//     const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+
+//     // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
+
+//     const balances = await getUserHelixBalances(bot, null, user.eosname);
+
+//     const assetBlockedNow = balances.totalBalances;
+
+//     const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
+
+//     let text = '';
+//     const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
+//     const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
+//     let userPower;
+//     let io;
+//     let convert_rate;
+//     let params;
+//     let totalShares;
+//     let estimateSysIncome;
+//     let royalty;
+
+//     if (hostname) {
+//       params = await getHelixParams(bot, hostname);
+//       convert_rate = params.host.sale_shift / 10000;
+//       totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
+//       userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
+//       io = await getUserIntelOwn(bot, hostname, user.eosname);
+//       estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
+
+//       royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
+//     }
+
+//     // text += '\n---------------------------------';
+//     text += `\n| Имя аккаунта: ${user.eosname}`;
+//     text += `\n| Цветки: ${totalBal}`;
+//     text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
+//     text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
+//     text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
+//     // text += `\n| Память: ${ram}`;
+//     text += `\n| Курс: ${parseFloat(outUsdRate).toFixed(8)} USD / FLOWER`;
+//     text += `\n| Стоимость: ${(parseFloat(totalBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
+
+//     if (hostname) {
+//       text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
+//       // text += `\n| Взносы: ${0} FLOWER`;
+//       text += `\n| Роялти: ${royalty}% от оборота`;
+//       text += `\n| Фракции: ${userPower.power} POWER`;
+//       text += `\n|\t\t\t\t\tКурс: ${(convert_rate * outUsdRate).toFixed(4)} USD / POWER`;
+//       text += `\n|\t\t\t\t\tСтоимость: ${(convert_rate * userPower.power * outUsdRate).toFixed(4)} USD`;
+//     }
+
+//     text += '\n---------------------------------';
+//     text += `\nСсылка для приглашений: ${link}\n`; //
+//     // eslint-disable-next-line max-len
+//     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+//     else {
+//       text += '\n\nсообщение будет удалено через 30 секунд';
+
+//       const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
+
+//       setTimeout(
+//         () => {
+//           ctx.deleteMessage(ctx.update.message.message_id);
+//           ctx.deleteMessage(id);
+//         },
+//         30 * 1000,
+//       );
+//     }
+//   }
+// }
+
+
+async function getRefBalancesByStatus(bot, hostname, username) {
+  let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'refbalances');
+  let status = await getPartnerStatus(bot, hostname, username);
+  
+  balances = balances.filter(el => el.level > status.level)
+  let summ = 0
+  balances.map(bal => {
+    summ += parseFloat(bal.amount)
+  })
+
+  return (summ).toFixed(4) + " FLOWER"
+
+}
+
+async function getPartnerStatus(bot, hostname, username){
+  let [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
+  
+  let partner = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'corepartners', username, username, 1);
+  partner = partner[0]
+
+  if (guest) {
+    return {status: 'гость', icon: "", level: -1}
+  } else if (!partner)
+    return {status: 'пайщик', icon: "", level: 0}
+  else {
+
+    let res = {}
+
+    if (partner.status == "koala")        {
+        res.icon = "🐨"
+        res.status = "коала"
+        res.level = 1
+    } else if (partner.status == "panda") {
+        res.icon = "🐼"
+        res.status = "панда"
+        res.level = 2
+    } else if (partner.status == "wolf")  {
+        res.icon = "🐺"
+        res.status = "волк"
+        res.level = 3
+    } else if (partner.status == "tiger") {
+        res.icon = "🐯"
+        res.status = "тигр"
+        res.level = 4
+    } else if (partner.status == "leo")   {
+        res.icon = "🦁"
+        res.status = "лев"
+        res.level = 5
+    } else if (partner.status == "bear")  {
+        res.icon = "🐻"
+        res.status = "медведь"
+        res.level = 6
+    } else if (partner.status == "dragon") {
+        res.icon = "🐲"
+        res.status = "дракон"
+        res.level = 7
+    }
+    res.expiration = partner.expiration
+    return res
+
+  }
+
+}
+
+async function printWallet(bot, user) {
   const buttons = [];
 
-  // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
-  // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
+  const status = await getPartnerStatus(bot, "core", user.eosname)
 
-  // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-  // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
-  buttons.push(Markup.button.callback('вывести', 'withdraw'));
+  // if(status.level == -1) {
+
+    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+
+  // } else {
+    buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
+    buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
+    buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
+    buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+
   // }
+  
 
+  
+  
   if (user && user.eosname) {
-    // const account = await bot.uni.readApi.getAccount(user.eosname);
+
+    const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
-    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+    
+    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER')
 
-    // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
+    const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
-    const balances = await getUserHelixBalances(bot, null, user.eosname);
+    // const balances = await getUserHelixBalances(bot, null, user.eosname);
 
-    const assetBlockedNow = balances.totalBalances;
+    
+    let hosts = await getHelixsList(bot)
+    if (hosts.length > 0){
+      let hostname = hosts[0].username
+      
+      const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname)
+      const status = await getPartnerStatus(bot, "core", user.eosname)
+      console.log("status: ", status)
+      const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
+      const balances = await getUserHelixBalances(bot, hostname, user.eosname);
+      const assetBlockedNow = balances.totalBalances.replace("FLOWER", "FLOWER");
 
-    const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
+      const params = await getHelixParams(bot, hostname);
+      
+      let uPower = (userPower.power / params.helix.quants_precision).toFixed(4)
+      let totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower
 
-    let text = '';
-    const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
-    const outUsdRate = await bot.uni.p2pContract.getUsdRate('FLOWER', 4);
-    let userPower;
-    let io;
-    let convert_rate;
-    let params;
-    let totalShares;
-    let estimateSysIncome;
-    let royalty;
 
-    if (hostname) {
-      params = await getHelixParams(bot, hostname);
-      convert_rate = params.host.sale_shift / 10000;
-      totalShares = params.host.total_shares > 0 ? params.host.total_shares : 1;
-      userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
-      io = await getUserIntelOwn(bot, hostname, user.eosname);
-      estimateSysIncome = await getEstimateSystemIncome(bot, hostname);
+      const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
 
-      royalty = parseFloat(userPower.power / totalShares * (params.host.cfund_percent / 1000000) * estimateSysIncome.free_flow_percent).toFixed(8);
-    }
+      let text = '';
+      const link = `https://t.me/${(await bot.telegram.getMe()).username}?&start=${user.eosname}`;
 
-    // text += '\n---------------------------------';
-    text += `\n| Имя аккаунта: ${user.eosname}`;
-    text += `\n| Цветки: ${totalBal}`;
-    text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
-    text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
-    text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
-    // text += `\n| Память: ${ram}`;
-    text += `\n| Курс: ${parseFloat(outUsdRate).toFixed(8)} USD / FLOWER`;
-    text += `\n| Стоимость: ${(parseFloat(totalBal) * parseFloat(outUsdRate)).toFixed(8)} USD`;
+      text += '\n---------------------------------';
+      text += `\n| Системное имя: ${user.eosname}`;
+      text += `\n| Статус: ${status.status} ${status.icon}`;
+      
+      if (status.level > 0)
+        text += `\n|\t\t\t\t\t до ${status.expiration}`
+      
+      text += `\n| Ликвидный баланс: ${liquidBal}`;//
+      // text += `\n|\t\t\t\t\tДоступные: ${liquidBal.replace("FLOWER", "FLOWER")}`;
+      // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`;
+      // text += `\n|\t\t\t\t\tПоступило от партнеров: ${refStat.replace("FLOWER", "FLOWER")}`;
+      // text += `\n|\t\t\t\t\tЗаблокировано по статусу: ${notAccessableRefBalance.replace("FLOWER", "FLOWER")}`;
+      
+      // text += `\n|\t\t\t\t\tФракции: ${uPower} шт.\n`
+      // text += `\n|\t\t\t\t\tЗаложено: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`
+    
 
-    if (hostname) {
-      text += `\n| Интеллектуальная собственность: ${io.approved_reports} объектов`;
-      // text += `\n| Взносы: ${0} FLOWER`;
-      text += `\n| Роялти: ${royalty}% от оборота`;
-      text += `\n| Фракции: ${userPower.power} POWER`;
-      text += `\n|\t\t\t\t\tКурс: ${(convert_rate * outUsdRate).toFixed(4)} USD / POWER`;
-      text += `\n|\t\t\t\t\tСтоимость: ${(convert_rate * userPower.power * outUsdRate).toFixed(4)} USD`;
-    }
+      // text += `\n| Ресурс аккаунта: ${ram} RAM`;
 
-    text += '\n---------------------------------';
-    text += `\nСсылка для приглашений: ${link}\n`; //
-    // eslint-disable-next-line max-len
-    if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    else {
-      text += '\n\nсообщение будет удалено через 30 секунд';
+      text += '\n---------------------------------';
+      text += `\n\nДля приглашения партнеров используйте ссылку: ${link}\n`; //
+      // eslint-disable-next-line max-len
+      await sendMessageToUser(bot, user, { text }, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+    } else await sendMessageToUser(bot, user, { text: "Кооперативные участки не найдены" }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
-      const id = (await ctx.reply(text, { reply_to_message_id: ctx.update.message.message_id })).message_id;
-
-      setTimeout(
-        () => {
-          ctx.deleteMessage(ctx.update.message.message_id);
-          ctx.deleteMessage(id);
-        },
-        30 * 1000,
-      );
-    }
   }
 }
 
@@ -787,7 +942,7 @@ async function getUserIntelOwn(bot, hostname, username) {
 }
 
 async function getHelixsList(bot) {
-  let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', 'unicore', 'ahosts');
+  let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
   helixs = helixs.filter((el) => el.username !== bot.getEnv().DEMO_HOST);
   return helixs;
 }
@@ -1127,37 +1282,40 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     const estimateSysIncome = await getEstimateSystemIncome(bot, params.host.ahost);
     const buttons = [];
 
-    if (helixs.length > 1) {
-      buttons.push(Markup.button.callback(`⬅️ Предыдущая (${currentIndex})`, `next ${currentIndex - 1}`));
-      buttons.push(Markup.button.callback(`Следующая (${helixs.length - 1 - currentIndex}) ➡️`, `next ${currentIndex + 1}`));
-    }
+    // if (helixs.length > 1) {
+      buttons.push(Markup.button.callback(`⬅️ Предыдущий (${currentIndex})`, `next ${currentIndex - 1}`));
+      buttons.push(Markup.button.callback(`Следующий (${helixs.length - 1 - currentIndex}) ➡️`, `next ${currentIndex + 1}`));
+    // }
 
-    buttons.push(Markup.button.callback('Войти', `select ${currentHelix.username}`));
+    // buttons.push(Markup.button.callback('Войти', `select ${currentHelix.username}`));
 
     let toPrint = '';
-    toPrint += `\nКасса ${currentHelix.username.toUpperCase()}`;
-    toPrint += '\n------------------------------';
-    toPrint += `\nСтол: ${params.currentPool.pool_num} ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
-    toPrint += `\nДоходность одноцветных: +${params.incomeStep}%`;
-    toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
+    // toPrint += `\n${currentHelix.title}`;
+    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username}}`;
+    
+    toPrint += `\n${currentHelix.purpose}`;
+    // toPrint += '\n------------------------------';
+    // toPrint += `\nСтол: ${params.currentPool.pool_num} ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
+    // toPrint += `\nДоходность одноцветных: +${params.incomeStep}%`;
+    // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 
-    if (params.host.referral_percent > 0) {
-      toPrint += '\n\nПодарки вам от каждой чистой прибыли ваших партнёров: ';
-      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
-    }
+    // if (params.host.referral_percent > 0) {
+    //   toPrint += '\n\nПодарки вам от каждой чистой прибыли ваших партнёров: ';
+    //   toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\t - уровень ${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
+    // }
 
-    toPrint += '\n------------------------------';
-    toPrint += `\nВаш вклад: ${totalInHelix}`;
+    // toPrint += '\n------------------------------';
+    // toPrint += `\nВаш вклад: ${totalInHelix}`;
 
     // TODO если есть опыт - обновить и вывести опытный поток
     // Если что-то начислено - обновить карточку и сообщить отдельным сообщением
     //
     if (hostname) {
-      ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
     } else if (nextIndex === undefined) {
-      await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      await ctx.replyWithHTML(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
     } else {
-      ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
     }
   }
 }

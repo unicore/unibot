@@ -516,7 +516,7 @@ async function printWallet(bot, user) {
       let hostname = hosts[0].username
       
       const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname)
-      const status = await getPartnerStatus(bot, hostname, user.eosname)
+      const status = await getPartnerStatus(bot, "core", user.eosname)
       console.log("status: ", status)
       const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
       const balances = await getUserHelixBalances(bot, hostname, user.eosname);

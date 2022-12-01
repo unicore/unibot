@@ -262,8 +262,11 @@ async function checkForExistBCAccount(bot, ctx) {
 }
 
 const quizDefinition = [
-  { message: 'Contacts' },
-  { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе, и мы расскажем вам, как DAO может быть в нём полезно?' },
+  { message: 'Номер телефона:' },
+  { message: 'Как тебя зовут?' },
+  { message: 'Ты принимаешь <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> Цифрового Кооператива?', buttons: ['Принимаю']},
+  
+  // { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе, и мы расскажем вам, как DAO может быть в нём полезно?' },
   // { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
   // { message: 'Люди применяют меня для решения задач развития в сообществах и учёта вкладов в них. Такие игровые сообщества развития они называют DAO.\n\nКаким навыком вы могли бы поделиться с людьми?' },
   // { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
@@ -330,32 +333,32 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
       if (currentSlideIndex + 1 === education.length) {
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      // buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
+      buttons.push(Markup.button.callback('C начала', `pusheducation 0`));
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
 
-        if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
+        // if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       } else {
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
-      // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
+      buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
-        if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
+        // if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       }
 
       let text = '';
-      text += 'Создать DAO.';// [${currentSlideIndex + 1} / ${education.length}]`
+      // text += 'Создать DAO.';// [${currentSlideIndex + 1} / ${education.length}]`
 
       text += `\n\n${slide.text}`;
 
       if (currentSlideIndex === 0 && slide.img !== '') {
         if (slide.img.length > 0) {
-          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, {parse_mode: "html",  caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
-          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          await ctx.reply(text, {parse_mode: "html", ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
         }
       } else {
         try {
@@ -364,10 +367,10 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
         if (slide.img.length > 0) {
           console.log('HERE3!');
-          await ctx.replyWithPhoto({ source: slide.img }, { caption: text, ...Markup.inlineKeyboard(buttons, { columns: 1 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, {parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
           console.log('HERE4!');
-          await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          await ctx.reply(text, {parse_mode: "html", ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
         }
       }
     }
@@ -429,11 +432,11 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
+      await ctx.reply(q.message,{disable_web_page_preview: true, parse_mode: "html", ...Markup.keyboard(buttons, { columns: 2 }).resize()});
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
+      await ctx.reply(q.message, clearMenu, {disable_web_page_preview: true, parse_mode: "html", reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -480,8 +483,10 @@ async function nextQuiz(bot, user, ctx) {
       }
       k++;
     }
+    const menu = Markup
+          .keyboard(mainButtons, { columns: 1 }).resize();
 
-    const id = await ctx.reply('Нам нужно время, чтобы создать предложение для вас. Оставайтесь на связи!');
+    const id = await ctx.reply('Наконец-то ты пришёл, Нео!', menu);
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
@@ -489,6 +494,8 @@ async function nextQuiz(bot, user, ctx) {
 
     user.state = 'chat';
     user.profile_channel_id = id3;
+    
+    // await printWallet(bot, user);
 
     await saveUser(bot.instanceName, user);
     console.log('after all');
@@ -593,14 +600,14 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.reply(`Добро пожаловать в DAO.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        await ctx.reply(`Добро пожаловать в Цифровой Кооператив, Нео.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-        const t = 'Этот робот предназначен для создания закрытых клубов с цифровыми копилками.\n\nДля получения полного доступа, пожалуйста, станьте пайщиком Цифрового Кооператива и нажмите кнопку "обновить": @digital_earth_bot';
-        buttons.push(Markup.button.callback('🔄 обновить', `newsunion`));
+        const t = 'Меня зовут Оператор. Через меня ты войдешь в клуб нео-предпринимателей Цифрового Кооператива.';
+        // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));   
 
         await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-        // await startQuiz(bot, ctx, user);
+        await startQuiz(bot, ctx, user);
 
         // TODO UNCOMMENT IT
         // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
@@ -619,8 +626,8 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(`Добро пожаловать в Децентрализованное Автономное Сообщество.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
 
-      const t = 'Добро пожаловать.\n\n';
-      await ctx.reply(t, clearMenu);
+      // const t = 'Добро пожаловать.\n\n';
+      // await ctx.reply(t, clearMenu);
 
       // TODO запуск WELCOME
       // let res = await ctx.getChatAdministrators()
@@ -632,6 +639,58 @@ module.exports.init = async (botModel, bot) => {
 
       // dont have any reactions on public chats
     }
+  });
+
+  bot.hears('🌀 каталог нео-клубов', async (ctx) => {
+    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+    // await checkForExistBCAccount(bot, ctx);
+    await printHelixs(bot, ctx, user);
+  });
+
+
+  bot.action("startreg", async (ctx) => {
+    // ctx.deleteMessage();
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    await startQuiz(bot, ctx, user);
+    // await printWallet(bot, user);
+    // TO CLIENT
+    // await sendMessageToUser(bot, user, { text: `Заявка на вывод ${wobj.amount} успешно обработана` });
+
+    // TODO make db insert
+    // TODO send request to admin
+    //
+  });
+
+
+bot.hears('❓ справка', async (ctx) => {
+
+
+    const buttons = [];
+
+    let help_buttons = bot.getEnv().HELP_BUTTONS
+
+    help_buttons.map(btn => {
+      if (btn.type == "callback") {
+        buttons.push(Markup.button.callback(btn.title, btn.command));
+    
+      } else if (btn.type == "url"){
+        buttons.push(Markup.button.url(btn.title, btn.url));
+      }
+    })
+
+    // buttons.push(Markup.button.callback('Схема работы', 'sendvideo'));
+    // buttons.push(Markup.button.url('Вопрос-ответ', 'https://dacom.io/welcome'));
+    // buttons.push(Markup.button.url('Поддержка', 'https://t.me/knouni_bot'));
+    // buttons.push(Markup.button.url('Чат сообщества', 'https://t.me/+TDKgKiSzfB33gt33'));
+    // buttons.push(Markup.button.url('Новости', 'https://t.me/dhelix_news'));
+
+    // let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    
+
+    // if (!user.is_demo) buttons.push(Markup.button.callback('Запустить демо', 'startdemo'));
+
+    await ctx.replyWithHTML(bot.getEnv().MAIN_HELP_MSG, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
   bot.on('contact', async (ctx) => {
