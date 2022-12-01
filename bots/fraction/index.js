@@ -698,7 +698,7 @@ async function startQuiz(bot, ctx, user) {
 const quizDefinition = [
   { message: 'Номер телефона:' },
   { message: 'Введите ФИО или никнейм:' },
-  { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> цифрового кооператива?', buttons: ['Принимаю']},
+  // { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> цифрового кооператива?', buttons: ['Принимаю']},
   // { message: 'Какие потребности благ у вас есть?' },
   // { message: 'Какие возможности по созданию благ у вас есть?' },
   
@@ -848,7 +848,7 @@ async function nextQuiz(bot, user, ctx) {
 
     // await pushEducation(ctx, 0);
 
-    await ctx.replyWithHTML(`Добро пожаловать в клуб. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> участника.`, {disable_web_page_preview: true, ...menu})
+    await ctx.replyWithHTML(`Добро пожаловать в клуб. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> фракционера.`, {disable_web_page_preview: true, ...menu})
     
     await printWallet(bot, user);
     // TO CLIENT
@@ -1669,7 +1669,7 @@ bot.hears('❓ справка', async (ctx) => {
       );
 
       if (result.data.status === 'ok') {
-        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">инструкцию</a> и отправьте USDT на ваш персональный адрес:', {disable_web_page_preview: true });
+        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/6abaac7d68eb4ca996e4e0183cb0bfc9">инструкцию</a> и отправьте USDT на ваш персональный адрес:', {disable_web_page_preview: true });
         await ctx.reply(`${result.data.address}`);
       } else {
         ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');

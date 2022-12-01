@@ -263,8 +263,8 @@ async function checkForExistBCAccount(bot, ctx) {
 
 const quizDefinition = [
   { message: 'Номер телефона:' },
-  { message: 'Как тебя зовут?' },
-  { message: 'Ты принимаешь <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> Цифрового Кооператива?', buttons: ['Принимаю']},
+  // { message: 'Как тебя зовут?' },
+  // { message: 'Ты принимаешь <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> Цифрового Кооператива?', buttons: ['Принимаю']},
   
   // { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе, и мы расскажем вам, как DAO может быть в нём полезно?' },
   // { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
@@ -486,7 +486,7 @@ async function nextQuiz(bot, user, ctx) {
     const menu = Markup
           .keyboard(mainButtons, { columns: 1 }).resize();
 
-    const id = await ctx.reply('Отлично! Теперь выбери клуб нео-предпринимателей и вступи в него.', menu);
+    const id = await ctx.reply('Выберите свой клуб и вступите в него для получения благ.', menu);
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
@@ -600,14 +600,14 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.reply(`Добро пожаловать в Цифровой Кооператив.\n\n`, clearMenu, { reply_markup: { remove_keyboard: true } });
+        await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вашего вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>`, {disable_web_page_preview: true, ...menu});
 
-        const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
+        // const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
         // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));   
 
-        await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+        // await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-        await startQuiz(bot, ctx, user);
+        // await startQuiz(bot, ctx, user);
 
         // TODO UNCOMMENT IT
         // await ctx.reply('\n\nЭтот робот создаёт DAO. \nИнструкция: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
