@@ -645,7 +645,7 @@ module.exports.init = async (botModel, bot) => {
     let user = await getUser(bot.instanceName, ctx.update.message.from.id);
     
     // await checkForExistBCAccount(bot, ctx);
-    await printHelixs(bot, ctx, user);
+    await printHelixs(bot, ctx, user, 0, bot.getEnv().CORE_HOST);
   });
 
 
