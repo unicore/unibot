@@ -609,7 +609,7 @@ module.exports.init = async (botModel, bot) => {
     
     // await ctx.reply('Купи фракцию телеграм-канала с доходностью до 100%. Стоимость фракции растёт за счёт продаж рекламы и спроса на фракции у новых фракционеров.', clearMenu, { reply_markup: { remove_keyboard: true } });
     let first_enter = await ctx.reply('...', clearMenu)
-    // await ctx.deleteMessage(first_enter.message_id);
+    await ctx.deleteMessage(first_enter.message_id);
 
     // await ctx.reply('Как получать гарантированный пассивный доход?', clearMenu);
     // await ctx.deleteMessage()
@@ -848,7 +848,7 @@ async function nextQuiz(bot, user, ctx) {
 
     // await pushEducation(ctx, 0);
 
-    await ctx.replyWithHTML(`Добро пожаловать в клуб. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> фракционера.`, {disable_web_page_preview: true, ...menu})
+    await ctx.replyWithHTML(`Добро пожаловать в Клуб Фракционеров!.\n\nОбязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">инструкцией</a> для фракционеров - в ней подробно описано как здесь всё работает и как принимать участие в Клубе.`, {disable_web_page_preview: true, ...menu})
     
     await printWallet(bot, user);
     // TO CLIENT
