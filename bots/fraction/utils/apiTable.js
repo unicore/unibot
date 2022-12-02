@@ -2,18 +2,17 @@ const { Serialize } = require('eosjs');
 
 const types = Serialize.createInitialTypes();
 
-
 const nameToUint64 = (name) => {
-  let ser = new Serialize.SerialBuffer();
+  const ser = new Serialize.SerialBuffer();
   ser.pushName(name);
   return types.get('uint64').deserialize(ser);
 };
 
 const uint64ToName = (num) => {
-  let ser = new Serialize.SerialBuffer();
+  const ser = new Serialize.SerialBuffer();
   types.get('uint64').serialize(ser, num);
   return ser.getName();
-}
+};
 
 async function lazyFetchAllTableInternal(api, code, scope, table, lower_bound, upper_bound, limit, index_position, key_type) {
   if (!limit) limit = 100;

@@ -15,7 +15,6 @@ async function getUserHelixBalance(suffix, username) {
   return null;
 }
 
-
 async function insertWithdraw(suffix, user, withdraw) {
   try {
     const db = await loadDB();
@@ -128,7 +127,7 @@ async function getNicknameByEosName(suffix, eosname) {
     const user = await collection.findOne({ eosname });
 
     if (user !== null) {
-      return `${user.first_name ? user.first_name : ""} ${user.last_name ? user.last_name : ""}`;
+      return `${user.first_name ? user.first_name : ''} ${user.last_name ? user.last_name : ''}`;
     }
   } catch (e) {
     console.log('error: ', e.message);
@@ -136,7 +135,6 @@ async function getNicknameByEosName(suffix, eosname) {
 
   return '-';
 }
-
 
 async function getQuiz(suffix, id) {
   try {
@@ -282,7 +280,7 @@ async function getSubscribers(bot, hostname) {
 
     // eslint-disable-next-line max-len
     if (hostname === bot.getEnv().DEMO_HOST) users = await collection.find({ is_demo: true }).toArray();
-    else users = await collection.find().toArray(); //{ subscribed_to: hostname }
+    else users = await collection.find().toArray(); // { subscribed_to: hostname }
 
     return users;
   } catch (e) {

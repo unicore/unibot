@@ -7,23 +7,23 @@ const { fetchReport, fetchGoal } = require('./goals');
 async function sendMessageToUser(bot, user, message, extra) {
   try {
     let id = {};
-    if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, {...extra, parse_mode: "html"});
-    if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id, {...extra, parse_mode: "html"});
-    if ('voice' in message) id = await bot.telegram.sendVoice(user.id, message.voice.file_id, {...extra, parse_mode: "html"});
-    if ('audio' in message) id = await bot.telegram.sendAudio(user.id, message.audio.file_id, {...extra, parse_mode: "html"});
-    if ('video_note' in message) id = await bot.telegram.sendVideoNote(user.id, message.video_note.file_id, {...extra, parse_mode: "html"});
-    if ('document' in message) id = await bot.telegram.sendDocument(user.id, message.document.file_id, {...extra, parse_mode: "html"});
+    if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, { ...extra, parse_mode: 'html' });
+    if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id, { ...extra, parse_mode: 'html' });
+    if ('voice' in message) id = await bot.telegram.sendVoice(user.id, message.voice.file_id, { ...extra, parse_mode: 'html' });
+    if ('audio' in message) id = await bot.telegram.sendAudio(user.id, message.audio.file_id, { ...extra, parse_mode: 'html' });
+    if ('video_note' in message) id = await bot.telegram.sendVideoNote(user.id, message.video_note.file_id, { ...extra, parse_mode: 'html' });
+    if ('document' in message) id = await bot.telegram.sendDocument(user.id, message.document.file_id, { ...extra, parse_mode: 'html' });
 
-    if ('video' in message) id = await bot.telegram.sendVideo(user.id, message.video.file_id, {...extra, parse_mode: "html"});
+    if ('video' in message) id = await bot.telegram.sendVideo(user.id, message.video.file_id, { ...extra, parse_mode: 'html' });
     if ('doc' in message) {
       // eslint-disable-next-line max-len
       id = await bot.telegram.sendDocument(user.id, { source: message.doc, filename: extra.filename });
     } if ('venue' in message) {
       // eslint-disable-next-line max-len
-      id = await bot.telegram.sendVenue(user.id, message.location.latitude, message.location.longitude, message.venue.title, message.venue.address, {...extra, parse_mode: "html"});
+      id = await bot.telegram.sendVenue(user.id, message.location.latitude, message.location.longitude, message.venue.title, message.venue.address, { ...extra, parse_mode: 'html' });
     } else if ('location' in message) {
       // eslint-disable-next-line max-len
-      id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude, {...extra, parse_mode: "html"});
+      id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude, { ...extra, parse_mode: 'html' });
     }
 
     return id.message_id;

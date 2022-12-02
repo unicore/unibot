@@ -145,7 +145,7 @@ module.exports.changeBotMode = async (req) => {
     wallet: 1,
     knouni2: 1,
     fraction: 1,
-    unicode: 1
+    unicode: 1,
   };
   const {
     name,

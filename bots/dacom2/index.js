@@ -139,7 +139,7 @@ const {
   delProject,
   showProject,
   renameProject,
-  updateUnion
+  updateUnion,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -265,7 +265,7 @@ const quizDefinition = [
   { message: 'Номер телефона:' },
   // { message: 'Как тебя зовут?' },
   // { message: 'Ты принимаешь <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> Цифрового Кооператива?', buttons: ['Принимаю']},
-  
+
   // { message: 'Я помогаю создать DAO - цифровую копилку для вашего сообщества.\n\nРасскажите подробнее о вашем сообществе, и мы расскажем вам, как DAO может быть в нём полезно?' },
   // { message: 'Приятно познакомиться!. Я помогаю людям войти в Коллективный Разум для взаимопомощи по всем вопросам.\n\nЧем вы зарабатываете?'},
   // { message: 'Люди применяют меня для решения задач развития в сообществах и учёта вкладов в них. Такие игровые сообщества развития они называют DAO.\n\nКаким навыком вы могли бы поделиться с людьми?' },
@@ -356,9 +356,9 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
       if (currentSlideIndex === 0 && slide.img !== '') {
         if (slide.img.length > 0) {
-          await ctx.replyWithPhoto({ source: slide.img }, {parse_mode: "html",  caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: 'html', caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
-          await ctx.reply(text, {parse_mode: "html", ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+          await ctx.reply(text, { parse_mode: 'html', ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         }
       } else {
         try {
@@ -367,10 +367,10 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
 
         if (slide.img.length > 0) {
           console.log('HERE3!');
-          await ctx.replyWithPhoto({ source: slide.img }, {parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: 'html', caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         } else {
           console.log('HERE4!');
-          await ctx.reply(text, {parse_mode: "html", ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+          await ctx.reply(text, { parse_mode: 'html', ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
         }
       }
     }
@@ -405,7 +405,7 @@ async function startQuiz(bot, ctx, user) {
   // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   // return ctx.reply('\n\nНапиши свой номер телефона для получения первого задания:', request);
-  await nextQuiz(bot, user, ctx)
+  await nextQuiz(bot, user, ctx);
   // startQuiz()
   // return ctx.reply('', request);
 }
@@ -432,11 +432,11 @@ async function nextQuiz(bot, user, ctx) {
         buttons.push(b);
       });
 
-      await ctx.reply(q.message,{disable_web_page_preview: true, parse_mode: "html", ...Markup.keyboard(buttons, { columns: 2 }).resize()});
+      await ctx.reply(q.message, { disable_web_page_preview: true, parse_mode: 'html', ...Markup.keyboard(buttons, { columns: 2 }).resize() });
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await ctx.reply(q.message, clearMenu, {disable_web_page_preview: true, parse_mode: "html", reply_markup: { remove_keyboard: true } });// , clearMenu,
+      await ctx.reply(q.message, clearMenu, { disable_web_page_preview: true, parse_mode: 'html', reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
 
     await saveQuiz(bot.instanceName, user, quiz);
@@ -484,7 +484,7 @@ async function nextQuiz(bot, user, ctx) {
       k++;
     }
     const menu = Markup
-          .keyboard(mainButtons, { columns: 1 }).resize();
+      .keyboard(mainButtons, { columns: 1 }).resize();
 
     const id = await ctx.reply('Выберите свой клуб и вступите в него для получения благ.', menu);
 
@@ -494,7 +494,7 @@ async function nextQuiz(bot, user, ctx) {
 
     user.state = 'chat';
     user.profile_channel_id = id3;
-    
+
     // await printWallet(bot, user);
 
     await saveUser(bot.instanceName, user);
@@ -600,10 +600,10 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>`, {disable_web_page_preview: true, ...menu});
+        await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>', { disable_web_page_preview: true, ...menu });
 
         // const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
-        // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));   
+        // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));
 
         // await ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
@@ -642,14 +642,13 @@ module.exports.init = async (botModel, bot) => {
   });
 
   bot.hears('🌀 каталог клубов', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     // await checkForExistBCAccount(bot, ctx);
     await printHelixs(bot, ctx, user);
   });
 
-
-  bot.action("startreg", async (ctx) => {
+  bot.action('startreg', async (ctx) => {
     // ctx.deleteMessage();
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     await startQuiz(bot, ctx, user);
@@ -662,22 +661,18 @@ module.exports.init = async (botModel, bot) => {
     //
   });
 
-
-bot.hears('❓ справка', async (ctx) => {
-
-
+  bot.hears('❓ справка', async (ctx) => {
     const buttons = [];
 
-    let help_buttons = bot.getEnv().HELP_BUTTONS
+    const help_buttons = bot.getEnv().HELP_BUTTONS;
 
-    help_buttons.map(btn => {
-      if (btn.type == "callback") {
+    help_buttons.map((btn) => {
+      if (btn.type == 'callback') {
         buttons.push(Markup.button.callback(btn.title, btn.command));
-    
-      } else if (btn.type == "url"){
+      } else if (btn.type == 'url') {
         buttons.push(Markup.button.url(btn.title, btn.url));
       }
-    })
+    });
 
     // buttons.push(Markup.button.callback('Схема работы', 'sendvideo'));
     // buttons.push(Markup.button.url('Вопрос-ответ', 'https://dacom.io/welcome'));
@@ -686,7 +681,6 @@ bot.hears('❓ справка', async (ctx) => {
     // buttons.push(Markup.button.url('Новости', 'https://t.me/dhelix_news'));
 
     // let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
 
     // if (!user.is_demo) buttons.push(Markup.button.callback('Запустить демо', 'startdemo'));
 
@@ -881,8 +875,6 @@ bot.hears('❓ справка', async (ctx) => {
     await ctx.reply('Теперь все новые проекты в этом DAO будут публичны.');
   });
 
-
-
   bot.command('create_dao', async (ctx) => {
     // finishEducation(bot, ctx)
     await pushEducation(bot, ctx, 0);
@@ -1047,7 +1039,7 @@ bot.hears('❓ справка', async (ctx) => {
         await ctx.reply('DAO уже активно в этом чате. Показать команды: /help');
       } else {
         const user = await checkAccountForExist(bot, ctx, ctx.from);
-        console.log("USER ON HOST: ", user)
+        console.log('USER ON HOST: ', user);
         if (user) {
           const type = 'union';
           const chat = await ctx.getChat();
@@ -1131,7 +1123,6 @@ bot.hears('❓ справка', async (ctx) => {
     if (user) { await printHelixStat(bot, user, current_chat.host, ctx); } else ctx.repy('Пользователь не зарегистрирован');
   });
 
-
   bot.command('make_news_private', async (ctx) => {
     await checkForExistBCAccount(bot, ctx);
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -1156,8 +1147,8 @@ bot.hears('❓ справка', async (ctx) => {
 
       await ctx.reply('Новостной канал не найден');
     } else {
-      newsChannel.is_public = false
-      await updateUnion(bot.instanceName, newsChannel._id, newsChannel)
+      newsChannel.is_public = false;
+      await updateUnion(bot.instanceName, newsChannel._id, newsChannel);
       ctx.reply('Новостной канал теперь НЕ дублирует все сообщения в чате DAO.');
     }
   });
@@ -1186,8 +1177,8 @@ bot.hears('❓ справка', async (ctx) => {
 
       await ctx.reply('Новостной канал не найден');
     } else {
-      newsChannel.is_public = true
-      await updateUnion(bot.instanceName, newsChannel._id, newsChannel)
+      newsChannel.is_public = true;
+      await updateUnion(bot.instanceName, newsChannel._id, newsChannel);
       ctx.reply('Новостной канал теперь дублирует все сообщения в чате DAO.');
     }
   });
@@ -1442,7 +1433,6 @@ bot.hears('❓ справка', async (ctx) => {
     }
   });
 
-
   bot.command('set_priority', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
@@ -1650,9 +1640,6 @@ bot.hears('❓ справка', async (ctx) => {
             }
           }
 
-
-
-
           const project = tags.find((el) => el.tag === 'project');
 
           if (project) {
@@ -1660,17 +1647,15 @@ bot.hears('❓ справка', async (ctx) => {
               const pr = await getProject(bot.instanceName, project.id);
 
               const goal = tags.find((el) => el.tag === 'goal');
-              let g
+              let g;
               if (goal) {
                 g = await getGoal(bot.instanceName, goal.id);
                 if (g) {
-                  console.log("GOAL ON SEND: ", g)
-                  console.log("reply_to_message_id: g.chat_message_id", g.chat_id, g.chat_message_id)
+                  console.log('GOAL ON SEND: ', g);
+                  console.log('reply_to_message_id: g.chat_message_id', g.chat_id, g.chat_message_id);
                   if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: g.chat_id }, ctx.update.message, { caption: text, reply_to_message_id: g.chat_message_id }); } else { await sendMessageToUser(bot, { id: g.chat_id }, { text }, { reply_to_message_id: g.chat_message_id }); }
 
-
                   await ctx.reply('Сообщение отправлено', { reply_to_message_id: ctx.update.message.message_id });
-                  
                 }
               } else {
                 if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: pr.id }, ctx.update.message, { caption: text }); } else { await sendMessageToUser(bot, { id: pr.id }, { text }); }
@@ -1679,27 +1664,21 @@ bot.hears('❓ справка', async (ctx) => {
               }
 
               const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-              console.log("NEWSCHANNEL: ", newsChannel)
+              console.log('NEWSCHANNEL: ', newsChannel);
 
               if (newsChannel) {
+                let news_text = '';
+                if (goal) {
+                  if (g) news_text += `новый комментарий в #ЦЕЛЬ_${g.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                } else {
+                  news_text += `новый комментарий в <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                }
 
-                  let news_text = ``
-                  if (goal){
-                    if (g)
-                      news_text += `новый комментарий в #ЦЕЛЬ_${g.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
-                  
-                  } else {
-                    news_text += `новый комментарий в <a href="${pr.link}">${pr.unionName}</a>:\n`;
-                    
-                  }
+                news_text += `${text}`;
+                if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); }
 
-                  news_text += `${text}`;
-                  if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); }
-
-                  // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
-                
+                // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
               }
-
             } else {
               await ctx.reply('Ошибка! Предоставьте идентификатор проекта.');
             }
@@ -1712,31 +1691,31 @@ bot.hears('❓ справка', async (ctx) => {
       if (tag.tag === 'delete') {
         if (tag.id) {
           const pr = await delProject(bot.instanceName, tag.id);
-          ctx.reply('Проект удален',{ reply_to_message_id: ctx.update.message.message_id })
-        }      
+          ctx.reply('Проект удален', { reply_to_message_id: ctx.update.message.message_id });
+        }
       }
-  
+
       if (tag.tag === 'rename') {
         if (tag.id) {
           const pr = await renameProject(bot.instanceName, tag.id, text);
-          ctx.reply('Проект переименован',{ reply_to_message_id: ctx.update.message.message_id })
+          ctx.reply('Проект переименован', { reply_to_message_id: ctx.update.message.message_id });
         }
       }
 
       if (tag.tag === 'hide') {
-        if (tag.id){
+        if (tag.id) {
           const pr = await hideProject(bot.instanceName, tag.id, text);
-          ctx.reply('Проект скрыт',{ reply_to_message_id: ctx.update.message.message_id })
+          ctx.reply('Проект скрыт', { reply_to_message_id: ctx.update.message.message_id });
         }
       }
-      
+
       if (tag.tag === 'show') {
         if (tag.id) {
           const pr = await showProject(bot.instanceName, tag.id);
-          ctx.reply('Проект показан',{ reply_to_message_id: ctx.update.message.message_id })
+          ctx.reply('Проект показан', { reply_to_message_id: ctx.update.message.message_id });
         }
       }
-      
+
       if (tag.tag === 'project') {
         const gexist = tags.find((el) => el.tag === 'goal');
         const logexist = tags.find((el) => el.tag === 'log');
@@ -1884,23 +1863,21 @@ bot.hears('❓ справка', async (ctx) => {
                 }
 
                 const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-            
+
                 if (newsChannel) {
                   const g = await getGoal(bot.instanceName, task.goal_id);
-                  
-                  let pr = await getUnion(bot.instanceName, (g.channel_id).toString())
+
+                  const pr = await getUnion(bot.instanceName, (g.channel_id).toString());
                   if (pr) {
-                    let news_text = ``
+                    let news_text = '';
 
                     news_text += `новое действие в #ЦЕЛЬ_${task.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
                     news_text += `${data}\n\n`;
-                    
-                    // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
+
+                    // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
                     if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
-
                   }
-              }
-
+                }
 
                 // await sendMessageToUser(bot, {id: current_chat.id}, { text });
 
@@ -2000,19 +1977,18 @@ bot.hears('❓ справка', async (ctx) => {
             const chat_message_id = (await ctx.reply(task_text, { reply_to_message_id: ctx.update.message.message_id, ...request })).message_id; //
 
             const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-             
+
             if (newsChannel) {
-              let pr = await getUnion(bot.instanceName, (goal.channel_id).toString())
-          
+              const pr = await getUnion(bot.instanceName, (goal.channel_id).toString());
+
               if (pr) {
-                let news_text = ``
+                let news_text = '';
 
                 news_text += `новая задача в #ЦЕЛЬ_${goal.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
                 news_text += `${text}\n\n`;
-                
-                // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
-                if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
 
+                // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
+                if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { news_text }); }
               }
             }
 
@@ -2160,18 +2136,15 @@ bot.hears('❓ справка', async (ctx) => {
               });
 
               const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-             
+
               if (newsChannel) {
-                let text = ``
+                let text = '';
 
                 text += `новая #ЦЕЛЬ_${goal.goalId} в <a href="${pr.link}">${pr.unionName}</a>:\n`;
                 text += `${goal.title}\n\n`;
-                
-                const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: text });  
-             
-              }
-              
 
+                const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text });
+              }
             } else {
               await ctx.reply('Проект не найден');
             }
@@ -2216,7 +2189,6 @@ bot.hears('❓ справка', async (ctx) => {
     console.log('catch message', user);
 
     if (user && user.id !== 777000) {
-
       console.log('here!', tags);
 
       if (ctx.update.message.chat.type !== 'private') {
@@ -2322,54 +2294,50 @@ bot.hears('❓ справка', async (ctx) => {
                 await ctx.reply('Ответ отправлен партнёру в ЛС', { reply_to_message_id: ctx.message.message_id });
               }
             } else {
-              console.log("CATHC RESEND TO NEWS CHANNEL")
+              console.log('CATHC RESEND TO NEWS CHANNEL');
               const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-              if (current_chat){
+              if (current_chat) {
                 const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-                console.log("current_chat: ", current_chat)
+                console.log('current_chat: ', current_chat);
                 // console.log("NEWSCHANNEL: ", newsChannel)
-                const project = await getProject(bot.instanceName, current_chat.projectCount)
-                console.log("project", project)
+                const project = await getProject(bot.instanceName, current_chat.projectCount);
+                console.log('project', project);
                 // const goal = await getGoalByChatMessage(bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString());
                 // console.log("GOAL", goal, bot.instanceName, current_chat.host, ctx.update.message.reply_to_message.forward_from_message_id, (ctx.chat.id).toString())
 
                 if (newsChannel && project) {
-                  let news_text = `` 
+                  let news_text = '';
 
                   news_text += `новый комментарий в <a href="${project.link}">${project.unionName}</a>:\n`;
-                  if (ctx.update.message.caption || text)
-                    news_text += ctx.update.message.caption ? ctx.update.message.caption : text
-                
+                  if (ctx.update.message.caption || text) news_text += ctx.update.message.caption ? ctx.update.message.caption : text;
+
                   if (ctx.update.message.caption || !text) {
-                    
-                    await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); 
-                  } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); 
+                    await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text });
+                  } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
                 }
               }
-
             }
           } else {
-            console.log("ON ELSE 2!!")
-            //TODO send to NEWS from PROJECT
+            console.log('ON ELSE 2!!');
+            // TODO send to NEWS from PROJECT
             // if ('video_note' in ctx.update.message || 'voice' in ctx.update.message || 'audio' in ctx.update.message) {
-              const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-              if (!current_chat)
-                return
+            const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
+            if (!current_chat) return;
 
-              const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-              console.log("current_chat: ", current_chat)
+            const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
+            console.log('current_chat: ', current_chat);
 
-              if (newsChannel && newsChannel.is_public == true) {
-                console.log("TEXT: ", !text)
-                  if (ctx.update.message.caption || !text) { 
-                    await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: ctx.update.message.caption }); 
-                  } else await sendMessageToUser(bot, { id: newsChannel.id }, { text }); 
-              }
-
-                  // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });  
-              // }
+            if (newsChannel && newsChannel.is_public == true) {
+              console.log('TEXT: ', !text);
+              if (ctx.update.message.caption || !text) {
+                await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: ctx.update.message.caption });
+              } else await sendMessageToUser(bot, { id: newsChannel.id }, { text });
             }
+
+            // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
+            // }
           }
+        }
       } else { // Если это диалог пользователя с ботом
         // проверяем не квиз ли
 
@@ -2386,12 +2354,12 @@ bot.hears('❓ справка', async (ctx) => {
           await saveQuiz(bot.instanceName, user, quiz);
           await nextQuiz(bot, user, ctx);
         } else if (user.state) {
-          console.log('user.state: ', user.state, user)
+          console.log('user.state: ', user.state, user);
           if (user.state === 'set_news_channel') {
             ctx.reply('Ожидаю сообщения');
           } else if (user.state === 'chat' || user.state === '') {
             try {
-              console.log('INSIDE!')
+              console.log('INSIDE!');
               const text2 = `Партнёр пишет: ${text}`;
               const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text: text2 }, { reply_to_message_id: user.profile_chat_id });
 
@@ -2450,11 +2418,9 @@ bot.hears('❓ справка', async (ctx) => {
         // }
       }
     } else {
-      console.log("on here!")
+      console.log('on here!');
       if (ctx.update.message && ctx.update.message.is_automatic_forward === true && ctx.update.message.sender_chat) {
-        
-        console.log("INSIDE")
-
+        console.log('INSIDE');
 
         let union;
         try {
@@ -2470,7 +2436,7 @@ bot.hears('❓ справка', async (ctx) => {
             };
           }
         }
-        console.log("UNION!: ", union)
+        console.log('UNION!: ', union);
 
         if (union) { // если словили пересылку из прикрепленного канала
           // eslint-disable-next-line no-constant-condition
@@ -2495,32 +2461,27 @@ bot.hears('❓ справка', async (ctx) => {
                 await insertMessage(bot.instanceName, { id: 'bot' }, 'goalInstruction', text, iid, 'autoforward', { forward_from_type: union.type, forward_from_channel_id: union.id, forward_from_message_id: ctx.update.message.forward_from_message_id });
                 await addMainChatMessageToGoal(bot.instanceName, ctx.update.message.forward_from_message_id, ctx.message.message_id, ctx.message.chat.id, goal.channel_id);
               } else {
-                //RESEND PROJECTS DATA TO NEWS
+                // RESEND PROJECTS DATA TO NEWS
                 if (union.type === 'projectChannel') {
-
                   const current_chat = await getUnion(bot.instanceName, (ctx.chat.id).toString());
-                  if (!current_chat)                  
-                    return
+                  if (!current_chat) { return; }
 
-                  console.log("current_chat: ", current_chat)
+                  console.log('current_chat: ', current_chat);
 
                   const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
-                   
-                  
-                  if (newsChannel) {
-                    console.log("TEXT: ", !text)
-                    console.log("UNION: ", union)
 
-                    let news_text = `` 
+                  if (newsChannel) {
+                    console.log('TEXT: ', !text);
+                    console.log('UNION: ', union);
+
+                    let news_text = '';
                     news_text += `новый комментарий в <a href="${union.link}">${union.unionName}</a>:\n`;
-                    
-                    if (ctx.update.message.caption || text)
-                      news_text += ctx.update.message.caption ? ctx.update.message.caption : text
-                  
+
+                    if (ctx.update.message.caption || text) news_text += ctx.update.message.caption ? ctx.update.message.caption : text;
+
                     if (ctx.update.message.caption || !text) {
-                      
-                      await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); 
-                    } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); 
+                      await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text });
+                    } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
                   }
                 }
               }
@@ -2550,7 +2511,7 @@ bot.hears('❓ справка', async (ctx) => {
           }
         }
       } else { // Или отправляем пользователю ответ в личку если это ответ на резюме пользователя
-        console.log("HERE?>!?!?!?!?!")
+        console.log('HERE?>!?!?!?!?!');
       }
     }
   });

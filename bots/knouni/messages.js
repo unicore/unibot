@@ -5,9 +5,8 @@ const { loadDB } = require('./db');
 
 async function sendMessageToUser(bot, user, message, extra) {
   let id = {};
-  
-  try {
 
+  try {
     if ('text' in message) id = await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) id = await bot.telegram.sendPhoto(user.id, message.photo[3].file_id);
     if ('voice' in message) id = await bot.telegram.sendVoice(user.id, message.voice.file_id);
@@ -23,14 +22,12 @@ async function sendMessageToUser(bot, user, message, extra) {
       // eslint-disable-next-line max-len
       id = await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude);
     }
-  
+
     return id.message_id;
-  
-  } catch(e) {
-    console.log("error on send: ", e.message)
-    return null
-  } 
-  
+  } catch (e) {
+    console.log('error on send: ', e.message);
+    return null;
+  }
 }
 
 async function sendMessageToAll(bot, message, extra) {
@@ -46,7 +43,7 @@ async function sendMessageToAll(bot, message, extra) {
 
   // eslint-disable-next-line no-restricted-syntax
   for (const user of users) {
-    try{
+    try {
       if ('text' in message) await bot.telegram.sendMessage(user.id, message.text, extra);
       if ('photo' in message) await bot.telegram.sendPhoto(user.id, message.photo[2].file_id, { caption: message.caption });
       if ('voice' in message) await bot.telegram.sendVoice(user.id, message.voice.file_id);
@@ -60,8 +57,8 @@ async function sendMessageToAll(bot, message, extra) {
         // eslint-disable-next-line max-len
         await bot.telegram.sendLocation(user.id, message.location.latitude, message.location.longitude);
       }
-    } catch(e){
-      console.log("error on mass send: ", user.id, e.message)
+    } catch (e) {
+      console.log('error on mass send: ', user.id, e.message);
     }
   }
 

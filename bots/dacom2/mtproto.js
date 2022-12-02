@@ -51,8 +51,8 @@ async function createChat(bot, user, hostname, unionName, type, is_private) {
     channelTitle = `Проект #${projectCount + 1} ${unionName}`;
     chatTitle = `Обсуждение проекта #${projectCount + 1} ${unionName}`;
   }
-  
-  console.log("projectCount:", projectCount)
+
+  console.log('projectCount:', projectCount);
 
   result = await client.invoke(new Api.channels.CreateChannel({
     title: channelTitle,

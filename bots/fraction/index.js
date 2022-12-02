@@ -30,7 +30,7 @@ const {
   transferToGateAction,
   cancelSellAction,
   getBalancesOnSale,
-  payStatus
+  payStatus,
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -128,27 +128,23 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
       },
     );
     if (message.data) {
-      console.log("message on reg: ", message.data)
+      console.log('message on reg: ', message.data);
       // TODO set partner info
       await saveUser(bot.instanceName, user);
-      return true
-    
+      return true;
     } else {
-
       await saveUser(bot.instanceName, user);
       console.error(message);
       ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Перезапустите робота командой /start.', Markup.removeKeyboard());
-      return false
+      return false;
     }
   } catch (e) {
     ctx.reply('Произошла ошибка при регистрации вашего аккаунта. Перезапустите робота командой /start.', Markup.removeKeyboard());
-    user.reg_error = e
+    user.reg_error = e;
     await saveUser(bot.instanceName, user);
-    
+
     return false;
   }
-
-  
 }
 
 async function checkSponsor(bot, username, sponsor, contract) {
@@ -173,20 +169,19 @@ async function isAdmin(bot, id) {
 
 async function depositAction(bot, ctx, user) {
   const helix = await getHelixParams(bot, user.deposit_action.hostname);
-  let fractions_on_sale = await getBalancesOnSale(bot, user.deposit_action.hostname, user.eosname, helix)
-  
-  let amount_for_direct_buy = 0
-  let total_deposit_amount = parseFloat(user.deposit_action.quantity)
-  let balances_for_buy = []
-  let actions = []
-  console.log("fractions_on_sale: ", fractions_on_sale)
+  const fractions_on_sale = await getBalancesOnSale(bot, user.deposit_action.hostname, user.eosname, helix);
 
-  fractions_on_sale.balances.map(bal => {
-    
-    if (total_deposit_amount > 0){
-      console.log("total_deposit_amount: ", total_deposit_amount)
-      
-      let quantity = total_deposit_amount >= parseFloat(bal.compensator_amount) ? bal.compensator_amount : total_deposit_amount.toFixed(4) + " FLOWER"
+  const amount_for_direct_buy = 0;
+  let total_deposit_amount = parseFloat(user.deposit_action.quantity);
+  const balances_for_buy = [];
+  const actions = [];
+  console.log('fractions_on_sale: ', fractions_on_sale);
+
+  fractions_on_sale.balances.map((bal) => {
+    if (total_deposit_amount > 0) {
+      console.log('total_deposit_amount: ', total_deposit_amount);
+
+      const quantity = total_deposit_amount >= parseFloat(bal.compensator_amount) ? bal.compensator_amount : total_deposit_amount.toFixed(4) + ' FLOWER';
 
       actions.push({
         account: helix.host.root_token_contract,
@@ -196,25 +191,25 @@ async function depositAction(bot, ctx, user) {
           permission: 'active',
         }],
         data: {
-            from: user.eosname,
-            to: 'unicore',
-            quantity: quantity,
-            memo: `150-${bal.id}-${user.deposit_action.hostname}`,
-          },
-      })
+          from: user.eosname,
+          to: 'unicore',
+          quantity,
+          memo: `150-${bal.id}-${user.deposit_action.hostname}`,
+        },
+      });
 
-      total_deposit_amount = parseFloat(total_deposit_amount) - parseFloat(quantity)
+      total_deposit_amount = parseFloat(total_deposit_amount) - parseFloat(quantity);
 
       // balances_for_buy.push(bal)
-    } 
-  })
-  
-  total_deposit_amount = (total_deposit_amount).toFixed(4) + " FLOWER"
+    }
+  });
 
-  console.log("total_deposit_amount: ", total_deposit_amount, parseFloat(total_deposit_amount) > 0)
-  
-  if (parseFloat(total_deposit_amount) > 0){
-    console.log("before push")
+  total_deposit_amount = (total_deposit_amount).toFixed(4) + ' FLOWER';
+
+  console.log('total_deposit_amount: ', total_deposit_amount, parseFloat(total_deposit_amount) > 0);
+
+  if (parseFloat(total_deposit_amount) > 0) {
+    console.log('before push');
     actions.push({
       account: helix.host.root_token_contract,
       name: 'transfer',
@@ -228,56 +223,51 @@ async function depositAction(bot, ctx, user) {
         quantity: total_deposit_amount,
         memo: `100-${user.deposit_action.hostname}-`,
       },
-    })
-    console.log("after push", actions)
+    });
+    console.log('after push', actions);
   }
 
-  console.log(actions)
+  console.log(actions);
   try {
     const eos = await bot.uni.getEosPassInstance(user.wif);
 
     const data = await eos.transact({
-      actions: actions,
+      actions,
     }, {
       blocksBehind: 3,
       expireSeconds: 30,
     });
 
-    await ctx.deleteMessage()
+    await ctx.deleteMessage();
     await ctx.replyWithHTML('Взнос успешно принят');
-    
-    
-    const cons = data.processed.action_traces[0].inline_traces[1].console;
-    let balanceID
 
-    data.processed.action_traces.map(at => {
-      at.inline_traces.map(it => {
-        console.log("IT: ", it)
+    const cons = data.processed.action_traces[0].inline_traces[1].console;
+    let balanceID;
+
+    data.processed.action_traces.map((at) => {
+      at.inline_traces.map((it) => {
+        console.log('IT: ', it);
         const regex = /BALANCE_ID: (\w+);?/gi;
         const group = regex.exec(cons);
-        if (group[1])
-          balanceID = group[1]
-        
-      })
-    })
+        if (group[1]) balanceID = group[1];
+      });
+    });
 
-    console.log("balanceID", balanceID)
-    
-    let index
+    console.log('balanceID', balanceID);
+
+    let index;
 
     if (balanceID) {
-      let balances = await getUserHelixBalances(bot, helix.host.username, user.eosname);
-      console.log("balances: ", balances)
-      
+      const balances = await getUserHelixBalances(bot, helix.host.username, user.eosname);
+      console.log('balances: ', balances);
+
       balances.all.map((bal, idx) => {
-        if (bal.id == balanceID)
-          index = idx
-      })
+        if (bal.id == balanceID) index = idx;
+      });
     }
 
-    console.log("BALANCE INDEX: ", index)
-    if (index)
-      await printUserBalances(bot, ctx, user, helix.host.username, index);
+    console.log('BALANCE INDEX: ', index);
+    if (index) await printUserBalances(bot, ctx, user, helix.host.username, index);
 
     // console.log("cons: ", data.processed.action_traces)
     // const regex = /BALANCE_ID: (\w+);?/gi;
@@ -384,37 +374,37 @@ async function pushEducation(ctx, currentSlideIndex) {
 
     // buttons.push(Markup.button.callback('⬅️ Назад', `pusheducation ${currentSlideIndex - 1}`));
 
-    if (currentSlideIndex + 1 === education.length){
+    if (currentSlideIndex + 1 === education.length) {
       // buttons.push(Markup.button.callback('🔄 Начать с начала', `pusheducation ${0}`))
-      buttons.push(Markup.button.callback('⏺ Войти', `finisheducation`));  
+      buttons.push(Markup.button.callback('⏺ Войти', 'finisheducation'));
     } else { buttons.push(Markup.button.callback('Продолжить ➡️', `pusheducation ${currentSlideIndex + 1}`)); }
 
-    // buttons.push(Markup.button.callback('⏺ Завершить', `finisheducation`));      
-    
+    // buttons.push(Markup.button.callback('⏺ Завершить', `finisheducation`));
+
     // buttons.push(Markup.button.callback('⏺ Пропустить ознакомление', `pusheducation ${education.length - 1}`));
 
     let text = '';
     text += `\n\n${slide.text}`;
 
     if (currentSlideIndex === 0 && slide.img !== '') {
-        if (slide.img.length > 0) {
-          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
-        } else {
-          await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-        }
+      if (slide.img.length > 0) {
+        await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: 'html', caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
       } else {
-        try {
-          await ctx.deleteMessage();
-        } catch (e) {}
-
-        if (slide.img.length > 0) {
-          console.log('HERE3!');
-          await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: "html", caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
-        } else {
-          console.log('HERE4!');
-          await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-        }
+        await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       }
+    } else {
+      try {
+        await ctx.deleteMessage();
+      } catch (e) {}
+
+      if (slide.img.length > 0) {
+        console.log('HERE3!');
+        await ctx.replyWithPhoto({ source: slide.img }, { parse_mode: 'html', caption: text, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+      } else {
+        console.log('HERE4!');
+        await ctx.replyWithHTML(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      }
+    }
   }
 }
 
@@ -600,37 +590,33 @@ module.exports.init = async (botModel, bot) => {
     let msg2;
 
     if (ctx.update.message.chat.type === 'private') {
+      const clearMenu = Markup.removeKeyboard();
+      // const menu = Markup
+      //   .keyboard(mainButtons, { columns: 2 }).resize();
 
+      // await ctx.reply('Купи фракцию телеграм-канала с доходностью до 100%. Стоимость фракции растёт за счёт продаж рекламы и спроса на фракции у новых фракционеров.', clearMenu, { reply_markup: { remove_keyboard: true } });
+      const first_enter = await ctx.reply('...', clearMenu);
+      await ctx.deleteMessage(first_enter.message_id);
 
-    const clearMenu = Markup.removeKeyboard();
-    // const menu = Markup
-    //   .keyboard(mainButtons, { columns: 2 }).resize();
+      // await ctx.reply('Как получать гарантированный пассивный доход?', clearMenu);
+      // await ctx.deleteMessage()
 
-    
-    // await ctx.reply('Купи фракцию телеграм-канала с доходностью до 100%. Стоимость фракции растёт за счёт продаж рекламы и спроса на фракции у новых фракционеров.', clearMenu, { reply_markup: { remove_keyboard: true } });
-    let first_enter = await ctx.reply('...', clearMenu)
-    await ctx.deleteMessage(first_enter.message_id);
+      let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+      // console.log("user", ctx.update.message.from)
 
-    // await ctx.reply('Как получать гарантированный пассивный доход?', clearMenu);
-    // await ctx.deleteMessage()
+      let is_registered = true;
+      let need_register = false;
 
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    // console.log("user", ctx.update.message.from)
-    
-    let is_registered = true
-    let need_register = false
+      try {
+        if (user) await bot.uni.readApi.getAccount(user.eosname);
+      } catch (e) {
+        need_register = true;
+      }
 
+      console.log('need_register: ', need_register);
 
-    try {
-      if (user) await bot.uni.readApi.getAccount(user.eosname);
-    } catch (e) {
-      need_register = true;
-    }
-
-    console.log("need_register: ", need_register)
-
-    if (!user || need_register) {
-      msg2 = await ctx.reply('Пожалуйста, подождите.. ⛓');
+      if (!user || need_register) {
+        msg2 = await ctx.reply('Пожалуйста, подождите.. ⛓');
 
         user = ctx.update.message.from;
         user.app = bot.getEnv().APP;
@@ -638,21 +624,19 @@ module.exports.init = async (botModel, bot) => {
         await saveUser(bot.instanceName, user);
         is_registered = await generateAccount(bot, ctx, false, ref);
         // await saveUser(bot.instanceName, user);
-        console.log("is_registered: ", is_registered)
+        console.log('is_registered: ', is_registered);
         // TODO check budget
         // TODO start demo
         await ctx.deleteMessage(msg2.message_id);
         // await ctx.reply('Аккаунт успешно зарегистрирован! 🗽');
-        
-    } else {
+      } else {
 
       // eosname = user.eosname;
-    }
+      }
 
-    if (is_registered)
-      await pushEducation(ctx, 0);
+      if (is_registered) await pushEducation(ctx, 0);
       // await startQuiz(bot, ctx, user);
-    
+
     // if (process.env.MODE === "community") {
     // printCommunityMenu(ctx, "Welcome")
     // } else {
@@ -663,158 +647,150 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
+  async function startQuiz(bot, ctx, user) {
+    await getQuiz(bot.instanceName, user.id);
 
-async function startQuiz(bot, ctx, user) {
-  await getQuiz(bot.instanceName, user.id);
+    const q = {
+      id: user.id,
+      current_quiz: 0,
+      answers: quizDefinition,
+      is_finish: false,
+    };
 
-  const q = {
-    id: user.id,
-    current_quiz: 0,
-    answers: quizDefinition,
-    is_finish: false,
-  };
-
-  await saveQuiz(bot.instanceName, user, q);
-
-  // const buttons = [];
-
-  // buttons.push(Markup.button.url('🏫 перейти на сайт', 'https://simply.estate'));
-
-  const request = Markup.keyboard([Markup.button.contactRequest('📱 Отправить номер')], { columns: 1 }).resize();
-
-  // await ctx.reply('Как можно к вам обращаться?');
-
-  // await insertMessage(bot.instanceName, user, user.id, 'Получил вопросы');
-
-  // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
-  // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
-  return ctx.reply('\n\nВведите номер телефона:', request);
-  // await nextQuiz(bot, user, ctx)
-  // startQuiz()
-  // return ctx.reply('', request);
-}
-
-
-const quizDefinition = [
-  { message: 'Номер телефона:' },
-  { message: 'Введите ФИО или никнейм:' },
-  // { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> цифрового кооператива?', buttons: ['Принимаю']},
-  // { message: 'Какие потребности благ у вас есть?' },
-  // { message: 'Какие возможности по созданию благ у вас есть?' },
-  
-  // { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
-  // { message: 'Какая главная проблема или задача развития стоит перед вами сейчас? Я помогу ' },
-];
-
-async function nextQuiz(bot, user, ctx) {
-  const quiz = await getQuiz(bot.instanceName, user.id);
-
-  let q;
-
-  // eslint-disable-next-line array-callback-return
-  quizDefinition.map((el, index) => {
-    if (!q && index > quiz.current_quiz) {
-      quiz.current_quiz = index;
-      q = el;
-    }
-  });
-
-  if (q) {
-    if (q.buttons && q.buttons.length > 0) {
-      const buttons = [];
-
-      // eslint-disable-next-line array-callback-return
-      q.buttons.map((b) => {
-        buttons.push(b);
-      });
-
-      await ctx.replyWithHTML(q.message, {disable_web_page_preview: true, ...Markup.keyboard(buttons, { columns: 2 }).resize()});
-    } else {
-      const clearMenu = Markup.removeKeyboard();
-
-      await ctx.replyWithHTML(q.message, clearMenu, { disable_web_page_preview: true, reply_markup: { remove_keyboard: true } });// , clearMenu,
-    }
-
-    await saveQuiz(bot.instanceName, user, quiz);
-  } else {
-    quiz.is_finish = true;
-    await saveQuiz(bot.instanceName, user, quiz);
-    // user.state = ""
-    // let unionName = quiz.answers[1].answer
-
-    // let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
-    // let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
-    // chatResult = {chatLink: "https://google.com", chatId: "-1001618007293"}
-
-    // const icomeMenu = Markup
-    //   .keyboard(mainButtons, { columns: 2 }).resize();
-
-    // let t1 = '';
-    // t1 += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
-
-    // t1 += `\nПоказать это сообщение: /help,`
-    // // t += `\nСоздать проект: напишите сообщение с тегом #project`
-    // // t += `\nСовершить взнос: /donate,`
-    // t1 += `\nКапитализация DAO: /stat,`
-    // t1 += "\nВаш кошелёк: /wallet,"
-
-    // const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
+    await saveQuiz(bot.instanceName, user, q);
 
     // const buttons = [];
 
-    // buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
-    // const t = 'Войдите в ваше DAO и получите инструкции:';
-    // ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+    // buttons.push(Markup.button.url('🏫 перейти на сайт', 'https://simply.estate'));
 
-    let k = 0;
-    let text = '';
+    const request = Markup.keyboard([Markup.button.contactRequest('📱 Отправить номер')], { columns: 1 }).resize();
 
-    // , //phone
-    text += `@${user.username} [${user.eosname}] \n`; //+${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}
+    // await ctx.reply('Как можно к вам обращаться?');
 
-    for (const answer of quiz.answers) {
-      if (k > 0) {
-        // text += `\n${answer.message}`;
-        text += `\n${answer.answer}\n`;
-      }
-      k++;
-    }
+    // await insertMessage(bot.instanceName, user, user.id, 'Получил вопросы');
 
-    // const id = await ctx.reply('Нам нужно время, чтобы создать предложение для вас. Оставайтесь на связи!');
-
-    const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
-    // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
-    // await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
-
-    user.state = 'chat';
-    user.profile_channel_id = id3;
-
-    await saveUser(bot.instanceName, user);
-    
-    const menu = Markup
-      .keyboard(mainButtons, { columns: 2 }).resize();
-
-
-    // await pushEducation(ctx, 0);
-
-    await ctx.replyWithHTML(`Добро пожаловать в Цифровой Кооператив. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.`, {disable_web_page_preview: true, ...menu})
-    // let btns = []
-
-    // btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-
-    // await ctx.reply(`Совершите паевый взнос для получения FLOWER. Обязательный регистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
-
-
-
-    // await ctx.reply('Регистрационный взнос будет ', menu)
-    
-    // await printWallet(bot, user);
-    // await ctx.reply('Краткое ознакомление:')
-    
-    
-
+    // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
+    // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
+    return ctx.reply('\n\nВведите номер телефона:', request);
+  // await nextQuiz(bot, user, ctx)
+  // startQuiz()
+  // return ctx.reply('', request);
   }
-}
+
+  const quizDefinition = [
+    { message: 'Номер телефона:' },
+    { message: 'Введите ФИО или никнейм:' },
+    // { message: 'Вы принимаете <a href="https://dacom.io/b85a436447704411b39ed130d58b4c55">устав</a> цифрового кооператива?', buttons: ['Принимаю']},
+    // { message: 'Какие потребности благ у вас есть?' },
+    // { message: 'Какие возможности по созданию благ у вас есть?' },
+
+  // { message: 'Мой двигатель - дарономика времени и денег, учёт которых я веду на блокчейне.\n\nСколько времени в неделю вы могли бы подарить людям, если бы знали, что ваш вклад вернётся к вам с превышением?' },
+  // { message: 'Какая главная проблема или задача развития стоит перед вами сейчас? Я помогу ' },
+  ];
+
+  async function nextQuiz(bot, user, ctx) {
+    const quiz = await getQuiz(bot.instanceName, user.id);
+
+    let q;
+
+    // eslint-disable-next-line array-callback-return
+    quizDefinition.map((el, index) => {
+      if (!q && index > quiz.current_quiz) {
+        quiz.current_quiz = index;
+        q = el;
+      }
+    });
+
+    if (q) {
+      if (q.buttons && q.buttons.length > 0) {
+        const buttons = [];
+
+        // eslint-disable-next-line array-callback-return
+        q.buttons.map((b) => {
+          buttons.push(b);
+        });
+
+        await ctx.replyWithHTML(q.message, { disable_web_page_preview: true, ...Markup.keyboard(buttons, { columns: 2 }).resize() });
+      } else {
+        const clearMenu = Markup.removeKeyboard();
+
+        await ctx.replyWithHTML(q.message, clearMenu, { disable_web_page_preview: true, reply_markup: { remove_keyboard: true } });// , clearMenu,
+      }
+
+      await saveQuiz(bot.instanceName, user, quiz);
+    } else {
+      quiz.is_finish = true;
+      await saveQuiz(bot.instanceName, user, quiz);
+      // user.state = ""
+      // let unionName = quiz.answers[1].answer
+
+      // let id = await ctx.reply("Пожалуйста, подождите. Мы регистрируем DAO для вас, это может занять несколько секунд.")
+      // let chatResult = await createChat(bot, user, user.eosname, unionName, "union")
+      // chatResult = {chatLink: "https://google.com", chatId: "-1001618007293"}
+
+      // const icomeMenu = Markup
+      //   .keyboard(mainButtons, { columns: 2 }).resize();
+
+      // let t1 = '';
+      // t1 += `\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n`
+
+      // t1 += `\nПоказать это сообщение: /help,`
+      // // t += `\nСоздать проект: напишите сообщение с тегом #project`
+      // // t += `\nСовершить взнос: /donate,`
+      // t1 += `\nКапитализация DAO: /stat,`
+      // t1 += "\nВаш кошелёк: /wallet,"
+
+      // const id2 = await sendMessageToUser(bot, { id: '-100' + chatResult.chatId }, { text: t1 });
+
+      // const buttons = [];
+
+      // buttons.push(Markup.button.url('🏫 войти', chatResult.chatLink));
+      // const t = 'Войдите в ваше DAO и получите инструкции:';
+      // ctx.reply(t, Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+
+      let k = 0;
+      let text = '';
+
+      // , //phone
+      text += `@${user.username} [${user.eosname}] \n`; // +${quiz.answers[0].answer.phone_number  || quiz.answers[0].answer}
+
+      for (const answer of quiz.answers) {
+        if (k > 0) {
+        // text += `\n${answer.message}`;
+          text += `\n${answer.answer}\n`;
+        }
+        k++;
+      }
+
+      // const id = await ctx.reply('Нам нужно время, чтобы создать предложение для вас. Оставайтесь на связи!');
+
+      const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+      // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
+      // await insertMessage(bot.instanceName, user, user.id, text, id3, 'CV', {});// goalId: goal.goalId,
+
+      user.state = 'chat';
+      user.profile_channel_id = id3;
+
+      await saveUser(bot.instanceName, user);
+
+      const menu = Markup
+        .keyboard(mainButtons, { columns: 2 }).resize();
+
+      // await pushEducation(ctx, 0);
+
+      await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.', { disable_web_page_preview: true, ...menu });
+      // let btns = []
+
+      // btns.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+
+      // await ctx.reply(`Совершите паевый взнос для получения FLOWER. Обязательный регистрационный взнос в размере 10 USDT будет автоматически удержан из средств первого взноса.\n\n`, Markup.inlineKeyboard(btns, { columns: 1 }).resize())
+
+      // await ctx.reply('Регистрационный взнос будет ', menu)
+
+      // await printWallet(bot, user);
+      // await ctx.reply('Краткое ознакомление:')
+    }
+  }
 
   // eslint-disable-next-line no-unused-vars
   bot.hears('Получить цветок 🌼', async (ctx) => {
@@ -836,8 +812,7 @@ async function nextQuiz(bot, user, ctx) {
     // }
   });
 
-
-  bot.action("finisheducation", async (ctx) => {
+  bot.action('finisheducation', async (ctx) => {
     ctx.deleteMessage();
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     // await startQuiz(bot, ctx, user);
@@ -845,11 +820,10 @@ async function nextQuiz(bot, user, ctx) {
     const menu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
 
-
     // await pushEducation(ctx, 0);
 
-    await ctx.replyWithHTML(`Добро пожаловать в Клуб Фракционеров!.\n\nОбязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">инструкцией</a> для фракционеров - в ней подробно описано как здесь всё работает и как принимать участие в Клубе.`, {disable_web_page_preview: true, ...menu})
-    
+    await ctx.replyWithHTML('Добро пожаловать в Клуб Фракционеров!.\n\nОбязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">инструкцией</a> для фракционеров - в ней подробно описано как здесь всё работает и как принимать участие в Клубе.', { disable_web_page_preview: true, ...menu });
+
     await printWallet(bot, user);
     // TO CLIENT
     // await sendMessageToUser(bot, user, { text: `Заявка на вывод ${wobj.amount} успешно обработана` });
@@ -858,7 +832,6 @@ async function nextQuiz(bot, user, ctx) {
     // TODO send request to admin
     //
   });
-
 
   bot.action(/confirmwithdraw (\w+)/gi, async (ctx) => {
     const withdraw_id = ctx.match[1];
@@ -877,25 +850,20 @@ async function nextQuiz(bot, user, ctx) {
     //
   });
 
+  bot.action('printbalances', async (ctx) => {
+    console.log('print');
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
-  bot.action('printbalances', async(ctx) => {
-    console.log("print")
-      let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-      
-      
-      // const hostname = ctx.match[1];
-      // const nextId = parseInt(ctx.match[2], 10);
+    // const hostname = ctx.match[1];
+    // const nextId = parseInt(ctx.match[2], 10);
 
-      let list = await getHelixsList(bot)
-      let first = list[0]
-      if (first){
-        await ctx.editMessageText(`Выберите фракцию для продажи:`)
-        // await printUserFractions(bot, ctx, user, first.username)
-        await printUserBalances(bot, ctx, user, first.username);
-      } else ctx.reply('у вас нет фракций для отображения.')
-      
-      
-      
+    const list = await getHelixsList(bot);
+    const first = list[0];
+    if (first) {
+      await ctx.editMessageText('Выберите фракцию для продажи:');
+      // await printUserFractions(bot, ctx, user, first.username)
+      await printUserBalances(bot, ctx, user, first.username);
+    } else ctx.reply('у вас нет фракций для отображения.');
   });
 
   bot.action('skipdemo', async (ctx) => {
@@ -950,10 +918,9 @@ async function nextQuiz(bot, user, ctx) {
     ctx.editMessageText('рассылка отменена');
   });
 
-
   bot.action(/select (\w+)/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     const hostname = ctx.match[1];
 
     try {
@@ -983,8 +950,7 @@ async function nextQuiz(bot, user, ctx) {
   });
 
   bot.action(/deposit (\w+)/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     let contract;
     if (user.is_demo) contract = 'faketoken';
@@ -996,17 +962,16 @@ async function nextQuiz(bot, user, ctx) {
 
     const maxDeposit = await getCondition(bot, hostname, 'maxdeposit');
     // eslint-disable-next-line max-len
-    let fractions_on_sale = await getBalancesOnSale(bot, params.host.username, user.eosname, params)
-    let remain = (parseFloat(params.currentPool.remain) + fractions_on_sale.summ).toFixed(4) + " FLOWER"
-    
+    const fractions_on_sale = await getBalancesOnSale(bot, params.host.username, user.eosname, params);
+    const remain = (parseFloat(params.currentPool.remain) + fractions_on_sale.summ).toFixed(4) + ' FLOWER';
+
     let max = parseFloat(remain) >= parseFloat(liquidBal) ? liquidBal : remain;
 
-    max = max.replace("FLOWER", "FLOWER")
+    max = max.replace('FLOWER', 'FLOWER');
     user.state = 'set_deposit_amount';
     user.deposit_action = { hostname };
     await saveUser(bot.instanceName, user);
     await ctx.reply(`Введите сумму до ${max}:`);
-   
   });
 
   bot.action(/tail (\w+)/gi, async (ctx) => {
@@ -1038,7 +1003,6 @@ async function nextQuiz(bot, user, ctx) {
     await refreshAction(bot, ctx, user, hostname, balanceId, currentIndex);
   });
 
-
   bot.action(/precancelsell (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
@@ -1048,20 +1012,16 @@ async function nextQuiz(bot, user, ctx) {
     const balance = await getOneUserHelixBalance(bot, hostname, user.eosname, balanceId);
     const buttons = [];
     buttons.push(Markup.button.callback('Да', `cancelsell ${hostname} ${balance.id}`));
-    buttons.push(Markup.button.callback('Нет', `cancelwithdrawaction`));
+    buttons.push(Markup.button.callback('Нет', 'cancelwithdrawaction'));
 
     await ctx.deleteMessage();
 
     if (parseFloat(balance.solded_for) > 0) {
-      ctx.reply(`Вы уверены, что хотите отменить продажу фракций на сумму ${balance.compensator_amount.replace("FLOWER", "FLOWER")} и получить ${balance.solded_for.replace("FLOWER", "FLOWER")}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
+      ctx.reply(`Вы уверены, что хотите отменить продажу фракций на сумму ${balance.compensator_amount.replace('FLOWER', 'FLOWER')} и получить ${balance.solded_for.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     } else {
-      ctx.reply(`Вы уверены, что хотите отменить продажу фракций на сумму ${balance.compensator_amount.replace("FLOWER", "FLOWER")}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
+      ctx.reply(`Вы уверены, что хотите отменить продажу фракций на сумму ${balance.compensator_amount.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     }
-    
-    
-    
   });
-
 
   bot.action(/prewithdrawaction (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
@@ -1072,42 +1032,35 @@ async function nextQuiz(bot, user, ctx) {
     await ctx.deleteMessage();
 
     const balance = await getOneUserHelixBalance(bot, hostname, user.eosname, balanceId);
-    
+
     const buttons = [];
 
-    
-
-    if (balance){
-
-
+    if (balance) {
       if (balance.win == 1) {
-          buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
-          buttons.push(Markup.button.callback('Отменить', `cancelwithdrawaction`));
+        buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
+        buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
-        ctx.reply(`Вы уверены, что хотите продать фракции на сумму ${balance.available.replace("FLOWER", "FLOWER")} с чистой прибылью ${balance.root_percent / 10000}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
-
+        ctx.reply(`Вы уверены, что хотите продать фракции на сумму ${balance.available.replace('FLOWER', 'FLOWER')} с чистой прибылью ${balance.root_percent / 10000}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       } else {
-        if (balance.last_recalculated_win_pool_id > balance.global_pool_id && balance.pool_num > 2){
+        if (balance.last_recalculated_win_pool_id > balance.global_pool_id && balance.pool_num > 2) {
           buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
-          buttons.push(Markup.button.callback('Отменить', `cancelwithdrawaction`));
+          buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
-          ctx.reply(`Вы уверены, что хотите отложенно продать фракции на сумму ${balance.compensator_amount.replace("FLOWER", "FLOWER")}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
-        
+          ctx.reply(`Вы уверены, что хотите отложенно продать фракции на сумму ${balance.compensator_amount.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         } else {
           buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
-          buttons.push(Markup.button.callback('Отменить', `cancelwithdrawaction`));
+          buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
-          ctx.reply(`Вы уверены, что хотите затребовать возврат фракций на сумму ${balance.available.replace("FLOWER", "FLOWER")}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
+          ctx.reply(`Вы уверены, что хотите затребовать возврат фракций на сумму ${balance.available.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         }
       }
-    } else ctx.reply(`Баланс не найден`)
-
+    } else ctx.reply('Баланс не найден');
   });
 
   bot.action('cancelwithdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
-    ctx.editMessageText(`Требование фракций отменено`)
+    ctx.editMessageText('Требование фракций отменено');
   });
 
   bot.action(/withdrawaction (\w+)\s(\w+)?/gi, async (ctx) => {
@@ -1119,8 +1072,6 @@ async function nextQuiz(bot, user, ctx) {
     await withdrawAction(bot, ctx, user, hostname, balanceId);
   });
 
-
-
   bot.action(/cancelsell (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
@@ -1130,60 +1081,54 @@ async function nextQuiz(bot, user, ctx) {
     await cancelSellAction(bot, ctx, user, hostname, balanceId);
   });
 
-
-
   bot.action('withdrawbalance', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    console.log("on withdraw", user)
-    
+    console.log('on withdraw', user);
+
     user.state = '';
 
-    let amount = parseFloat(user.fast_withdraw_action.out_quantity).toFixed(4) + " FLOWER"
-    let address = user.fast_withdraw_action.address
-    
+    const amount = parseFloat(user.fast_withdraw_action.out_quantity).toFixed(4) + ' FLOWER';
+    const address = user.fast_withdraw_action.address;
+
     const withdraw_id = await insertWithdraw(bot.instanceName, user, {
       userId: user.id,
       eosname: user.eosname,
-      amount: amount,
-      address: address,
+      amount,
+      address,
       created_at: new Date(),
       status: 'created',
     });
-    
+
     // MASSWITHDRAWACTION
     // massWithdrawAction(bot, user, bot.getEnv().CORE_HOST, balances.all).then((res) => {
-      // TODO make a burn from user with address in memo
-        
-        try {
-        
-          await transferToGateAction(bot, user, amount, address)
-          
+    // TODO make a burn from user with address in memo
 
-          const buttons = [];
+    try {
+      await transferToGateAction(bot, user, amount, address);
 
-          console.log("withdraw_id: ", `confirmwithdraw ${withdraw_id}`)
+      const buttons = [];
 
-          buttons.push(Markup.button.callback('подтвердить оплату', `confirmwithdraw ${withdraw_id}`));
+      console.log('withdraw_id: ', `confirmwithdraw ${withdraw_id}`);
 
-          // TO CLIENT
-          await sendMessageToUser(bot, user, { text: `Платежное поручение создано на сумму ${amount.replace("FLOWER", "FLOWER")}. Перевод будет выполнен на адрес: ${address}. Вы получите подтверждение по факту исполнения поручения.` });
+      buttons.push(Markup.button.callback('подтвердить оплату', `confirmwithdraw ${withdraw_id}`));
 
-          // TO ADMIN
+      // TO CLIENT
+      await sendMessageToUser(bot, user, { text: `Платежное поручение создано на сумму ${amount.replace('FLOWER', 'FLOWER')}. Перевод будет выполнен на адрес: ${address}. Вы получите подтверждение по факту исполнения поручения.` });
 
-          const admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
-          await sendMessageToUser(bot, admin, { text: `Получено новое платежное поручение на сумму:\n${amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
-          await sendMessageToUser(bot, admin, { text: `${address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+      // TO ADMIN
 
-          await updateWithdraw(bot.instanceName, withdraw_id, 'waiting');
-        } catch(e) {
-          await ctx.deleteMessage(); // delete buttons
-          console.log(e)
-          ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`);
+      const admin = await getUserByEosName(bot.instanceName, bot.getEnv().OPERATOR_EOSNAME);
+      await sendMessageToUser(bot, admin, { text: `Получено новое платежное поручение на сумму:\n${amount} от пользователя ${user.eosname} (${user.id}). Перевод будет выполнен на адрес:` });
+      await sendMessageToUser(bot, admin, { text: `${address}` }, Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
 
-        }
-        
+      await updateWithdraw(bot.instanceName, withdraw_id, 'waiting');
+    } catch (e) {
+      await ctx.deleteMessage(); // delete buttons
+      console.log(e);
+      ctx.reply(`Ошибка! Обратитесь в поддержку с сообщением: ${e.message}`);
+    }
 
-      // })
+    // })
     // }).catch((e) => {
     //   console.error(e);
     //   ctx.reply(`Произошла ошибка при выполнении транзакции вывода. Попробуйте еще раз или обратитесь в поддержку с сообщением: ${e.message}`);
@@ -1194,7 +1139,6 @@ async function nextQuiz(bot, user, ctx) {
 
   bot.action(/prioroneaction (\w+)\s(\w+)?/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-
 
     const hostname = ctx.match[1];
     const balanceId = parseInt(ctx.match[2], 10);
@@ -1212,97 +1156,90 @@ async function nextQuiz(bot, user, ctx) {
   });
 
   bot.action(/buystatus (.+)?/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const json = JSON.parse(ctx.match[1]);
-    console.log("JSON", json)
-    let text = ""
+    console.log('JSON', json);
+    let text = '';
     // text += `Ваш статус: кот 🐈\n`
     const buttons = [];
     if (!json.s) {
-      text += `Статус - это подписка на доход ваших партнеров. Когда партнер получает прибыль, тогда получаете прибыль и вы.\n\n`
-      text += `гость - не получает доход от дохода партнеров\n`
-      text += `коала 🐨 - доход с 1го уровня партнеров\n`
-      text += `панда 🐼 - доход с 1го и 2го уровня партнеров\n`
-      text += `волк 🐺 - доход до 3го уровня партнеров\n`
-      text += `тигр 🐯 - доход до 4го уровня партнеров\n`
-      text += `лев 🦁 - доход до 5го уровня партнеров\n`
-      text += `медведь 🐻 - доход до 6го уровня партнеров\n`
-      text += `дракон 🐲 - доход со всех уровней партнеров\n`
-      text += `\nВыберите уровень подписки: `
+      text += 'Статус - это подписка на доход ваших партнеров. Когда партнер получает прибыль, тогда получаете прибыль и вы.\n\n';
+      text += 'гость - не получает доход от дохода партнеров\n';
+      text += 'коала 🐨 - доход с 1го уровня партнеров\n';
+      text += 'панда 🐼 - доход с 1го и 2го уровня партнеров\n';
+      text += 'волк 🐺 - доход до 3го уровня партнеров\n';
+      text += 'тигр 🐯 - доход до 4го уровня партнеров\n';
+      text += 'лев 🦁 - доход до 5го уровня партнеров\n';
+      text += 'медведь 🐻 - доход до 6го уровня партнеров\n';
+      text += 'дракон 🐲 - доход со всех уровней партнеров\n';
+      text += '\nВыберите уровень подписки: ';
 
-      buttons.push(Markup.button.callback(`🐨 коала`, `buystatus ${JSON.stringify({s: 1, du: 1, di: 1})}`));
-      buttons.push(Markup.button.callback(`🐼 панда`, `buystatus ${JSON.stringify({s: 2, du: 1, di: 1})}`));
-      buttons.push(Markup.button.callback(`🐺 волк`, `buystatus ${JSON.stringify({s: 3, du: 1, di: 1})}`));
-      buttons.push(Markup.button.callback(`🐯 тигр`, `buystatus ${JSON.stringify({s: 4,du: 1, di: 1})}`));
-      buttons.push(Markup.button.callback(`🦁 лев`, `buystatus ${JSON.stringify({s: 5, du: 1, di:1})}`));
-      buttons.push(Markup.button.callback(`🐻 медведь`, `buystatus ${JSON.stringify({s: 6, du: 1, di:1})}`));
-      buttons.push(Markup.button.callback(`🐲 дракон`, `buystatus ${JSON.stringify({s: 7, du: 1, di:1})}`));
+      buttons.push(Markup.button.callback('🐨 коала', `buystatus ${JSON.stringify({ s: 1, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🐼 панда', `buystatus ${JSON.stringify({ s: 2, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🐺 волк', `buystatus ${JSON.stringify({ s: 3, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🐯 тигр', `buystatus ${JSON.stringify({ s: 4, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🦁 лев', `buystatus ${JSON.stringify({ s: 5, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🐻 медведь', `buystatus ${JSON.stringify({ s: 6, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('🐲 дракон', `buystatus ${JSON.stringify({ s: 7, du: 1, di: 1 })}`));
       await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-
     } else {
-      let status = ""
-      if (json.s == 1){
-        status = "🐨 коала"  
-      } else if (json.s == 2){
-        status = "🐼 панда"
-      } else if (json.s == 3){
-        status = "🐺 волк"
-      } else if (json.s == 4){
-        status = "🐯 тигр"
-      } else if (json.s == 5){
-        status = "🦁 лев"
-      } else if (json.s == 6){
-        status = "🐻 медведь"
-      } else if (json.s == 7){
-        status = "🐲 дракон"
+      let status = '';
+      if (json.s == 1) {
+        status = '🐨 коала';
+      } else if (json.s == 2) {
+        status = '🐼 панда';
+      } else if (json.s == 3) {
+        status = '🐺 волк';
+      } else if (json.s == 4) {
+        status = '🐯 тигр';
+      } else if (json.s == 5) {
+        status = '🦁 лев';
+      } else if (json.s == 6) {
+        status = '🐻 медведь';
+      } else if (json.s == 7) {
+        status = '🐲 дракон';
       }
-      
-      
-      text += `Выбранный статус: ${status}\n`
-      text += `Продолжительность: ${json.du} мес\n`
-      text += `Стоимость: ${(100 * json.s * json.du * json.di).toFixed(4) } FLOWER\n`
-      text += `Скидка: -${100 - json.di * 100}%\n\n`
 
-      text += `Выберите продолжильность: `
+      text += `Выбранный статус: ${status}\n`;
+      text += `Продолжительность: ${json.du} мес\n`;
+      text += `Стоимость: ${(100 * json.s * json.du * json.di).toFixed(4)} FLOWER\n`;
+      text += `Скидка: -${100 - json.di * 100}%\n\n`;
 
-      buttons.push(Markup.button.callback(`назад`, `buystatus ${JSON.stringify({})}`));
-      
-      buttons.push(Markup.button.callback(`${json.du == 1 ? "✅" : ""} 1 мес (-0%)`, `buystatus ${JSON.stringify({...json, du: 1, di: 1})}`));
-      buttons.push(Markup.button.callback(`${json.du == 3 ? "✅" : ""} 3 мес (-10%)`, `buystatus ${JSON.stringify({...json, du: 3, di: 0.9})}`));
-      buttons.push(Markup.button.callback(`${json.du == 6 ? "✅" : ""} 6 мес (-20%)`, `buystatus ${JSON.stringify({...json, du: 6, di: 0.8})}`));
-      buttons.push(Markup.button.callback(`${json.du == 9 ? "✅" : ""} 9 мес (-30%)`, `buystatus ${JSON.stringify({...json, du: 9, di: 0.7})}`));
-      buttons.push(Markup.button.callback(`${json.du == 12 ? "✅" : ""} 12 мес (-50%)`, `buystatus ${JSON.stringify({...json, du: 12, di: 0.5})}`));
-      buttons.push(Markup.button.callback(`продолжить`, `buystatusact ${JSON.stringify({...json})}`));
+      text += 'Выберите продолжильность: ';
+
+      buttons.push(Markup.button.callback('назад', `buystatus ${JSON.stringify({})}`));
+
+      buttons.push(Markup.button.callback(`${json.du == 1 ? '✅' : ''} 1 мес (-0%)`, `buystatus ${JSON.stringify({ ...json, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback(`${json.du == 3 ? '✅' : ''} 3 мес (-10%)`, `buystatus ${JSON.stringify({ ...json, du: 3, di: 0.9 })}`));
+      buttons.push(Markup.button.callback(`${json.du == 6 ? '✅' : ''} 6 мес (-20%)`, `buystatus ${JSON.stringify({ ...json, du: 6, di: 0.8 })}`));
+      buttons.push(Markup.button.callback(`${json.du == 9 ? '✅' : ''} 9 мес (-30%)`, `buystatus ${JSON.stringify({ ...json, du: 9, di: 0.7 })}`));
+      buttons.push(Markup.button.callback(`${json.du == 12 ? '✅' : ''} 12 мес (-50%)`, `buystatus ${JSON.stringify({ ...json, du: 12, di: 0.5 })}`));
+      buttons.push(Markup.button.callback('продолжить', `buystatusact ${JSON.stringify({ ...json })}`));
 
       // await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-      try{
+      try {
         await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-      } catch(e){
-        console.log("e", e)
+      } catch (e) {
+        console.log('e', e);
       }
     }
 
-    
     // await buyStatus(bot, user, json);
   });
 
-bot.hears('❓ справка', async (ctx) => {
-
-
+  bot.hears('❓ справка', async (ctx) => {
     const buttons = [];
 
-    let help_buttons = bot.getEnv().HELP_BUTTONS
+    const help_buttons = bot.getEnv().HELP_BUTTONS;
 
-    help_buttons.map(btn => {
-      if (btn.type == "callback") {
+    help_buttons.map((btn) => {
+      if (btn.type == 'callback') {
         buttons.push(Markup.button.callback(btn.title, btn.command));
-    
-      } else if (btn.type == "url"){
+      } else if (btn.type == 'url') {
         buttons.push(Markup.button.url(btn.title, btn.url));
       }
-    })
+    });
 
     // buttons.push(Markup.button.callback('Схема работы', 'sendvideo'));
     // buttons.push(Markup.button.url('Вопрос-ответ', 'https://dacom.io/welcome'));
@@ -1311,112 +1248,98 @@ bot.hears('❓ справка', async (ctx) => {
     // buttons.push(Markup.button.url('Новости', 'https://t.me/dhelix_news'));
 
     // let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
 
     // if (!user.is_demo) buttons.push(Markup.button.callback('Запустить демо', 'startdemo'));
 
     await ctx.replyWithHTML(bot.getEnv().MAIN_HELP_MSG, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
-  function getStatusByNumber(number){
-    let status
-    let status2
+  function getStatusByNumber(number) {
+    let status;
+    let status2;
     if (number == 1) {
-      status = "koala"
-      status2 = "🐨 коала"  
-    } else if (number == 2){
-      status = "panda"
-      status2 = "🐼 панда"
-    } else if (number == 3){
-      status = "wolf"
-      status2 = "🐺 волк"
-    } else if (number == 4){
-      status = "tiger"
-      status2 = "🐯 тигр"
-    } else if (number == 5){
-      status = "leo"
-      status2 = "🦁 лев"
-    } else if (number == 6){
-      status = "bear"
-      status2 = "🐻 медведь"
-    } else if (number == 7){
-      status = "dragon"
-      status2 = "🐲 дракон"
+      status = 'koala';
+      status2 = '🐨 коала';
+    } else if (number == 2) {
+      status = 'panda';
+      status2 = '🐼 панда';
+    } else if (number == 3) {
+      status = 'wolf';
+      status2 = '🐺 волк';
+    } else if (number == 4) {
+      status = 'tiger';
+      status2 = '🐯 тигр';
+    } else if (number == 5) {
+      status = 'leo';
+      status2 = '🦁 лев';
+    } else if (number == 6) {
+      status = 'bear';
+      status2 = '🐻 медведь';
+    } else if (number == 7) {
+      status = 'dragon';
+      status2 = '🐲 дракон';
     }
 
-    return {status, status2}
+    return { status, status2 };
   }
 
   bot.action(/buystatusact (.+)?/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-   
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const json = JSON.parse(ctx.match[1]);
-    
-    let number = parseInt(json.s)
 
-    let statuses = getStatusByNumber(json.s)
-    console.log(statuses)
-    let cost = (100 * json.s * json.du * json.di).toFixed(4)
+    const number = parseInt(json.s);
 
-    let text = ""
+    const statuses = getStatusByNumber(json.s);
+    console.log(statuses);
+    const cost = (100 * json.s * json.du * json.di).toFixed(4);
+
+    let text = '';
     // text += `Ваш статус: кот 🐈\n`
     const buttons = [];
 
-    
-    text += `Выбранный статус: ${statuses.status2}\n`
-    text += `Продолжительность: ${json.du} мес\n\n`
-    
-    text += `Стоимость: ${cost} FLOWER\n`
-    
-    buttons.push(Markup.button.callback(`Отмена`, `buystatus ${JSON.stringify({...json})}`));
-    buttons.push(Markup.button.callback(`Оплатить`, `buystatusaction ${JSON.stringify({status: statuses.status, cost})}`));
-    
+    text += `Выбранный статус: ${statuses.status2}\n`;
+    text += `Продолжительность: ${json.du} мес\n\n`;
+
+    text += `Стоимость: ${cost} FLOWER\n`;
+
+    buttons.push(Markup.button.callback('Отмена', `buystatus ${JSON.stringify({ ...json })}`));
+    buttons.push(Markup.button.callback('Оплатить', `buystatusaction ${JSON.stringify({ status: statuses.status, cost })}`));
+
     await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
 
     // await buyStatus(bot, user, json);
   });
 
-
-
   bot.action(/buystatusaction (.+)?/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const json = JSON.parse(ctx.match[1]);
-    json.cost = json.cost + " FLOWER"
+    json.cost += ' FLOWER';
 
     const myBalance = await getLiquidBalance(bot, user.eosname, 'FLOWER');
-    
-    console.log("COST: ", json.cost)
 
-    if (parseFloat(myBalance) < parseFloat(json.cost)){
-      await ctx.deleteMessage()
-      ctx.reply(`Недостаточно средств на балансе.`)
+    console.log('COST: ', json.cost);
+
+    if (parseFloat(myBalance) < parseFloat(json.cost)) {
+      await ctx.deleteMessage();
+      ctx.reply('Недостаточно средств на балансе.');
+    } else {
+      try {
+        await payStatus(bot, 'core', user, json.status, json.cost);
+        await ctx.deleteMessage();
+        await ctx.reply('Статус получен');
+        await printWallet(bot, user);
+      } catch (e) {
+        await ctx.reply(`Системная ошибка на этапе покупки статуса: ${e.message}`);
+      }
     }
-    
-    else try{
-      
-      await payStatus(bot, "core", user, json.status, json.cost)
-      await ctx.deleteMessage()
-      await ctx.reply("Статус получен");
-      await printWallet(bot, user);
-    
-    } catch(e){
-
-      await ctx.reply(`Системная ошибка на этапе покупки статуса: ${e.message}`)
-
-    }
-    
 
     // await buyStatus(bot, user, json);
   });
 
-
-
   bot.action(/mybalances (\w+)\s(\w+)?/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const hostname = ctx.match[1];
     const nextId = parseInt(ctx.match[2], 10);
@@ -1490,59 +1413,57 @@ bot.hears('❓ справка', async (ctx) => {
     else if (to === 'helix') {
       await printHelixWallet(bot, ctx, user, hostname);
     } else if (to === 'wallet') {
-      await ctx.editMessageText("Покупка фракций отменена");
+      await ctx.editMessageText('Покупка фракций отменена');
       await printWallet(bot, user);
     }
   });
 
   bot.action(/showexp (\w+)?/gi, async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-   
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     const hostname = ctx.match[1];
     await printExpirience(bot, ctx, user, hostname);
   });
 
   bot.hears('❇️ заложить FLOWER', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
-    console.log("user", user)
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
+    console.log('user', user);
     // await checkForExistBCAccount(bot, ctx);
     await printHelixs(bot, ctx, user);
   });
 
   bot.hears('🌀 касса', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     if (user.is_demo) await printHelixWallet(bot, ctx, user, bot.getEnv().DEMO_HOST);
     else if (bot.getEnv().MODE === 'community') await printHelixWallet(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
   });
 
   bot.hears('🛑 требовать FLOWER', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
     // const hostname = ctx.match[1];
     // const nextId = parseInt(ctx.match[2], 10);
 
-    let list = await getHelixsList(bot)
-    let first = list[0]
-    console.log("FIRST:", first)
+    const list = await getHelixsList(bot);
+    const first = list[0];
+    console.log('FIRST:', first);
 
-    if (first){
+    if (first) {
       // await printUserFractions(bot, ctx, user, first.username)
       await printUserBalances(bot, ctx, user, first.username);
-    } else ctx.reply('у вас нет фракций для отображения.')
-    
-    console.log(list)
-    
+    } else ctx.reply('у вас нет фракций для отображения.');
+
+    console.log(list);
+
     // if (user.is_demo) await printGoalsMenu(bot, ctx, user, bot.getEnv().DEMO_HOST);
     // else if (bot.getEnv().MODE === 'community') await printGoalsMenu(bot, ctx, user, bot.getEnv().COMMUNITY_HOST);
   });
 
   bot.hears('🏁 завершить демо', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     // await checkForExistBCAccount(bot, ctx);
     const buttons = [];
 
@@ -1552,10 +1473,8 @@ bot.hears('❓ справка', async (ctx) => {
     await ctx.reply('Вы уверены, что хотите завершить демо и войти в реальную жизнь?', Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   });
 
-
   bot.action('startdemo', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     user.is_demo = true;
 
@@ -1567,8 +1486,7 @@ bot.hears('❓ справка', async (ctx) => {
   });
 
   bot.action('cancelfinish', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
     await ctx.deleteMessage();
 
@@ -1576,8 +1494,8 @@ bot.hears('❓ справка', async (ctx) => {
   });
 
   bot.action('finishdemo', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     user.is_demo = false;
 
     await saveUser(bot.instanceName, user);
@@ -1599,8 +1517,6 @@ bot.hears('❓ справка', async (ctx) => {
   });
 
   bot.hears('Начать ознакомление', async (ctx) => {
-
-
     await pushEducation(ctx, 0);
   });
 
@@ -1640,7 +1556,6 @@ bot.hears('❓ справка', async (ctx) => {
     await ctx.replyWithHTML('Бот поддержки: @knouni_bot');
   });
 
-  
   bot.hears('Назад', async (ctx) => {
     await backToMainMenu(ctx);
   });
@@ -1651,7 +1566,6 @@ bot.hears('❓ справка', async (ctx) => {
     // console.log("купить билет")
     // await setBuyMenu(ctx)
     await buyTicket(bot, user, ctx, 'USDT.TRC20');
-    
   });
 
   async function buyTicket(bot, user, ctx, currency) {
@@ -1659,7 +1573,7 @@ bot.hears('❓ справка', async (ctx) => {
       const params = {
         username: user.eosname,
         currency,
-        type: "issue",
+        type: 'issue',
       };
       const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 
@@ -1669,21 +1583,21 @@ bot.hears('❓ справка', async (ctx) => {
       );
 
       if (result.data.status === 'ok') {
-        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/6abaac7d68eb4ca996e4e0183cb0bfc9">инструкцию</a> и отправьте USDT на ваш персональный адрес:', {disable_web_page_preview: true });
+        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/6abaac7d68eb4ca996e4e0183cb0bfc9">инструкцию</a> и отправьте USDT на ваш персональный адрес:', { disable_web_page_preview: true });
         await ctx.reply(`${result.data.address}`);
       } else {
         ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
-        console.log(result.data)
+        console.log(result.data);
       }
     } catch (e) {
-      console.log(e)
+      console.log(e);
       ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
     }
   }
 
   bot.hears('⬆️ оказать помощь', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+
     user.state = 'giveHelp';
     await saveUser(bot.instanceName, user);
     const buttons = [];
@@ -1692,8 +1606,7 @@ bot.hears('❓ справка', async (ctx) => {
   });
 
   bot.hears('⬇️ получить помощь', async (ctx) => {
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
-   
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     user.state = 'getHelp';
     await saveUser(bot.instanceName, user);
@@ -1705,11 +1618,9 @@ bot.hears('❓ справка', async (ctx) => {
   bot.hears('💎 кошелёк', async (ctx) => {
     // await checkForExistBCAccount(bot, ctx);
 
-    let user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
-   
-    if (user)
-      await printWallet(bot, user);
+    if (user) await printWallet(bot, user);
   });
 
   bot.hears('партнёры', async (ctx) => {
@@ -1774,8 +1685,6 @@ bot.hears('❓ справка', async (ctx) => {
     await sendMessageToUser(bot, user, { text: 'https://youtu.be/AMyoPTnrxno' });
   });
 
-
-
   bot.action(/startaction (\w+)/gi, async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     const taskId = ctx.match[1];
@@ -1802,8 +1711,8 @@ bot.hears('❓ справка', async (ctx) => {
   bot.action(/subscribe (\w+)/gi, async (ctx) => {
     // TODO cancel order
     const hostname = ctx.match[1];
-    let user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-   
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
     let subscribedNow = false;
     if (!user.subscribed_to) user.subscribed_to = [];
 
@@ -2082,23 +1991,19 @@ bot.hears('❓ справка', async (ctx) => {
 
   bot.action('prewithdrawbalance', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
-    
 
     const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
-
-    if (parseFloat(liquidBal) == 0){
-        await ctx.reply(`Ваш доступный баланс равен нулю. Если у вас есть фракции, пожалуйста, продайте их до создания заявки на вывод.`)
+    if (parseFloat(liquidBal) == 0) {
+      await ctx.reply('Ваш доступный баланс равен нулю. Если у вас есть фракции, пожалуйста, продайте их до создания заявки на вывод.');
     } else {
-      user.state = 'set_order_amount'
-      user.fast_withdraw_action = {}
-      await saveUser(bot.instanceName, user)
+      user.state = 'set_order_amount';
+      user.fast_withdraw_action = {};
+      await saveUser(bot.instanceName, user);
 
-      await ctx.reply(`Здесь вы можете создать платежное поручение, которое будет оплачено кооперативом в USDT на предоставленный вами адрес в сети TRON (TRC.20).\n\nСумма для создания поручения от 2 до ${liquidBal.replace("FLOWER", "FLOWER")}. Комиссия исполнения: 1 FLOWER.\n\nВведите сумму для создания платежного поручения:`)
-    
+      await ctx.reply(`Здесь вы можете создать платежное поручение, которое будет оплачено кооперативом в USDT на предоставленный вами адрес в сети TRON (TRC.20).\n\nСумма для создания поручения от 2 до ${liquidBal.replace('FLOWER', 'FLOWER')}. Комиссия исполнения: 1 FLOWER.\n\nВведите сумму для создания платежного поручения:`);
     }
-
-  })
+  });
 
   bot.on('contact', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -2114,7 +2019,6 @@ bot.hears('❓ справка', async (ctx) => {
     await nextQuiz(bot, user, ctx);
   });
 
-
   bot.on('message', async (ctx) => {
     const userId = ctx.update.message.from.id;
     const user = await getUser(bot.instanceName, userId);
@@ -2129,21 +2033,20 @@ bot.hears('❓ справка', async (ctx) => {
     const isVideoNote = ctx.update.message.video_note;
     const isVideo = ctx.update.message.video;
     const isLocation = ctx.update.message.location;
-      
 
     if (ctx.update.message.chat.type === 'private') {
       const quiz = await getQuiz(bot.instanceName, user.id);
       const { text } = ctx.update.message;
 
       if (quiz && !quiz.is_finish) {
-          quiz.answers.map((el, index) => {
-            if (index === quiz.current_quiz) {
-              el.answer = text;
-            }
-          });
+        quiz.answers.map((el, index) => {
+          if (index === quiz.current_quiz) {
+            el.answer = text;
+          }
+        });
 
-          await saveQuiz(bot.instanceName, user, quiz);
-          await nextQuiz(bot, user, ctx);
+        await saveQuiz(bot.instanceName, user, quiz);
+        await nextQuiz(bot, user, ctx);
       } else if (isLocation) {
         if (isAdminUser) {
           const count = await sendMessageToAll(ctx.update.message);
@@ -2219,34 +2122,29 @@ bot.hears('❓ справка', async (ctx) => {
             return ctx.replyWithHTML(`Ошибка: ${e.message}`);
           });
         } else if (user.state === 'set_order_amount') {
-            let on_withdraw = parseFloat(text)
-            
-            const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+          const on_withdraw = parseFloat(text);
 
-            if (on_withdraw > parseFloat(liquidBal))
-            {
-              await ctx.reply(`Ваш доступный баланс ${liquidBal} меньше того, который вы ставите на вывод. Пожалуйста, продайте свои фракции и убедитесь, что доступный баланс превышает сумму вывода.`)
-              return
-            }
+          const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
-            
-            user.fast_withdraw_action.out_quantity = parseFloat(text);
-            user.state = 'set_order_details';
-            await saveUser(bot.instanceName, user)
-            await ctx.reply(`Пожалуйста, введите адрес для вывода USDT.TRC20 (сеть TRON):`)
+          if (on_withdraw > parseFloat(liquidBal)) {
+            await ctx.reply(`Ваш доступный баланс ${liquidBal} меньше того, который вы ставите на вывод. Пожалуйста, продайте свои фракции и убедитесь, что доступный баланс превышает сумму вывода.`);
+            return;
+          }
 
+          user.fast_withdraw_action.out_quantity = parseFloat(text);
+          user.state = 'set_order_details';
+          await saveUser(bot.instanceName, user);
+          await ctx.reply('Пожалуйста, введите адрес для вывода USDT.TRC20 (сеть TRON):');
         } else if (user.state === 'set_order_details') {
           user.state = '';
-          
-          user.fast_withdraw_action.address = text
-          await saveUser(bot.instanceName, user)
+
+          user.fast_withdraw_action.address = text;
+          await saveUser(bot.instanceName, user);
 
           const buttons = [];
           buttons.push(Markup.button.callback('Да', 'withdrawbalance'));
           buttons.push(Markup.button.callback('Нет', 'cancelwithdrawbalance'));
           await ctx.replyWithHTML(`Вы уверены, что хотите создать платежное поручение на сумму: ${user.fast_withdraw_action.out_quantity} USDT? Реквизиты для получения: ${text}\n\n`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-
-
         } else if (user.state === 'transfer_to') {
           const account = await bot.uni.readApi.getAccount(text).catch((err) => {
             console.error(err);
@@ -2290,10 +2188,10 @@ bot.hears('❓ справка', async (ctx) => {
           const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER', contract);
 
           const maxDeposit = await getCondition(bot, hostname, 'maxdeposit');
-          let fractions_on_sale = await getBalancesOnSale(bot, helix.host.username, user.eosname, helix)
-          let remain = (parseFloat(helix.currentPool.remain) + fractions_on_sale.summ).toFixed(4) + " FLOWER"
-          
-          console.log("REMAIN: ", remain, amount)
+          const fractions_on_sale = await getBalancesOnSale(bot, helix.host.username, user.eosname, helix);
+          const remain = (parseFloat(helix.currentPool.remain) + fractions_on_sale.summ).toFixed(4) + ' FLOWER';
+
+          console.log('REMAIN: ', remain, amount);
 
           if (maxDeposit > 0) {
             const currentDeposit = await getCurrentUserDeposit(bot, hostname, user.eosname);
@@ -2317,7 +2215,7 @@ bot.hears('❓ справка', async (ctx) => {
             buttons.push(Markup.button.callback('Да', 'depositaction'));
             buttons.push(Markup.button.callback('Нет', `backto wallet ${user.deposit_action.hostname}`));// helix ${user.deposit_action.hostname}
 
-            ctx.reply(`Вы подтверждаете, что хотите купить фракцию ${user.deposit_action.hostname.toUpperCase()} на сумму ${user.deposit_action.quantity.replace("FLOWER", "FLOWER")}?`, Markup.inlineKeyboard(buttons, { columns: 2 }));
+            ctx.reply(`Вы подтверждаете, что хотите купить фракцию ${user.deposit_action.hostname.toUpperCase()} на сумму ${user.deposit_action.quantity.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }));
             await saveUser(bot.instanceName, user);
           }
         } else if (user.state === 'add_promo_budget') {
@@ -2353,6 +2251,3 @@ bot.hears('❓ справка', async (ctx) => {
 
   return null;
 };
-
-
-

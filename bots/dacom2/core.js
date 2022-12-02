@@ -23,7 +23,7 @@ async function getHelixParams(bot, hostname) {
   const [currentPool] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', host[0].current_pool_id, host[0].current_pool_id, 1);
 
   const [currentRate] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'rate', currentPool.pool_num - 1, currentPool.pool_num - 1, 1);
-  
+
   const bcinfo = await bot.eosapi.getInfo({});
   const bctime = await new Date(bcinfo.head_block_time);
 
@@ -38,7 +38,7 @@ async function getHelixParams(bot, hostname) {
     // eslint-disable-next-line max-len
     currentPool.priority_time = ((currentPool.priority_time - bctime) / 1000 / 60 / 60).toFixed(2);
     // console.log("currentPool.remain_quants: ", currentPool.remain_quants, )
-    currentPool.remain = (parseFloat(currentPool.remain_quants) / parseFloat(helix[0].quants_precision) * parseFloat(currentPool.quant_cost)).toFixed(4) + " " + host[0].symbol
+    currentPool.remain = (parseFloat(currentPool.remain_quants) / parseFloat(helix[0].quants_precision) * parseFloat(currentPool.quant_cost)).toFixed(4) + ' ' + host[0].symbol;
   }
 
   const incomeStep = (helix[0].overlap / 100 - 100).toFixed(2);
@@ -46,7 +46,7 @@ async function getHelixParams(bot, hostname) {
   const maxIncome = (incomeStep * Math.floor(helix[0].pool_limit / 2)).toFixed(0);
 
   return {
-    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome, currentRate
+    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome, currentRate,
   };
 }
 
@@ -554,123 +554,111 @@ async function printHelixStat(bot, user, hostname, ctx) {
 //   }
 // }
 
-
 async function getRefBalancesByStatus(bot, hostname, username) {
   let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'refbalances');
-  let status = await getPartnerStatus(bot, hostname, username);
-  
-  balances = balances.filter(el => el.level > status.level)
-  let summ = 0
-  balances.map(bal => {
-    summ += parseFloat(bal.amount)
-  })
+  const status = await getPartnerStatus(bot, hostname, username);
 
-  return (summ).toFixed(4) + " FLOWER"
+  balances = balances.filter((el) => el.level > status.level);
+  let summ = 0;
+  balances.map((bal) => {
+    summ += parseFloat(bal.amount);
+  });
 
+  return (summ).toFixed(4) + ' FLOWER';
 }
 
-async function getPartnerStatus(bot, hostname, username){
-  let [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
-  
+async function getPartnerStatus(bot, hostname, username) {
+  const [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
+
   let partner = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'corepartners', username, username, 1);
-  partner = partner[0]
+  partner = partner[0];
 
   if (guest) {
-    return {status: 'гость', icon: "", level: -1}
-  } else if (!partner)
-    return {status: 'пайщик', icon: "", level: 0}
+    return { status: 'гость', icon: '', level: -1 };
+  } else if (!partner) return { status: 'пайщик', icon: '', level: 0 };
   else {
+    const res = {};
 
-    let res = {}
-
-    if (partner.status == "koala")        {
-        res.icon = "🐨"
-        res.status = "коала"
-        res.level = 1
-    } else if (partner.status == "panda") {
-        res.icon = "🐼"
-        res.status = "панда"
-        res.level = 2
-    } else if (partner.status == "wolf")  {
-        res.icon = "🐺"
-        res.status = "волк"
-        res.level = 3
-    } else if (partner.status == "tiger") {
-        res.icon = "🐯"
-        res.status = "тигр"
-        res.level = 4
-    } else if (partner.status == "leo")   {
-        res.icon = "🦁"
-        res.status = "лев"
-        res.level = 5
-    } else if (partner.status == "bear")  {
-        res.icon = "🐻"
-        res.status = "медведь"
-        res.level = 6
-    } else if (partner.status == "dragon") {
-        res.icon = "🐲"
-        res.status = "дракон"
-        res.level = 7
+    if (partner.status == 'koala') {
+      res.icon = '🐨';
+      res.status = 'коала';
+      res.level = 1;
+    } else if (partner.status == 'panda') {
+      res.icon = '🐼';
+      res.status = 'панда';
+      res.level = 2;
+    } else if (partner.status == 'wolf') {
+      res.icon = '🐺';
+      res.status = 'волк';
+      res.level = 3;
+    } else if (partner.status == 'tiger') {
+      res.icon = '🐯';
+      res.status = 'тигр';
+      res.level = 4;
+    } else if (partner.status == 'leo') {
+      res.icon = '🦁';
+      res.status = 'лев';
+      res.level = 5;
+    } else if (partner.status == 'bear') {
+      res.icon = '🐻';
+      res.status = 'медведь';
+      res.level = 6;
+    } else if (partner.status == 'dragon') {
+      res.icon = '🐲';
+      res.status = 'дракон';
+      res.level = 7;
     }
-    res.expiration = partner.expiration
-    return res
-
+    res.expiration = partner.expiration;
+    return res;
   }
-
 }
 
 async function printWallet(bot, user) {
   const buttons = [];
 
-  const status = await getPartnerStatus(bot, "core", user.eosname)
+  const status = await getPartnerStatus(bot, 'core', user.eosname);
 
   // if(status.level == -1) {
 
-    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-    // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+  // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+  // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+  // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // } else {
-    buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-    buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
-    buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
-    buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
-    buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+  buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+  buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
+  buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
+  buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
+  buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // }
-  
 
-  
-  
   if (user && user.eosname) {
-
     const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
-    
-    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER')
+
+    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
 
     const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
     // const balances = await getUserHelixBalances(bot, null, user.eosname);
 
-    
-    let hosts = await getHelixsList(bot)
-    if (hosts.length > 0){
-      let hostname = hosts[0].username
-      
-      const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname)
-      const status = await getPartnerStatus(bot, "core", user.eosname)
-      console.log("status: ", status)
+    const hosts = await getHelixsList(bot);
+    if (hosts.length > 0) {
+      const hostname = hosts[0].username;
+
+      const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname);
+      const status = await getPartnerStatus(bot, 'core', user.eosname);
+      console.log('status: ', status);
       const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
       const balances = await getUserHelixBalances(bot, hostname, user.eosname);
-      const assetBlockedNow = balances.totalBalances.replace("FLOWER", "FLOWER");
+      const assetBlockedNow = balances.totalBalances.replace('FLOWER', 'FLOWER');
 
       const params = await getHelixParams(bot, hostname);
-      
-      let uPower = (userPower.power / params.helix.quants_precision).toFixed(4)
-      let totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower
 
+      const uPower = (userPower.power / params.helix.quants_precision).toFixed(4);
+      const totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower;
 
       const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
 
@@ -680,28 +668,25 @@ async function printWallet(bot, user) {
       text += '\n---------------------------------';
       text += `\n| Системное имя: ${user.eosname}`;
       text += `\n| Статус: ${status.status} ${status.icon}`;
-      
-      if (status.level > 0)
-        text += `\n|\t\t\t\t\t до ${status.expiration}`
-      
+
+      if (status.level > 0) text += `\n|\t\t\t\t\t до ${status.expiration}`;
+
       text += `\n| Ликвидный баланс: ${liquidBal}`;//
       // text += `\n|\t\t\t\t\tДоступные: ${liquidBal.replace("FLOWER", "FLOWER")}`;
       // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`;
       // text += `\n|\t\t\t\t\tПоступило от партнеров: ${refStat.replace("FLOWER", "FLOWER")}`;
       // text += `\n|\t\t\t\t\tЗаблокировано по статусу: ${notAccessableRefBalance.replace("FLOWER", "FLOWER")}`;
-      
+
       // text += `\n|\t\t\t\t\tФракции: ${uPower} шт.\n`
       // text += `\n|\t\t\t\t\tЗаложено: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`
-    
 
       // text += `\n| Ресурс аккаунта: ${ram} RAM`;
 
       text += '\n---------------------------------';
       text += `\n\nДля приглашения партнеров используйте ссылку: ${link}\n`; //
       // eslint-disable-next-line max-len
-      await sendMessageToUser(bot, user, { text }, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
-    } else await sendMessageToUser(bot, user, { text: "Кооперативные участки не найдены" }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-
+      await sendMessageToUser(bot, user, { text }, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+    } else await sendMessageToUser(bot, user, { text: 'Кооперативные участки не найдены' }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
   }
 }
 
@@ -1263,20 +1248,20 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
   const helixs = await getHelixsList(bot);
   let currentHelix;
 
-  console.log("on print helix", bot.getEnv().CORE_HOST,  helixs);
+  console.log('on print helix', bot.getEnv().CORE_HOST, helixs);
   const currentIndex = nextIndex || 0;
 
   currentHelix = helixs[currentIndex];
-  console.log("on print helix2", currentHelix);
+  console.log('on print helix2', currentHelix);
   if (hostname) {
     currentHelix = helixs.find((el) => el.username == hostname);
   } else {
     // currentHelix = helixs.find((el) => el.username == bot.getEnv().CORE_HOST);
   }
-  console.log("on print helix3", currentHelix, bot.getEnv().CORE_HOST);
+  console.log('on print helix3', currentHelix, bot.getEnv().CORE_HOST);
 
   if (currentHelix) {
-    console.log("inside")
+    console.log('inside');
     const params = await getHelixParams(bot, currentHelix.username);
     const balances = await getUserHelixBalances(bot, currentHelix.username, user.eosname, params);
     const myTail = await getTail(bot, user.eosname, currentHelix.username);
@@ -1289,15 +1274,15 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     const buttons = [];
 
     // if (helixs.length > 1) {
-      buttons.push(Markup.button.callback(`⬅️ Предыдущий (${currentIndex})`, `next ${currentIndex - 1}`));
-      buttons.push(Markup.button.callback(`Следующий (${helixs.length - 1 - currentIndex}) ➡️`, `next ${currentIndex + 1}`));
+    buttons.push(Markup.button.callback(`⬅️ Предыдущий (${currentIndex})`, `next ${currentIndex - 1}`));
+    buttons.push(Markup.button.callback(`Следующий (${helixs.length - 1 - currentIndex}) ➡️`, `next ${currentIndex + 1}`));
     // }
 
     // buttons.push(Markup.button.callback('Войти', `select ${currentHelix.username}`));
 
     let toPrint = '';
     // toPrint += `\n${currentHelix.title}`;
-    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b>`;//{${currentHelix.username}}
+    toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b>`;// {${currentHelix.username}}
     toPrint += '\n------------------------------';
     toPrint += `\n${currentHelix.purpose}`;
     // toPrint += `\nСтол: ${params.currentPool.pool_num} ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
@@ -1316,11 +1301,11 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     // Если что-то начислено - обновить карточку и сообщить отдельным сообщением
     //
     if (hostname) {
-      ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+      ctx.editMessageText(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
     } else if (nextIndex === undefined) {
-      await ctx.replyWithHTML(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+      await ctx.replyWithHTML(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
     } else {
-      ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+      ctx.editMessageText(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
     }
   }
 }

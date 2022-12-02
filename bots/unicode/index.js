@@ -135,7 +135,7 @@ const {
   getProjects,
   getMyProjects,
   getGoal,
-  getUsers
+  getUsers,
 } = require('./db');
 
 const { getDecodedParams } = require('./utils/utm');
@@ -398,14 +398,14 @@ async function startQuiz(bot, ctx, user) {
   // const buttons = [Markup.button.contactRequest('Поделиться контактом')];
   // const request = Markup.keyboard(buttons, { columns: 1 }).resize();
   // return ctx.reply('\n\nНапиши свой номер телефона для получения первого задания:', request);
-  await nextQuiz(bot, user, ctx)
+  await nextQuiz(bot, user, ctx);
   // startQuiz()
   // return ctx.reply('', request);
 }
 
 async function nextQuiz(bot, user, ctx) {
   const quiz = await getQuiz(bot.instanceName, user.id);
-  console.log('next:', user)
+  console.log('next:', user);
   let q;
 
   // eslint-disable-next-line array-callback-return
@@ -427,12 +427,10 @@ async function nextQuiz(bot, user, ctx) {
 
       // await ctx.reply(q.message, Markup.keyboard(buttons, { columns: 2 }).resize());
       await sendMessageToUser(bot, user, { text: q.message }, Markup.keyboard(buttons, { columns: 2 }).resize());
-
     } else {
       const clearMenu = Markup.removeKeyboard();
 
-      await sendMessageToUser(bot, user, { text: q.message }, {...clearMenu, reply_markup: { remove_keyboard: true }});
-
+      await sendMessageToUser(bot, user, { text: q.message }, { ...clearMenu, reply_markup: { remove_keyboard: true } });
 
       // await ctx.reply(q.message, clearMenu, { reply_markup: { remove_keyboard: true } });// , clearMenu,
     }
@@ -738,22 +736,17 @@ module.exports.init = async (botModel, bot) => {
     await makeChannelAdmin(bot, current_chat.id, ctx.update.message.from.id, ctx, '-1001598098546');
   });
 
-
   bot.command('send_welcome_to_all', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    console.log(user)
+    console.log(user);
     if (user.id == 174122419) {
-      console.log(bot.instanceName)
-      let users = await getUsers(bot) 
-      console.log('users: ', users)
-      for (u of users){
-        await startQuiz(bot, ctx, u);  
-      } 
-      
+      console.log(bot.instanceName);
+      const users = await getUsers(bot);
+      console.log('users: ', users);
+      for (u of users) {
+        await startQuiz(bot, ctx, u);
+      }
     }
-    
-
-
   });
 
   bot.command('team', async (ctx) => {

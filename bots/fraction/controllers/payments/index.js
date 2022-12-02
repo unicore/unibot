@@ -18,7 +18,7 @@ module.exports.payReciever = async (req, res) => {
     eosname,
     amount,
     trx_id,
-    message
+    message,
   } = req.body;
 
   const bot = await getBotByNameAndType(botName, 'fraction');
@@ -42,19 +42,18 @@ module.exports.payReciever = async (req, res) => {
   }
 
   const user = await getUserByEosName(botName, eosname);
-  let amount2 = parseFloat(amount).toFixed(4) + " USDT"
-
+  const amount2 = parseFloat(amount).toFixed(4) + ' USDT';
 
   // let message2 = message.replace("FLOWER", "USDT")
 
   // let status = await getPartnerStatus(bot, "core", eosname)
   // let extra = {}
-  
+
   // if status.status != 'гость'
-  //   extra = 
+  //   extra =
 
   await sendMessageToUser(bot, user, { text: message });
-  await printWallet(bot, user)
+  await printWallet(bot, user);
 
   return {
     ok: true,

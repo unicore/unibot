@@ -697,7 +697,6 @@ async function getTickets(suffix, user) {
   }
 }
 
-
 async function getUsers(bot) {
   try {
     const db = await loadDB();
@@ -715,7 +714,6 @@ async function getUsers(bot) {
 
   return [];
 }
-
 
 module.exports = {
   loadDB,
@@ -762,5 +760,5 @@ module.exports = {
   getUnionByHostType,
   getAllHeadGoalsMessages,
   getGoal,
-  getUsers
+  getUsers,
 };

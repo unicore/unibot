@@ -253,21 +253,20 @@ module.exports.init = async (botModel, bot) => {
           user = ctx.update.message.from;
           user.app = bot.getEnv().APP;
           user.ref = ref;
-          user.requests_count = 3
+          user.requests_count = 3;
           await saveUser(bot.instanceName, user);
         } else {
-
           user.request_chat_id = false;
           user.request_channel_id = false;
           // if (!user.requests_count)
-            user.requests_count = 3
-          
+          user.requests_count = 3;
+
           await saveUser(bot.instanceName, user);
         }
 
         const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
         const buttons = [];
-        
+
         if (user.requests_count > 0) {
           await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', request);
           buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
@@ -275,10 +274,10 @@ module.exports.init = async (botModel, bot) => {
         } else {
           const clearMenu = Markup.removeKeyboard();
           buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
-          
+
           await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
           await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
-          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         }
       }
     } else {
@@ -293,19 +292,15 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
   }
 
-
-
-
   bot.command('restart_all', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     const isAdminUser = isAdmin(bot, user.id);
-    
+
     const text = ctx.update.message.text;
     const entities = ctx.update.message.entities;
-    let to_send = 'Внимание! Для получения советов в сложных жизненных ситуациях, пожалуйста, перезапустите Персонального Помощника командой /start';
+    const to_send = 'Внимание! Для получения советов в сложных жизненных ситуациях, пожалуйста, перезапустите Персонального Помощника командой /start';
 
-    
     if (isAdminUser) {
       const count = await sendMessageToAll(bot, { text: to_send });
       await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
@@ -339,29 +334,24 @@ module.exports.init = async (botModel, bot) => {
 
     await closeRequest(bot.instanceName, user.request_channel_id);
 
-
-
     user.state = null;
     user.request_chat_id = false;
     user.requests_count -= 1;
 
     await saveUser(bot.instanceName, user);
-    let menu 
+    let menu;
 
     if (user.requests_count > 0) {
-      
       menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
       await ctx.reply(`Ваш запрос закрыт. Осталось запросов: ${user.requests_count}.\n\nДля пополнения запросов станьте пайщиком Цифрового Кооператива: @digital_earth_bot`, menu);
-
     } else {
-        const clearMenu = Markup.removeKeyboard();
-        await ctx.reply(`Ваш запрос закрыт.`, clearMenu, { reply_markup: { remove_keyboard: true } });
-        let buttons = []
-        buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
-          
-        await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize())
+      const clearMenu = Markup.removeKeyboard();
+      await ctx.reply('Ваш запрос закрыт.', clearMenu, { reply_markup: { remove_keyboard: true } });
+      const buttons = [];
+      buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
+
+      await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     }
-  
   });
 
   bot.on('message', async (ctx) => {
@@ -398,7 +388,7 @@ module.exports.init = async (botModel, bot) => {
             await catchRequest(bot, user, ctx, text);
           } else if (user.state === 'chat') {
             // console.log("user: ", user)
-            console.log("try to send: ", bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id)
+            console.log('try to send: ', bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id);
 
             const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
 
@@ -429,10 +419,10 @@ module.exports.init = async (botModel, bot) => {
         if (ctx.update.message.sender_chat.id == bot.getEnv().CV_CHANNEL) { // если словили пересылку из прикрепленного канала
           if (ctx.update.message.forward_from_chat.id == bot.getEnv().CV_CHANNEL) { // то нужно запомнить ID сообщения, чтоб отвечать в том же треде
             user = await getUserByResumeChannelId(bot.instanceName, ctx.update.message.forward_from_message_id);
-            console.log("before catch: ", user)
+            console.log('before catch: ', user);
 
             if (user && !user.request_chat_id) {
-              console.log("catch forwarded messsage to chat: ", ctx.update.message.message_id)
+              console.log('catch forwarded messsage to chat: ', ctx.update.message.message_id);
               user.request_chat_id = ctx.update.message.message_id;
               await saveUser(bot.instanceName, user);
             }
@@ -447,12 +437,11 @@ module.exports.init = async (botModel, bot) => {
 
           await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', request);
           await ctx.reply('Мой искусственный интеллект помогает принять решение в любой жизненной ситуации. Попробуйте! Опишите вашу жизненную ситуацию, сформулируйте вопрос, и получите разумный ответ.', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-        
+
           // await ctx.reply('Добро пожаловать!', request);
           // await ctx.reply('Коллективный Разум ищет ответы на запросы людей любой сложности и неопределенности. Попробуйте! Оставьте свой запрос на решение вашей задачи развития и получите релевантный ответ:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
-          
-          // buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
 
+          // buttons.push(Markup.button.url('🏫 узнать подробнее', 'https://intellect.run'));
         }
         // ?
       }
@@ -468,7 +457,6 @@ module.exports.init = async (botModel, bot) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
     await printPartners(bot, user);
   });
-
 
   return null;
 };

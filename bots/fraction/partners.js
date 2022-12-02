@@ -5,7 +5,7 @@ const {
   saveUser, getUserHelixBalance, getNicknameByEosName, getTelegramByEosName,
 } = require('./db');
 
-const {getAllHelixBalances, getHelixsList} = require('./core')
+const { getAllHelixBalances, getHelixsList } = require('./core');
 
 const { mainButtons } = require('./utils/bot');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
@@ -36,15 +36,14 @@ function getMyPartners(bot, username) {
 }
 
 async function loadStructure(bot, partnerBase, level) {
-  
   const partners = [];
-  console.log("level:" , level)
+  console.log('level:', level);
   const line = await getMyPartners(bot, partnerBase);
   // eslint-disable-next-line no-restricted-syntax
   for (const row of line) {
     // eslint-disable-next-line no-await-in-loop
     row.partners = await loadStructure(bot, row.username, level + 1);
-    row.level = level
+    row.level = level;
     partners.push(row);
   }
 
@@ -57,7 +56,7 @@ async function loadStructure(bot, partnerBase, level) {
       for (const row of partner.partners) {
         if (row.username) {
           row.username = `+${row.username}`;
-          if (!row.level) row.level = level
+          if (!row.level) row.level = level;
 
           // row.level = level
           str.push(row);
@@ -69,22 +68,21 @@ async function loadStructure(bot, partnerBase, level) {
 }
 
 async function getStructure(bot, baseUsername, hosts) {
- 
   const structure = await loadStructure(bot, baseUsername, 1);
 
   const newStr = [];
 
   let k = 1;
-  let balances = []
-  
+  let balances = [];
+
   for (host of hosts) {
-    console.log("HOST.username: ", host)
-    let balances2 = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', host.username, 'balance4');
-    balances = balances.concat(balances2)
+    console.log('HOST.username: ', host);
+    const balances2 = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', host.username, 'balance4');
+    balances = balances.concat(balances2);
   }
 
-  console.log("BALANCES: ", balances)
-  
+  console.log('BALANCES: ', balances);
+
   // eslint-disable-next-line no-restricted-syntax
   for (const row of structure) {
     if (row.username) {
@@ -102,28 +100,28 @@ async function getStructure(bot, baseUsername, hosts) {
           getTelegramByEosName(bot.instanceName, username),
         ]);
 
-        let totalWhite = '0.0000 FLOWER';
-        let totalBlack = '0.0000 FLOWER';
-        let total = '0.0000 FLOWER'
+        const totalWhite = '0.0000 FLOWER';
+        const totalBlack = '0.0000 FLOWER';
+        let total = '0.0000 FLOWER';
 
         if (balances) {
           // eslint-disable-next-line no-restricted-syntax
-          let user_balances = balances.filter(el => el.owner == username)
+          const user_balances = balances.filter((el) => el.owner == username);
 
           for (const bal of user_balances) {
-            total = (parseFloat(total) + parseFloat(bal.compensator_amount)).toFixed(4) + ' FLOWER'
+            total = (parseFloat(total) + parseFloat(bal.compensator_amount)).toFixed(4) + ' FLOWER';
             // if (bal.pool_color === 'white') totalWhite = `${parseFloat(totalWhite) + parseFloat(bal.available)} FLOWER`;
             // else totalBlack = `${parseFloat(totalBlack) + parseFloat(bal.available)} FLOWER`;
           }
         }
-        
+
         newStr.push({
           '#': k,
           'Системное имя': row.username,
           Уровень: row.level,
           Никнейм: nickname,
           Телеграм: telegram,
-          Фракции: total.replace('FLOWER', 'FLOWER')
+          Фракции: total.replace('FLOWER', 'FLOWER'),
           // 'На белых столах': totalWhite,
           // 'На чёрных столах': totalBlack,
         });
@@ -140,7 +138,7 @@ async function getStructure(bot, baseUsername, hosts) {
       Уровень: '-',
       Никнейм: '-',
       Телеграм: '-',
-      'Фракции': '-',
+      Фракции: '-',
       // 'На белых столах': '-',
       // 'На чёрных столах': '-',
     });
@@ -166,68 +164,57 @@ async function printPartners(bot, ctx, user) {
   // eslint-disable-next-line no-param-reassign
   // user.promo_budget = parseFloat(promoBudget);
 
-  if (!user.ref_count)
-    user.ref_count = 0
+  if (!user.ref_count) user.ref_count = 0;
 
   const buttons = [];
-  
+
   // buttons.push(Markup.button.callback('Пополнить спонсорский бюджет', 'startpromotion'));
   // let text2 = `В вашей структуре: ${user.ref_count} партнёров`
-  let text = `Пожалуйста, подождите, идёт подсчет..`
+  const text = 'Пожалуйста, подождите, идёт подсчет..';
 
-  let message_id = await sendMessageToUser(bot, user, { text: text });//, Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-  let hosts =  await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
+  const message_id = await sendMessageToUser(bot, user, { text });// , Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+  const hosts = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
 
   await getStructure(bot, user.eosname, hosts).then(async (structure) => {
     // console.log(structure)
-    
-    console.log("user.ref_count: ", user.ref_count)
-    
-    user.ref_count = structure.length
-    console.log("structure: ", structure)
-    console.log("structure.length: ", structure.length)
-    let text1 = `Ваш старший партнёр: ${me.referer.toUpperCase()}\n\t\t\tИмя: ${ref}\n\t\t\tТелеграм: ${telegram}`
-    
-    let text3 = `\n\nВ вашей структуре ${structure.length == 1 && structure[0]['Системное имя'] == 'партнёров нет'? 'нет' : structure.length} партнеров`
 
-    let l1 = structure.filter(row => row["Уровень"] == 1)
-    let l2 = structure.filter(row => row["Уровень"] == 2)
-    let l3 = structure.filter(row => row["Уровень"] == 3)
-    let l4 = structure.filter(row => row["Уровень"] == 4)
-    let l5 = structure.filter(row => row["Уровень"] == 5)
-    let l6 = structure.filter(row => row["Уровень"] == 6)
-    let l7 = structure.filter(row => row["Уровень"] == 7)
+    console.log('user.ref_count: ', user.ref_count);
 
+    user.ref_count = structure.length;
+    console.log('structure: ', structure);
+    console.log('structure.length: ', structure.length);
+    const text1 = `Ваш старший партнёр: ${me.referer.toUpperCase()}\n\t\t\tИмя: ${ref}\n\t\t\tТелеграм: ${telegram}`;
 
-    console.log("L1", l1)
+    let text3 = `\n\nВ вашей структуре ${structure.length == 1 && structure[0]['Системное имя'] == 'партнёров нет' ? 'нет' : structure.length} партнеров`;
 
-    if(l1.length > 0)
-      text3 += `\n\t\t\tуровень 1: ${l1.length}`
-    if(l2.length > 0)
-      text3 += `\n\t\t\tуровень 2: ${l2.length}`
-    if(l3.length > 0)
-      text3 += `\n\t\t\tуровень 3: ${l3.length}`
-    if(l4.length > 0)
-      text3 += `\n\t\t\tуровень 4: ${l4.length}`
-    if(l5.length > 0)
-      text3 += `\n\t\t\tуровень 5: ${l5.length}`
-    if(l6.length > 0)
-      text3 += `\n\t\t\tуровень 6: ${l6.length}`
-    if(l7.length > 0)
-      text3 += `\n\t\t\tуровень 7: ${l7.length}`
-    
-    text3 += `\n\nДля приглашения фракционеров в вашу структуру используйте ссылку из кошелька.`
+    const l1 = structure.filter((row) => row['Уровень'] == 1);
+    const l2 = structure.filter((row) => row['Уровень'] == 2);
+    const l3 = structure.filter((row) => row['Уровень'] == 3);
+    const l4 = structure.filter((row) => row['Уровень'] == 4);
+    const l5 = structure.filter((row) => row['Уровень'] == 5);
+    const l6 = structure.filter((row) => row['Уровень'] == 6);
+    const l7 = structure.filter((row) => row['Уровень'] == 7);
 
-    await ctx.deleteMessage(message_id)
-    await sendMessageToUser(bot, user, { text: text1 + text3 });//, Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+    console.log('L1', l1);
+
+    if (l1.length > 0) text3 += `\n\t\t\tуровень 1: ${l1.length}`;
+    if (l2.length > 0) text3 += `\n\t\t\tуровень 2: ${l2.length}`;
+    if (l3.length > 0) text3 += `\n\t\t\tуровень 3: ${l3.length}`;
+    if (l4.length > 0) text3 += `\n\t\t\tуровень 4: ${l4.length}`;
+    if (l5.length > 0) text3 += `\n\t\t\tуровень 5: ${l5.length}`;
+    if (l6.length > 0) text3 += `\n\t\t\tуровень 6: ${l6.length}`;
+    if (l7.length > 0) text3 += `\n\t\t\tуровень 7: ${l7.length}`;
+
+    text3 += '\n\nДля приглашения фракционеров в вашу структуру используйте ссылку из кошелька.';
+
+    await ctx.deleteMessage(message_id);
+    await sendMessageToUser(bot, user, { text: text1 + text3 });// , Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
     await saveUser(bot.instanceName, user);
-  
 
     await sendStructureFileToUser(bot, user, structure);
-    
-  }).catch(e => {
-    ctx.reply(`Ошибка на подсчёте. Пожалуйста, обратитесь в поддержку с сообщением: ${e.message}`)
-  })
+  }).catch((e) => {
+    ctx.reply(`Ошибка на подсчёте. Пожалуйста, обратитесь в поддержку с сообщением: ${e.message}`);
+  });
 }
 
 async function addPromoBudgetAction(bot, ctx, user, budget) {

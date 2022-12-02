@@ -97,7 +97,6 @@ async function constructGoalMessage(bot, hostname, goal, goalId) {
   if (!goal && goalId) { goal = await fetchGoal(bot, hostname, goalId); }
 
   if (goal) {
-  
     const host = await fetchHost(bot, hostname);
     const total_shares = host.total_shares;
     const user = await getUserByEosName(bot.instanceName, goal.creator);
@@ -147,7 +146,7 @@ async function constructTaskMessage(bot, hostname, task, taskId) {
 async function constructReportMessage(bot, hostname, report, reportId) {
   if (!report && reportId) { report = await fetchReport(bot, hostname, reportId); }
   const user = await getUserByEosName(bot.instanceName, report.username);
-    
+
   if (report && user) {
     const goal = await fetchGoal(bot, hostname, report.goal_id);
 
@@ -156,7 +155,6 @@ async function constructReportMessage(bot, hostname, report, reportId) {
     let bonus;
     let votes;
 
-    
     const from = (user.username && user.username !== '') ? '@' + user.username : report.username;
     text += `🏁 #ОТЧЁТ_${report.report_id} от ${from}: \n`;
     text += `${report.data}\n\n`;

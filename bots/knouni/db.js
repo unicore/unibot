@@ -318,7 +318,7 @@ async function getMessage(suffix, message_id, chat_id) {
 
     // eslint-disable-next-line camelcase
     const message = await collection.findOne({ message_id, from: chat_id });
-    console.log("message_id: ", message)
+    console.log('message_id: ', message);
 
     return message;
   } catch (e) {
