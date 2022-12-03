@@ -1582,7 +1582,7 @@ module.exports.init = async (botModel, bot) => {
       );
 
       if (result.data.status === 'ok') {
-        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/6abaac7d68eb4ca996e4e0183cb0bfc9">инструкцию</a> и отправьте USDT на ваш персональный адрес:', { disable_web_page_preview: true });
+        await ctx.replyWithHTML('Взносы принимаются в USDT (TRC-20). Прочитайте <a href="https://dacom.io/60279ba5d0454f5cac5f4c782d412988">инструкцию</a> и отправьте USDT на ваш персональный адрес:', { disable_web_page_preview: true });
         await ctx.reply(`${result.data.address}`);
       } else {
         ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
@@ -2000,7 +2000,7 @@ module.exports.init = async (botModel, bot) => {
       user.fast_withdraw_action = {};
       await saveUser(bot.instanceName, user);
 
-      await ctx.reply(`Здесь вы можете создать платежное поручение, которое будет оплачено кооперативом в USDT на предоставленный вами адрес в сети TRON (TRC.20).\n\nСумма для создания поручения от 2 до ${liquidBal.replace('FLOWER', 'FLOWER')}. Комиссия исполнения: 1 FLOWER.\n\nВведите сумму для создания платежного поручения:`);
+      await ctx.replyWithHTML(`Здесь вы можете создать платежное поручение, которое будет оплачено кооперативом в USDT на предоставленный вами адрес в сети TRON (TRC.20). Подробная инструкция обмена FLOWER на RUB <a href="https://dacom.io/c473c948fab0435aa432eb436d245998">здесь</a>.\n\nСумма для создания поручения от 2 до ${liquidBal.replace('FLOWER', 'FLOWER')}. Комиссия исполнения: 1 FLOWER.\n\nВведите сумму для создания платежного поручения:`, {disable_web_page_preview: true});
     }
   });
 
