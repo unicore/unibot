@@ -1277,9 +1277,9 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 
     let toPrint = '';
     toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username}}`;
-    toPrint += `\n<a href="${currentHelix.purpose}">программа</a> клуба`;
-
     toPrint += '\n------------------------------';
+    toPrint += `\n${currentHelix.purpose}\n`;
+
     // toPrint += `\n\n`;
     // toPrint += `\n\t\t\t`;
 
