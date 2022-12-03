@@ -1185,19 +1185,19 @@ module.exports.init = async (botModel, bot) => {
       await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     } else {
       let status = '';
-      if (json.s == 1) {
+      if (json.s === 1) {
         status = '🐨 коала';
-      } else if (json.s == 2) {
+      } else if (json.s === 2) {
         status = '🐼 панда';
-      } else if (json.s == 3) {
+      } else if (json.s === 3) {
         status = '🐺 волк';
-      } else if (json.s == 4) {
+      } else if (json.s === 4) {
         status = '🐯 тигр';
-      } else if (json.s == 5) {
+      } else if (json.s === 5) {
         status = '🦁 лев';
-      } else if (json.s == 6) {
+      } else if (json.s === 6) {
         status = '🐻 медведь';
-      } else if (json.s == 7) {
+      } else if (json.s === 7) {
         status = '🐲 дракон';
       }
 
@@ -1210,11 +1210,11 @@ module.exports.init = async (botModel, bot) => {
 
       buttons.push(Markup.button.callback('назад', `buystatus ${JSON.stringify({})}`));
 
-      buttons.push(Markup.button.callback(`${json.du == 1 ? '✅' : ''} 1 мес (-0%)`, `buystatus ${JSON.stringify({ ...json, du: 1, di: 1 })}`));
-      buttons.push(Markup.button.callback(`${json.du == 3 ? '✅' : ''} 3 мес (-10%)`, `buystatus ${JSON.stringify({ ...json, du: 3, di: 0.9 })}`));
-      buttons.push(Markup.button.callback(`${json.du == 6 ? '✅' : ''} 6 мес (-20%)`, `buystatus ${JSON.stringify({ ...json, du: 6, di: 0.8 })}`));
-      buttons.push(Markup.button.callback(`${json.du == 9 ? '✅' : ''} 9 мес (-30%)`, `buystatus ${JSON.stringify({ ...json, du: 9, di: 0.7 })}`));
-      buttons.push(Markup.button.callback(`${json.du == 12 ? '✅' : ''} 12 мес (-50%)`, `buystatus ${JSON.stringify({ ...json, du: 12, di: 0.5 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 1 ? '✅' : ''} 1 мес (-0%)`, `buystatus ${JSON.stringify({ ...json, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 3 ? '✅' : ''} 3 мес (-10%)`, `buystatus ${JSON.stringify({ ...json, du: 3, di: 0.9 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 6 ? '✅' : ''} 6 мес (-20%)`, `buystatus ${JSON.stringify({ ...json, du: 6, di: 0.8 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 9 ? '✅' : ''} 9 мес (-30%)`, `buystatus ${JSON.stringify({ ...json, du: 9, di: 0.7 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 12 ? '✅' : ''} 12 мес (-50%)`, `buystatus ${JSON.stringify({ ...json, du: 12, di: 0.5 })}`));
       buttons.push(Markup.button.callback('продолжить', `buystatusact ${JSON.stringify({ ...json })}`));
 
       // await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());

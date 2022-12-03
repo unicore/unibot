@@ -486,7 +486,7 @@ async function nextQuiz(bot, user, ctx) {
     const menu = Markup
       .keyboard(mainButtons, { columns: 1 }).resize();
 
-    const id = await ctx.reply('Выберите свой клуб и вступите в него для получения благ.', menu);
+    const id = await ctx.reply('Выберите участок и вступите в него для получения благ.', menu);
 
     const id3 = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
     // await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id3, 'CV');
@@ -600,7 +600,7 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив 🏁 \n\nВступите в клуб нео-предпринимателей и получайте справедливый пассивный доход от вклада в общий бизнес.\n\n<a href="https://dacom.io/welcome">как это работает</a>', { disable_web_page_preview: true, ...menu });
+        await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив 🏁 \n\nЦифровой Кооператив предоставляет сервис для создания клубов в телеграмме с возможностью проведения краудфандинга, кооперативного управления и  распределения прибыли на блокчейне.\n\n<a href="https://dacom.io/welcome">как это работает</a>', { disable_web_page_preview: true, ...menu });
 
         // const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
         // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));
@@ -641,7 +641,7 @@ module.exports.init = async (botModel, bot) => {
     }
   });
 
-  bot.hears('🌀 каталог клубов', async (ctx) => {
+  bot.hears('🌀 каталог участков', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
 
     // await checkForExistBCAccount(bot, ctx);
@@ -667,9 +667,9 @@ module.exports.init = async (botModel, bot) => {
     const help_buttons = bot.getEnv().HELP_BUTTONS;
 
     help_buttons.map((btn) => {
-      if (btn.type == 'callback') {
+      if (btn.type === 'callback') {
         buttons.push(Markup.button.callback(btn.title, btn.command));
-      } else if (btn.type == 'url') {
+      } else if (btn.type === 'url') {
         buttons.push(Markup.button.url(btn.title, btn.url));
       }
     });
@@ -1148,6 +1148,7 @@ module.exports.init = async (botModel, bot) => {
       await ctx.reply('Новостной канал не найден');
     } else {
       newsChannel.is_public = false;
+      // eslint-disable-next-line no-underscore-dangle
       await updateUnion(bot.instanceName, newsChannel._id, newsChannel);
       ctx.reply('Новостной канал теперь НЕ дублирует все сообщения в чате DAO.');
     }
@@ -1178,6 +1179,7 @@ module.exports.init = async (botModel, bot) => {
       await ctx.reply('Новостной канал не найден');
     } else {
       newsChannel.is_public = true;
+      // eslint-disable-next-line no-underscore-dangle
       await updateUnion(bot.instanceName, newsChannel._id, newsChannel);
       ctx.reply('Новостной канал теперь дублирует все сообщения в чате DAO.');
     }
@@ -2327,7 +2329,7 @@ module.exports.init = async (botModel, bot) => {
             const newsChannel = await getUnionByHostType(bot.instanceName, current_chat.host, 'unionNews');
             console.log('current_chat: ', current_chat);
 
-            if (newsChannel && newsChannel.is_public == true) {
+            if (newsChannel && newsChannel.is_public === true) {
               console.log('TEXT: ', !text);
               if (ctx.update.message.caption || !text) {
                 await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: ctx.update.message.caption });
