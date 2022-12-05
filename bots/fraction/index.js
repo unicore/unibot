@@ -8,6 +8,8 @@ const {
   mainButtons, communityButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
+const PayForStatus = 10 //FLOWER
+
 const {
   getHelixParams,
   getUserHelixBalances,
@@ -1202,7 +1204,7 @@ module.exports.init = async (botModel, bot) => {
 
       text += `Выбранный статус: ${status}\n`;
       text += `Продолжительность: ${json.du} мес\n`;
-      text += `Стоимость: ${(100 * json.s * json.du * json.di).toFixed(4)} FLOWER\n`;
+      text += `Стоимость: ${(PayForStatus * json.s * json.du * json.di).toFixed(4)} FLOWER\n`;
       text += `Скидка: -${100 - json.di * 100}%\n\n`;
 
       text += 'Выберите продолжильность: ';
@@ -1291,7 +1293,7 @@ module.exports.init = async (botModel, bot) => {
 
     const statuses = getStatusByNumber(json.s);
     console.log(statuses);
-    const cost = (100 * json.s * json.du * json.di).toFixed(4);
+    const cost = (PayForStatus * json.s * json.du * json.di).toFixed(4);
 
     let text = '';
     // text += `Ваш статус: кот 🐈\n`
