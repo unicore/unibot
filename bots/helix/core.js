@@ -474,7 +474,7 @@ async function massWithdrawAction(bot, user, hostname, balances) {
 }
 
 async function getHelixsList(bot) {
-  let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', 'unicore', 'ahosts');
+  let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
   helixs = helixs.filter((el) => el.username !== bot.getEnv().DEMO_HOST);
   return helixs;
 }
