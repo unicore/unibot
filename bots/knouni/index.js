@@ -274,23 +274,23 @@ module.exports.init = async (botModel, bot) => {
           await ctx.reply('Привет!', clearMenu, { reply_markup: { remove_keyboard: true } });
           
 
-          const id = await sendMessageToUser(bot, { id: user.id }, { video: {
-            "duration": 5,
-            "width": 1920,
-            "height": 1080,
-            "file_name": "ПП.mp4",
-            "mime_type": "video/mp4",
-            "thumb": {
-              "file_id": "AAMCAgADGQEAAQtPm2OPlFCEWJ8mSw_S6GWROGea_S0GAAJ2JQACjw6ASHie52PN2rlRAQAHbQADKwQ",
-              "file_unique_id": "AQADdiUAAo8OgEhy",
-              "file_size": 5044,
-              "width": 320,
-              "height": 180
-            },
-            "file_id": "BAACAgIAAxkBAAELT5tjj5RQhFifJksP0uhlkThnmv0tBgACdiUAAo8OgEh4nudjzdq5USsE",
-            "file_unique_id": "AgADdiUAAo8OgEg",
-            "file_size": 4252145
-          } }, clearMenu);
+          const id = await sendMessageToUser(bot, { id: user.id }, {   video: {
+                duration: 5,
+                width: 1920,
+                height: 1080,
+                file_name: 'ПП.mp4',
+                mime_type: 'video/mp4',
+                thumb: {
+                  file_id: 'AAMCAgADGQEAAhKkY4-c1qW95qGFk_IfDq9nAAEz_MXUAAKaJwACk2aBSJjUQK2_Wr7-AQAHbQADKwQ',
+                  file_unique_id: 'AQADmicAApNmgUhy',
+                  file_size: 5044,
+                  width: 320,
+                  height: 180
+                },
+                file_id: 'BAACAgIAAxkBAAISpGOPnNalveahhZPyHw6vZwABM_zF1AACmicAApNmgUiY1ECtv1q-_isE',
+                file_unique_id: 'AgADmicAApNmgUg',
+                file_size: 4252145
+            }}, clearMenu);
 
           await addRequestAction(bot, user, ctx)
           // await ctx.reply('> Задайте ваш вопрос:', request);
