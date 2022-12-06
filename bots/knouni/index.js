@@ -271,7 +271,7 @@ module.exports.init = async (botModel, bot) => {
           const clearMenu = Markup.removeKeyboard();
           // buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
 
-          // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
+          await ctx.reply('Привет!', clearMenu, { reply_markup: { remove_keyboard: true } });
           
 
           const id = await sendMessageToUser(bot, { id: user.id }, { video: {

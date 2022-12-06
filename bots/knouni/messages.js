@@ -25,7 +25,7 @@ async function sendMessageToUser(bot, user, message, extra) {
 
     return id.message_id;
   } catch (e) {
-    console.log('error on send: ', e.message);
+    console.log('error on send message: ', e.message, message, extra);
     return null;
   }
 }
