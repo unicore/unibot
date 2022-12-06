@@ -1670,13 +1670,15 @@ module.exports.init = async (botModel, bot) => {
 
               if (newsChannel) {
                 let news_text = '';
+                
+                news_text += `${text}`;
+
                 if (goal) {
-                  if (g) news_text += `новый комментарий в #ЦЕЛЬ_${g.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                  if (g) news_text += `опубликовано в #ЦЕЛЬ_${g.goal_id} <a href="${pr.link}">${pr.unionName}</a>:\n`;
                 } else {
-                  news_text += `новый комментарий в <a href="${pr.link}">${pr.unionName}</a>:\n`;
+                  news_text += `опубликовано в <a href="${pr.link}">${pr.unionName}</a>:\n`;
                 }
 
-                news_text += `${text}`;
                 if (ctx.update.message.caption) { await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text }); } else { await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text }); }
 
                 // const newsMessageId = await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
@@ -2310,9 +2312,8 @@ module.exports.init = async (botModel, bot) => {
                 if (newsChannel && project) {
                   let news_text = '';
 
-                  news_text += `новый комментарий в <a href="${project.link}">${project.unionName}</a>:\n`;
                   if (ctx.update.message.caption || text) news_text += ctx.update.message.caption ? ctx.update.message.caption : text;
-
+                  news_text += `опубликовано в <a href="${project.link}">${project.unionName}</a>:\n`;
                   if (ctx.update.message.caption || !text) {
                     await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text });
                   } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });
@@ -2477,10 +2478,8 @@ module.exports.init = async (botModel, bot) => {
                     console.log('UNION: ', union);
 
                     let news_text = '';
-                    news_text += `новый комментарий в <a href="${union.link}">${union.unionName}</a>:\n`;
-
                     if (ctx.update.message.caption || text) news_text += ctx.update.message.caption ? ctx.update.message.caption : text;
-
+                    news_text += `опубликовано в <a href="${union.link}">${union.unionName}</a>:\n`;
                     if (ctx.update.message.caption || !text) {
                       await sendMessageToUser(bot, { id: newsChannel.id }, ctx.update.message, { caption: news_text });
                     } else await sendMessageToUser(bot, { id: newsChannel.id }, { text: news_text });

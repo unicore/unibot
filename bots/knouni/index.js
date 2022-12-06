@@ -164,10 +164,10 @@ const quizDefinition = [
 ];
 
 async function catchRequest(bot, user, ctx, text) {
-  const reply = 'Я получил запрос, мне нужно время на подготовку ответа! Для дополнения запроса, напишите сообщение ниже:';
-  const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); // , '🪙 кошелёк'
+  const reply = 'Пожалуйста, подождите.. Мне потребуется некоторое время на создание разумного ответа. Я сразу свяжусь с вами, когда ответ будет найден!';
+  // const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); // , '🪙 кошелёк'
 
-  await sendMessageToUser(bot, user, { text: reply }, menu);
+  await sendMessageToUser(bot, user, { text: reply });//, menu
 
   const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
 
@@ -268,16 +268,41 @@ module.exports.init = async (botModel, bot) => {
         const buttons = [];
 
         if (user.requests_count > 0) {
-          await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', request);
-          buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
-          await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          const clearMenu = Markup.removeKeyboard();
+          buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
+
+          // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
+          
+
+          const id = await sendMessageToUser(bot, { id: user.id }, { video: {
+            "duration": 5,
+            "width": 1920,
+            "height": 1080,
+            "file_name": "ПП.mp4",
+            "mime_type": "video/mp4",
+            "thumb": {
+              "file_id": "AAMCAgADGQEAAQtPm2OPlFCEWJ8mSw_S6GWROGea_S0GAAJ2JQACjw6ASHie52PN2rlRAQAHbQADKwQ",
+              "file_unique_id": "AQADdiUAAo8OgEhy",
+              "file_size": 5044,
+              "width": 320,
+              "height": 180
+            },
+            "file_id": "BAACAgIAAxkBAAELT5tjj5RQhFifJksP0uhlkThnmv0tBgACdiUAAo8OgEh4nudjzdq5USsE",
+            "file_unique_id": "AgADdiUAAo8OgEg",
+            "file_size": 4252145
+          } }, clearMenu);
+
+          await addRequestAction(bot, user, ctx)
+          // await ctx.reply('> Задайте ваш вопрос:', request);
+          // buttons.push(Markup.button.callback('🆕 cоздать запрос', 'createrequest'));
+          // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         } else {
           const clearMenu = Markup.removeKeyboard();
-          buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
+          buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
 
-          await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
-          await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
-          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
+          // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
+          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов купите лицензию за 100 RUB в месяц:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         }
       }
     } else {
@@ -287,7 +312,7 @@ module.exports.init = async (botModel, bot) => {
   });
 
   async function addRequestAction(bot, user, ctx) {
-    ctx.reply('Введите текст запроса:');
+    ctx.reply('> введите ваш запрос:');
     user.state = 'newrequest';
     await saveUser(bot.instanceName, user);
   }
