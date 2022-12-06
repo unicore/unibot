@@ -269,7 +269,7 @@ module.exports.init = async (botModel, bot) => {
 
         if (user.requests_count > 0) {
           const clearMenu = Markup.removeKeyboard();
-          buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
+          // buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
 
           // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
           
