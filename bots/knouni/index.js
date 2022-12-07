@@ -90,8 +90,8 @@ const {
 const { getDecodedParams } = require('./utils/utm');
 const { parseTokenString } = require('./utils/tokens');
 
-async function generateAccount(bot, ctx, isAdminUser, ref) {
-  const user = ctx.update.message.from;
+async function generateAccount(bot, ctx, isAdminUser, ref, userext) {
+  const user = userext || ctx.update.message.from;
 
   const generatedAccount = await generateUniAccount();
 
@@ -105,7 +105,7 @@ async function generateAccount(bot, ctx, isAdminUser, ref) {
   if (!user.ref) user.ref = '';
 
   const params = {
-    tg_id: ctx.update.message.from.id,
+    tg_id: user.id,
     username: user.eosname,
     active_pub: user.pub,
     owner_pub: user.pub,
@@ -259,13 +259,22 @@ module.exports.init = async (botModel, bot) => {
           user.app = bot.getEnv().APP;
           user.ref = ref;
           user.requests_count = 3;
-          user.eosname = await generateAccount(bot, ctx, false, user.ref);
+
+          // try{
+            user.eosname = await generateAccount(bot, ctx, false, user.ref);
+          // } catch(e){
+            // ctx.reply('')
+          // }
           await saveUser(bot.instanceName, user);
         } else {
           user.request_chat_id = false;
           user.request_channel_id = false;
           if (!user.requests_count)
             user.requests_count = 3;
+
+          if (!user.eosname) {
+            user.eosname = await generateAccount(bot, ctx, false, user.ref);
+          }
 
           await saveUser(bot.instanceName, user);
         }
