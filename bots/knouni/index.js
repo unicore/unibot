@@ -8,6 +8,8 @@ const {
   mainButtons, backToMainMenu, demoButtons,
 } = require('./utils/bot');
 
+const {getAIAnswer} = require('./ai.js')
+
 const {
   getHelixParams,
   getUserHelixBalances,
@@ -176,13 +178,16 @@ async function catchRequest(bot, user, ctx, text) {
   user.state = 'chat';
   user.request_channel_id = id;
 
-  if (!user.eosname) {
-    user.eosname = await generateAccount(bot, ctx, false, user.ref);
-  }
+  // if (!user.eosname) {
+  //   user.eosname = await generateAccount(bot, ctx, false, user.ref);
+  // }
 
   await saveUser(bot.instanceName, user);
 
   await insertRequest(bot.instanceName, user, id, text);
+  
+  //TODO AI
+
 }
 
 module.exports.init = async (botModel, bot) => {
@@ -244,7 +249,7 @@ module.exports.init = async (botModel, bot) => {
 
     const ref = await ctx.update.message.text.split('/start ')[1] || null;
     let msg2;
-
+    console.log("REFERER:", ref)
     if (ctx.update.message.chat.type === 'private') {
       if (!ctx.update.message.from.is_bot) {
         let user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -254,17 +259,18 @@ module.exports.init = async (botModel, bot) => {
           user.app = bot.getEnv().APP;
           user.ref = ref;
           user.requests_count = 3;
+          user.eosname = await generateAccount(bot, ctx, false, user.ref);
           await saveUser(bot.instanceName, user);
         } else {
           user.request_chat_id = false;
           user.request_channel_id = false;
-          // if (!user.requests_count)
-          user.requests_count = 3;
+          if (!user.requests_count)
+            user.requests_count = 3;
 
           await saveUser(bot.instanceName, user);
         }
 
-        const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
+        // const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
         const buttons = [];
 
         if (user.requests_count > 0) {
@@ -420,6 +426,12 @@ module.exports.init = async (botModel, bot) => {
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 
             await saveUser(bot.instanceName, user);
+            // //TODO AI
+            // let response = await getAIAnswer(bot, text)
+            // console.log("AI RESPONCE: ", response.data.choices)
+
+            // // response.data.choices[0].text
+            // await ctx.reply(response.data.choices[0].text)
 
             // ctx.reply('Сообщение отправлено');
           } else {
