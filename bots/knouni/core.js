@@ -347,12 +347,15 @@ async function withdrawAllUserRefBalances(bot, user) {
 
 async function printWallet(bot, user, ctx) {
   const buttons = [];
+  console.log("on PRINT WALLET")
 
   // buttons.push(Markup.button.callback('перевести FLOWER', 'transfer'));
   // buttons.push(Markup.button.callback('мои партнёры', 'mypartners'));
 
   // if (bot.getEnv().DEPOSIT_WITHDRAW_FROM === 'wallet') {
-  //   buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+    // buttons.push(Markup.button.callback('пополнить', 'givehelp'));
+  // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+  buttons.push(Markup.button.callback('оформить подписку', `buystatus ${JSON.stringify({})}`));
   //   buttons.push(Markup.button.callback('вывести', 'gethelp'));
   // }
 
@@ -361,9 +364,8 @@ async function printWallet(bot, user, ctx) {
     await withdrawAllUserRefBalances(bot, user);
     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
     const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
-
-    // const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
-
+    const status = await getPartnerStatus(bot, bot.getEnv().CORE_HOST, user.eosname)
+    
     const balances = await getUserHelixBalances(bot, null, user.eosname);
 
     const assetBlockedNow = balances.totalBalances;
@@ -375,7 +377,20 @@ async function printWallet(bot, user, ctx) {
 
     text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
-    text += `\n| Цветки: ${totalBal}`;
+    text += `\n| Ваш статус: `;
+
+    text += `\n|\t\t\t\t\t${status.level == -1 ? (user.requests_count > 0 ? '✅' : '❌') : '☑️'} гость`
+    
+    if (status.level == -1 || status.level == 0)
+      text += `\n|\t\t\t\t\t\t\t\t -> осталось запросов: ${user.requests_count}`
+    
+    text += `\n|\t\t\t\t\t${status.level == 1 ? '✅' : '☑️'} советник`
+    // text += `\n|\t\t\t\t\t${status.level == 2 ? '✅' : '☑️'} ассистент`
+    
+    if (status.level > 0)
+      text += `\n|\t\t\t\t\t до ${status.expiration}`
+      
+    // text += `\n| Цветки: ${totalBal}`;
     // text += `\n|\t\t\t\t\tДоступно: ${liquidBal}`;
     // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow}`;
     // text += `\n|\t\t\t\t\tПоступило от партнёров: ${refStat}`;
@@ -387,6 +402,36 @@ async function printWallet(bot, user, ctx) {
     if (!ctx) await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
     else ctx.reply(text);
   }
+}
+
+
+
+async function getPartnerStatus(bot, hostname, username){
+  let [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
+  
+  let partner = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'corepartners', username, username, 1);
+  partner = partner[0]
+
+  if (!partner) {
+    return {status: 'гость', icon: "", level: -1}
+  } else {
+
+    let res = {}
+
+    if (partner.status == "adviser")        {
+        res.icon = "🐨"
+        res.status = "советник"
+        res.level = 1
+    } else if (partner.status == "assistant") {
+        res.icon = "🐼"
+        res.status = "ассистент"
+        res.level = 2
+    } 
+    res.expiration = partner.expiration
+    return res
+
+  }
+
 }
 
 async function transferAction(bot, user, amount, ctx) {
@@ -927,6 +972,7 @@ module.exports = {
   printHelixWallet,
   refreshState,
   transferAction,
+  getPartnerStatus,
   getLiquidBalance,
   getOneUserHelixBalance,
   printWallet,

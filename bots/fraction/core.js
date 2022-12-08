@@ -14,74 +14,81 @@ const { getPartner } = require('./partners');
 const { timestampToDHMS } = require('./utils/time');
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
 
+
 async function transferToGateAction(bot, user, amount, address) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-
+  
   await eos.transact({
-    actions: [{
-      account: 'eosio.token',
-      name: 'transfer',
-      authorization: [{
-        actor: user.eosname,
-        permission: 'active',
+      actions: [{
+        account: 'eosio.token',
+        name: 'transfer',
+        authorization: [{
+          actor: user.eosname,
+          permission: 'active',
+        }],
+        data: {
+          from: user.eosname,
+          to: "gateway",
+          quantity: amount,
+          memo: `withdraw to : ${address}`,
+        },
       }],
-      data: {
-        from: user.eosname,
-        to: 'gateway',
-        quantity: amount,
-        memo: `withdraw to : ${address}`,
-      },
-    }],
-  }, {
-    blocksBehind: 3,
-    expireSeconds: 30,
-  });
+    }, {
+      blocksBehind: 3,
+      expireSeconds: 30,
+    })
+
+
 }
 
-async function getPartnerStatus(bot, hostname, username) {
-  const [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
-
+async function getPartnerStatus(bot, hostname, username){
+  let [guest] = await lazyFetchAllTableInternal(bot.eosapi, 'registrator', 'registrator', 'guests', username, username, 1);
+  
   let partner = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'corepartners', username, username, 1);
-  partner = partner[0];
+  partner = partner[0]
 
   if (guest) {
-    return { status: 'гость', icon: '', level: -1 };
-  } else if (!partner) return { status: 'пайщик', icon: '', level: 0 };
+    return {status: 'гость', icon: "", level: -1}
+  } else if (!partner)
+    return {status: 'пайщик', icon: "", level: 0}
   else {
-    const res = {};
 
-    if (partner.status == 'koala') {
-      res.icon = '🐨';
-      res.status = 'коала';
-      res.level = 1;
-    } else if (partner.status == 'panda') {
-      res.icon = '🐼';
-      res.status = 'панда';
-      res.level = 2;
-    } else if (partner.status == 'wolf') {
-      res.icon = '🐺';
-      res.status = 'волк';
-      res.level = 3;
-    } else if (partner.status == 'tiger') {
-      res.icon = '🐯';
-      res.status = 'тигр';
-      res.level = 4;
-    } else if (partner.status == 'leo') {
-      res.icon = '🦁';
-      res.status = 'лев';
-      res.level = 5;
-    } else if (partner.status == 'bear') {
-      res.icon = '🐻';
-      res.status = 'медведь';
-      res.level = 6;
-    } else if (partner.status == 'dragon') {
-      res.icon = '🐲';
-      res.status = 'дракон';
-      res.level = 7;
+    let res = {}
+
+    if (partner.status == "koala")        {
+        res.icon = "🐨"
+        res.status = "коала"
+        res.level = 1
+    } else if (partner.status == "panda") {
+        res.icon = "🐼"
+        res.status = "панда"
+        res.level = 2
+    } else if (partner.status == "wolf")  {
+        res.icon = "🐺"
+        res.status = "волк"
+        res.level = 3
+    } else if (partner.status == "tiger") {
+        res.icon = "🐯"
+        res.status = "тигр"
+        res.level = 4
+    } else if (partner.status == "leo")   {
+        res.icon = "🦁"
+        res.status = "лев"
+        res.level = 5
+    } else if (partner.status == "bear")  {
+        res.icon = "🐻"
+        res.status = "медведь"
+        res.level = 6
+    } else if (partner.status == "dragon") {
+        res.icon = "🐲"
+        res.status = "дракон"
+        res.level = 7
     }
-    res.expiration = partner.expiration;
-    return res;
+    res.expiration = partner.expiration
+    return res
+
   }
+
 }
 
 async function getHelixParams(bot, hostname) {
@@ -92,7 +99,7 @@ async function getHelixParams(bot, hostname) {
   const [currentPool] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', host[0].current_pool_id, host[0].current_pool_id, 1);
 
   const [currentRate] = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'rate', currentPool.pool_num - 1, currentPool.pool_num - 1, 1);
-
+  
   const bcinfo = await bot.eosapi.getInfo({});
   const bctime = await new Date(bcinfo.head_block_time);
 
@@ -107,7 +114,7 @@ async function getHelixParams(bot, hostname) {
     // eslint-disable-next-line max-len
     currentPool.priority_time = ((currentPool.priority_time - bctime) / 1000 / 60 / 60).toFixed(2);
     // console.log("currentPool.remain_quants: ", currentPool.remain_quants, )
-    currentPool.remain = (parseFloat(currentPool.remain_quants) / parseFloat(helix[0].quants_precision) * parseFloat(currentPool.quant_cost)).toFixed(4) + ' ' + host[0].symbol;
+    currentPool.remain = (parseFloat(currentPool.remain_quants) / parseFloat(helix[0].quants_precision) * parseFloat(currentPool.quant_cost)).toFixed(4) + " " + host[0].symbol
   }
 
   const incomeStep = (helix[0].overlap / 100 - 100).toFixed(2);
@@ -115,31 +122,32 @@ async function getHelixParams(bot, hostname) {
   const maxIncome = (incomeStep * Math.floor(helix[0].pool_limit / 2)).toFixed(0);
 
   return {
-    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome, currentRate,
+    helix: helix[0], host: host[0], currentPool, incomeStep, lossFactor, maxIncome, currentRate
   };
 }
 
 async function getBalancesOnSale(bot, hostname, username, params) {
-  const balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'balance4', 'onsell', 'onsell', 1000, 4, 'i64');
-  let summ = 0;
+  let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'balance4', "onsell", "onsell", 1000, 4, 'i64');
+  let summ = 0 
 
-  balances.map((bal) => {
-    summ += parseFloat(bal.compensator_amount);
-  });
+  balances.map(bal => {
+    summ += parseFloat(bal.compensator_amount)
+  })
 
-  const fractions_on_sale = (summ / (parseFloat(params.host.sale_shift) / 10000).toFixed(4));
+  let fractions_on_sale = (summ / (parseFloat(params.host.sale_shift) / 10000).toFixed(4))
 
-  return { balances, summ, fractions_on_sale };
+  return {balances, summ, fractions_on_sale}
+
 }
 
 async function getAllHelixBalances(bot, hostname) {
-  const balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'balance4');
-  return balances;
+  let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'balance4');
+  return balances
 }
 
 async function getUserHelixBalances(bot, hostname, username, helix) {
   let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'balance4');
-  balances = balances.filter((bal) => bal.owner == username);
+  balances = balances.filter(bal => bal.owner == username)
   // console.log("balances.length", balances)
 
   if (hostname) {
@@ -160,8 +168,8 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
   const winBalances = [];
   const loseBalances = [];
   let totalWinBalances = '0.0000 FLOWER';
-  const totalPriorityBalances = '0.0000 FLOWER';
-  const totalLoseBalances = '0.0000 FLOWER';
+  let totalPriorityBalances = '0.0000 FLOWER';
+  let totalLoseBalances = '0.0000 FLOWER';
   let totalNominal = 0;
   let totalProfit = 0;
 
@@ -179,20 +187,20 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     totalNominal += parseFloat(balance.purchase_amount);
 
     // if (hostname) {
-    if (parseFloat(balance.compensator_amount) > parseFloat(balance.purchase_amount)) {
-      // if (helix.host.current_cycle_num > balance.cycle_num) {
-      //   priorityBalances.push(balance);
-      //   totalPriorityBalances = `${(parseFloat(totalPriorityBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
-      // }
+      if (parseFloat(balance.compensator_amount) > parseFloat(balance.purchase_amount)) {
+        // if (helix.host.current_cycle_num > balance.cycle_num) {
+        //   priorityBalances.push(balance);
+        //   totalPriorityBalances = `${(parseFloat(totalPriorityBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
+        // }
 
-      // loseBalances.push(balance);
-      // totalLoseBalances = `${(parseFloat(totalLoseBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
+        // loseBalances.push(balance);
+        // totalLoseBalances = `${(parseFloat(totalLoseBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
       // } else {
-      totalProfit += (parseFloat(balance.compensator_amount) - parseFloat(balance.purchase_amount));
+        totalProfit += (parseFloat(balance.compensator_amount) - parseFloat(balance.purchase_amount));
 
-      winBalances.push(balance);
-      totalWinBalances = `${(parseFloat(totalWinBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
-    }
+        winBalances.push(balance);
+        totalWinBalances = `${(parseFloat(totalWinBalances) + parseFloat(balance.available)).toFixed(4)} FLOWER`;
+      }
     // }
   });
 
@@ -210,7 +218,7 @@ async function getUserHelixBalances(bot, hostname, username, helix) {
     totalBlackBalances,
     totalBalances,
     totalProfit,
-    totalNominal,
+    totalNominal
   };
 }
 
@@ -306,7 +314,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
   // toPrint += `\n\t⚫️ Чёрный баланс: ${balances.totalBlackBalances}`;
 
   // if (skipForDemo) {
-  // toPrint += `\n\t💎 Опыт: ${totalSharesAsset} | ${sharesStake}%`;
+    // toPrint += `\n\t💎 Опыт: ${totalSharesAsset} | ${sharesStake}%`;
   // }
 
   // toPrint += `\n\t🔗 В очереди: ${myTail.totalUserInTail}`;
@@ -334,7 +342,7 @@ async function printHelixWallet(bot, ctx, user, hostname) {
 
   // if (skipForDemo) {
   //   buttons.push(Markup.button.callback('Мой опыт', `showexp ${hostname} `));
-  // buttons.push(Markup.button.callback('Цели', `showgoals ${hostname} `));
+    // buttons.push(Markup.button.callback('Цели', `showgoals ${hostname} `));
   // }
 
   // buttons.push(Markup.button.callback('Очередь', `tail ${hostname}`));
@@ -404,15 +412,16 @@ function getRefBalances(bot, username) {
 
 async function getRefBalancesByStatus(bot, hostname, username) {
   let balances = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', username, 'refbalances');
-  const status = await getPartnerStatus(bot, hostname, username);
+  let status = await getPartnerStatus(bot, hostname, username);
+  
+  balances = balances.filter(el => el.level > status.level)
+  let summ = 0
+  balances.map(bal => {
+    summ += parseFloat(bal.amount)
+  })
 
-  balances = balances.filter((el) => el.level > status.level);
-  let summ = 0;
-  balances.map((bal) => {
-    summ += parseFloat(bal.amount);
-  });
+  return (summ).toFixed(4) + " FLOWER"
 
-  return (summ).toFixed(4) + ' FLOWER';
 }
 
 async function internalRefWithdrawAction(bot, user, refbalance) {
@@ -446,10 +455,11 @@ async function internalRefWithdrawAction(bot, user, refbalance) {
 }
 
 async function withdrawAllUserRefBalances(bot, user) {
+
   let refBalances = await getRefBalances(bot, user.eosname);
-  const status = await getPartnerStatus(bot, 'core');
-  refBalances = refBalances.filter((bal) => bal.level > status.level);
-  console.log(refBalances);
+  let status = await getPartnerStatus(bot, "core", )
+  refBalances = refBalances.filter(bal => bal.level > status.level)
+  console.log(refBalances)
 
   const promises = refBalances.map((rb) => internalRefWithdrawAction(bot, user, rb));
 
@@ -468,49 +478,55 @@ async function withdrawAllUserRefBalances(bot, user) {
 async function printWallet(bot, user) {
   const buttons = [];
 
-  const status = await getPartnerStatus(bot, 'core', user.eosname);
+  const status = await getPartnerStatus(bot, "core", user.eosname)
 
   // if(status.level == -1) {
 
-  // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-  // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-  // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // } else {
-  buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-  buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
-  buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
-  buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
-  buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+    buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
+    buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
+    buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
+    buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
+    buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // }
+  
 
+  
+  
   if (user && user.eosname) {
+
     const account = await bot.uni.readApi.getAccount(user.eosname);
     await withdrawAllUserRefBalances(bot, user);
     const refStat = await getRefStat(bot, user.eosname, 'FLOWER');
-
-    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+    
+    const liquidBal = await getLiquidBalance(bot, user.eosname, 'FLOWER')
 
     const ram = `${((account.ram_quota - account.ram_usage) / 1024).toFixed(2)} kb`;
 
     // const balances = await getUserHelixBalances(bot, null, user.eosname);
 
-    const hosts = await getHelixsList(bot);
-    if (hosts.length > 0) {
-      const hostname = hosts[0].username;
-
-      const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname);
-      const status = await getPartnerStatus(bot, 'core', user.eosname);
-      console.log('status: ', status);
+    
+    let hosts = await getHelixsList(bot)
+    if (hosts.length > 0){
+      let hostname = hosts[0].username
+      
+      const notAccessableRefBalance = await getRefBalancesByStatus(bot, hostname, user.eosname)
+      const status = await getPartnerStatus(bot, "core", user.eosname)
+      console.log("status: ", status)
       const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
       const balances = await getUserHelixBalances(bot, hostname, user.eosname);
-      const assetBlockedNow = balances.totalBalances.replace('FLOWER', 'FLOWER');
+      const assetBlockedNow = balances.totalBalances.replace("FLOWER", "FLOWER");
 
       const params = await getHelixParams(bot, hostname);
+      
+      let uPower = (userPower.power / params.helix.quants_precision).toFixed(4)
+      let totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower
 
-      const uPower = (userPower.power / params.helix.quants_precision).toFixed(4);
-      const totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower;
 
       const totalBal = `${(parseFloat(liquidBal) + parseFloat(assetBlockedNow)).toFixed(4)} FLOWER`;
 
@@ -520,25 +536,28 @@ async function printWallet(bot, user) {
       text += '\n---------------------------------';
       text += `\n| Системное имя: ${user.eosname}`;
       text += `\n| Статус: ${status.status} ${status.icon}`;
-
-      if (status.level > 0) text += `\n|\t\t\t\t\t до ${status.expiration}`;
-
+      
+      if (status.level > 0)
+        text += `\n|\t\t\t\t\t до ${status.expiration}`
+      
       text += `\n| Фракции: ${totalBal}`;//
-      text += `\n|\t\t\t\t\tДоступные: ${liquidBal.replace('FLOWER', 'FLOWER')}`;
+      text += `\n|\t\t\t\t\tДоступные: ${liquidBal.replace("FLOWER", "FLOWER")}`;
       // text += `\n|\t\t\t\t\tЗаблокировано: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`;
-      text += `\n|\t\t\t\t\tПоступило от партнеров: ${refStat.replace('FLOWER', 'FLOWER')}`;
-      text += `\n|\t\t\t\t\tЗаблокировано по статусу: ${notAccessableRefBalance.replace('FLOWER', 'FLOWER')}`;
-
+      text += `\n|\t\t\t\t\tПоступило от партнеров: ${refStat.replace("FLOWER", "FLOWER")}`;
+      text += `\n|\t\t\t\t\tЗаблокировано по статусу: ${notAccessableRefBalance.replace("FLOWER", "FLOWER")}`;
+      
       // text += `\n|\t\t\t\t\tФракции: ${uPower} шт.\n`
-      text += `\n|\t\t\t\t\tЗаложено: ${assetBlockedNow.replace('FLOWER', 'FLOWER')}`;
+      text += `\n|\t\t\t\t\tЗаложено: ${assetBlockedNow.replace("FLOWER", "FLOWER")}`
+    
 
       // text += `\n| Ресурс аккаунта: ${ram} RAM`;
 
       text += '\n---------------------------------';
       text += `\n\nДля приглашения партнеров используйте ссылку: ${link}\n`; //
       // eslint-disable-next-line max-len
-      await sendMessageToUser(bot, user, { text }, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
-    } else await sendMessageToUser(bot, user, { text: 'Кооперативные участки не найдены' }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      await sendMessageToUser(bot, user, { text }, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+    } else await sendMessageToUser(bot, user, { text: "Кооперативные участки не найдены" }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+
   }
 }
 
@@ -616,19 +635,20 @@ async function internalWithdrawAction(bot, user, hostname, balanceId) {
   }, {
     blocksBehind: 3,
     expireSeconds: 30,
-  });
+  })
 }
+
 
 async function sellBalance(bot, user, hostname, balanceId) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
-
-  const data = {
+  
+  let data = {
     username: user.eosname,
     host: hostname,
     balance_id: balanceId,
-  };
+  }
 
-  console.log(data);
+  console.log(data)
 
   await eos.transact({
     actions: [{
@@ -638,12 +658,12 @@ async function sellBalance(bot, user, hostname, balanceId) {
         actor: user.eosname,
         permission: 'active',
       }],
-      data,
+      data: data,
     }],
   }, {
     blocksBehind: 3,
     expireSeconds: 30,
-  });
+  })
 }
 
 async function massWithdrawAction(bot, user, hostname, balances) {
@@ -661,6 +681,8 @@ async function massWithdrawAction(bot, user, hostname, balances) {
 }
 
 async function getHelixsList(bot) {
+  
+
   let helixs = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', bot.getEnv().CORE_HOST, 'ahosts');
   helixs = helixs.filter((el) => el.username !== bot.getEnv().DEMO_HOST);
   return helixs;
@@ -668,7 +690,7 @@ async function getHelixsList(bot) {
 
 async function internalRefreshAction(bot, balance, username) {
   const eos = await bot.uni.getEosPassInstance(bot.getEnv().REFRESHER);
-  console.log('REFRESH:', balance);
+  console.log("REFRESH:", balance)
   try {
     await eos.transact({
       actions: [{
@@ -751,65 +773,69 @@ async function refreshAllBalances(bot, hostname, baseUser, skip) {
   }
 }
 
-async function getForecast(bot, hostname, params) {
-  // console.log(params)
-  const currentPool = params.currentPool;
-  const pools = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', currentPool.id - currentPool.pool_num + 1, currentPool.id, 100);
-  console.log(currentPool);
 
+async function getForecast(bot, hostname, params){
+  // console.log(params)
+  let currentPool = params.currentPool
+  let pools = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', currentPool.id - currentPool.pool_num + 1, currentPool.id, 100);
+  console.log(currentPool)
+  
   const bcinfo = await bot.eosapi.getInfo({});
   const bctime = await new Date(bcinfo.head_block_time);
 
   const firstPoolStartedAt = await new Date(pools[0].pool_started_at);
-
-  const cycleTimeInSeconds = (bctime - firstPoolStartedAt) / 1000;
-  console.log('timeIncome: ', cycleTimeInSeconds);
-  const humanResult = timestampToDHMS(cycleTimeInSeconds);
-  console.log('human: ', humanResult);
+  
+  let cycleTimeInSeconds = (bctime - firstPoolStartedAt ) / 1000
+  console.log('timeIncome: ', cycleTimeInSeconds)
+  let humanResult = timestampToDHMS(cycleTimeInSeconds);
+  console.log('human: ', humanResult)
 
   const targetRates = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'rate', params.currentPool.pool_num - 1, params.currentPool.pool_num, 2);
+  
+  console.log(targetRates)
+  
+  let factIncomeInCycle = parseFloat(targetRates[0].total_in_box) - parseFloat(targetRates[0].pool_cost) + parseFloat(currentPool.filled)
+  
+  let realRemainForHalfRotate = parseFloat(currentPool.remain).toFixed(4) + params.host.quote_symbol
 
-  console.log(targetRates);
+  let realRemainForRotate = parseFloat(realRemainForHalfRotate) + parseFloat(targetRates[1].live_balance_for_sale)
+  
 
-  const factIncomeInCycle = parseFloat(targetRates[0].total_in_box) - parseFloat(targetRates[0].pool_cost) + parseFloat(currentPool.filled);
+  console.log("factIncomeInCycle: ", factIncomeInCycle)
+  console.log("realRemainForRotate: ", realRemainForRotate)
+  let factCycleIncomeInFlowersPerSecond = factIncomeInCycle / cycleTimeInSeconds
 
-  const realRemainForHalfRotate = parseFloat(currentPool.remain).toFixed(4) + params.host.quote_symbol;
-
-  const realRemainForRotate = parseFloat(realRemainForHalfRotate) + parseFloat(targetRates[1].live_balance_for_sale);
-
-  console.log('factIncomeInCycle: ', factIncomeInCycle);
-  console.log('realRemainForRotate: ', realRemainForRotate);
-  const factCycleIncomeInFlowersPerSecond = factIncomeInCycle / cycleTimeInSeconds;
-
-  const factCycleIncomeInFlowersPerMonth = factCycleIncomeInFlowersPerSecond * 86400 * 30;
+  let factCycleIncomeInFlowersPerMonth = factCycleIncomeInFlowersPerSecond * 86400 * 30
   // const targetRates = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'rate', params.currentPool.pool_num - 1, params.currentPool.pool_num + 1, 1000);
-  console.log('factCycleIncomeInFlowersPerMonth: ', factCycleIncomeInFlowersPerMonth);
+  console.log("factCycleIncomeInFlowersPerMonth: ", factCycleIncomeInFlowersPerMonth)
+  
+  //TODO filter pools, which older then 1 month
+  //TODO add fact business budget per month
 
-  // TODO filter pools, which older then 1 month
-  // TODO add fact business budget per month
+  let forecastedPercentIncomePerMonth = (factCycleIncomeInFlowersPerMonth / realRemainForRotate * 100).toFixed(4)
+  console.log("forecastedPercentIncomePerMonth per mounth:", forecastedPercentIncomePerMonth)
 
-  const forecastedPercentIncomePerMonth = (factCycleIncomeInFlowersPerMonth / realRemainForRotate * 100).toFixed(4);
-  console.log('forecastedPercentIncomePerMonth per mounth:', forecastedPercentIncomePerMonth);
+  let forecastedTimeForRotate = realRemainForRotate / factCycleIncomeInFlowersPerSecond
 
-  const forecastedTimeForRotate = realRemainForRotate / factCycleIncomeInFlowersPerSecond;
+  let forecastedTimeForHalfRotate = parseFloat(realRemainForHalfRotate) / factCycleIncomeInFlowersPerSecond
 
-  const forecastedTimeForHalfRotate = parseFloat(realRemainForHalfRotate) / factCycleIncomeInFlowersPerSecond;
-
-  return { forecastedPercentIncomePerMonth, forecastedTimeForRotate, forecastedTimeForHalfRotate };
+  return {forecastedPercentIncomePerMonth, forecastedTimeForRotate, forecastedTimeForHalfRotate}
 }
 
 async function printUserFractions(bot, ctx, user, hostname, nextIndex) {
+
   const userPower = await bot.uni.coreContract.getUserPower(user.eosname, hostname);
   const balances = await getUserHelixBalances(bot, hostname, user.eosname);
 
   const params = await getHelixParams(bot, hostname);
+  
+  let uPower = (userPower.power / params.helix.quants_precision).toFixed(4)
+  let totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower
 
-  const uPower = (userPower.power / params.helix.quants_precision).toFixed(4);
-  const totalCost = parseFloat(params.currentRate.quant_sell_rate) * uPower;
 
-  let text = `Фракции ${hostname.toUpperCase()}\n`;
+  let text = `Фракции ${hostname.toUpperCase()}\n`
   text += '------------------------------\n';
-  text += `У вас: ${uPower} фракций\n`;
+  text += `У вас: ${uPower} фракций\n`
   // text += `\nКурс: ${params.currentRate.quant_sell_rate.replace("FLOWER", "FLOWER")} за фракцию\n`
   // text += `\nПрирост: ${(balances.totalProfit).toFixed(4)} FLOWER`
   // text += `\n\t\t\t +${5}% на росте курса`;
@@ -817,28 +843,32 @@ async function printUserFractions(bot, ctx, user, hostname, nextIndex) {
   // text += `\n\t\t\t +${5}% на росте пула`;
   // text += `\n\nДоля: `
   // text += `\n\t\t\t +${5}% на росте пула`;
-  text += `\nСтоимость: ${totalCost.toFixed(4)} FLOWER`;
-
+  text += `\nСтоимость: ${totalCost.toFixed(4)} FLOWER`
+  
   text += '\n------------------------------';
   // text += uPower
-
+  
   const buttons = [];
 
-  buttons.push(Markup.button.callback('продать', 'printbalances'));
-  buttons.push(Markup.button.callback('обновить', 'refreshaction'));
+  buttons.push(Markup.button.callback('продать', `printbalances`));
+  buttons.push(Markup.button.callback('обновить', `refreshaction`));
+    
 
-  ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+  ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize())
+
+
 }
 
 async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
   const balances = await getUserHelixBalances(bot, hostname, user.eosname);
   const params = await getHelixParams(bot, hostname);
   // const estimateSysIncome = await getEstimateSystemIncome(bot, params.host.ahost, params);
+  
 
   const currentIndex = nextIndex || 0;
   const currentBalance = balances.all[currentIndex];
-  console.log('ON PRINT', currentIndex);
-  console.log('currentBalance: ', currentBalance);
+  console.log("ON PRINT", currentIndex)
+  console.log("currentBalance: ", currentBalance)
 
   if (currentBalance) {
     // let isPriority = false;
@@ -851,191 +881,228 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     if (balances.all.length === 1) {
       // buttons.push(Markup.button.callback('Назад', `backto helix ${hostname}`));
     } else {
-      if (currentIndex === 0) buttons.push(Markup.button.callback('❎ Предыдущая', 'nothing'));
-      else { buttons.push(Markup.button.callback('⬅️ Предыдущая', `mybalances ${hostname} ${currentIndex - 1}`)); }
+      if (currentIndex === 0) buttons.push(Markup.button.callback('❎ Предыдущая', `nothing`));
+      else 
+        buttons.push(Markup.button.callback(`⬅️ Предыдущая`, `mybalances ${hostname} ${currentIndex - 1}`));
 
-      if (balances.all.length - 1 - currentIndex === 0) buttons.push(Markup.button.callback('❎ Следующая', 'nothing'));
-      else { buttons.push(Markup.button.callback('Следующая ➡️', `mybalances ${hostname} ${currentIndex + 1}`)); }
+      if (balances.all.length - 1 - currentIndex === 0) buttons.push(Markup.button.callback('❎ Следующая', `nothing`));
+      else 
+        buttons.push(Markup.button.callback(`Следующая ➡️`, `mybalances ${hostname} ${currentIndex + 1}`));
     }
 
     buttons.push(Markup.button.callback('🔄 Обновить', `refreshaction ${hostname} ${currentBalance.id} ${currentIndex}`));
+    
 
-    if (currentBalance.status == 'onsell') {
+    if (currentBalance.status == "onsell") {
+    
       buttons.push(Markup.button.callback('🟢 отменить замещение', `precancelsell ${hostname} ${currentBalance.id}`));
-    } else if (currentBalance.status == 'solded') {
+    
+    } else if (currentBalance.status == "solded") {
+
       buttons.push(Markup.button.callback('🟢 вывести баланс', `precancelsell ${hostname} ${currentBalance.id}`));
-    } else {
+
+    }
+
+    else {
+
       buttons.push(Markup.button.callback('🛑 Требовать', `prewithdrawaction ${hostname} ${currentBalance.id}`));
     }
 
     // buttons.push(Markup.button.callback('Вывести прибыль', `withdrawaction ${hostname} ${currentBalance.id}`));
-
+    
     // if (isPriority) buttons.push(Markup.button.callback('Войти в очередь', `prioroneaction ${hostname} ${currentBalance.id}`));
 
     let toPrint = '';
     // toPrint += `\nВзнос на ${currentBalance.pool_num} ${currentBalance.pool_color === 'white' ? '⚪️ белый' : '⚫️ чёрный'} стол ${currentBalance.cycle_num} цикла:`;
     // toPrint += `\n\t\t${currentBalance.purchase_amount}`;
+    
+    toPrint += `\n#${currentBalance.id}`//${hostname.toUpperCase()}
 
-    toPrint += `\nКлуб тDAO #${currentBalance.id}`;// ${hostname.toUpperCase()}
-
-    const forecast = await getForecast(bot, hostname, params);
-
+    let forecast = await getForecast(bot, hostname, params)
+      
     // if (parseFloat(currentBalance.compensator_amount) > 0) toPrint += `\n\nНа крайнем одноцветном столе:\n\t\t${currentBalance.compensator_amount}`;
 
     // toPrint += `\n\nДоступно сейчас:\n\t\t${currentBalance.available}`; // (${parseFloat(currentBalance.root_percent / 10000).toFixed(1)}%)
     // TODO отобразить в следующем цикле
-    const income = ((parseFloat(currentBalance.compensator_amount) / parseFloat(currentBalance.purchase_amount)) * 100 - 100).toFixed(1);
-    // let current_step = 1 + (currentBalance.pool_num - 1) / 2 ;
-    const current_step = currentBalance.pool_num;
+    let income = ((parseFloat(currentBalance.compensator_amount) / parseFloat(currentBalance.purchase_amount)) * 100 - 100).toFixed(1)
+    //let current_step = 1 + (currentBalance.pool_num - 1) / 2 ;
+    let current_step = currentBalance.pool_num
 
     if (parseFloat(currentBalance.available) >= parseFloat(currentBalance.purchase_amount)) {
-      toPrint += '\n🟢 входящее предложение';
+      toPrint += `\n🟢 входящее предложение`
       toPrint += '\n------------------------------';
       toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
-
-      toPrint += `\nДоступно: ${currentBalance.available.replace('FLOWER', 'FLOWER')}`;
+      
+      toPrint += `\nДоступно: ${currentBalance.available.replace("FLOWER", "FLOWER")}`;
       toPrint += `\nДоход: +${income}%`;
-      toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace('FLOWER', 'FLOWER')}`;
-      toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.available) - parseFloat(currentBalance.purchase_amount)).toFixed(4)} FLOWER`;// ${params.host.quote_symbol}
-
+      toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
+      toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.available) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
+      
       toPrint += '\n------------------------------';
-      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего стола распределения фракций.`;
-
+      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего стола распределения фракций.`
+      
+      
       // toPrint += `\nПрогноз дохода: +${params.incomeStep}% через ${timestampToDHMS(forecast.forecastedTimeForRotate)} секунд`;
+      
     } else {
-      let last_print;
+      
+      let last_print
 
-      if (currentBalance.status == 'onsell') {
-        toPrint += '\n🔴 на замещении';
-        last_print = 'Ваша фракция находится на замещении фракционерами. Вы можете выводить баланс FLOWER по мере их поступления.';
+      if (currentBalance.status == "onsell"){
+        toPrint += `\n🔴 на замещении`
+        last_print = `Ваша фракция находится на замещении фракционерами. Вы можете выводить баланс FLOWER по мере их поступления.`
         toPrint += '\n------------------------------';
         toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
-        toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace('FLOWER', 'FLOWER')}`;
-        toPrint += `\nПолучено: ${currentBalance.solded_for.replace('FLOWER', 'FLOWER')}`;
+        toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
+        toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
+        
       }
-
-      if (currentBalance.status == 'solded') {
-        toPrint += '\n🔵 замещение завершено';
+      
+      if (currentBalance.status == "solded") {
+        toPrint += `\n🔵 замещение завершено`
         toPrint += '\n------------------------------';
         toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
-        toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace('FLOWER', 'FLOWER')}`;
-        toPrint += `\nПолучено: ${currentBalance.solded_for.replace('FLOWER', 'FLOWER')}`;
+        toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
+        toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
         // toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
         // toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
-
-        last_print = 'Ваша фракция замещена. Вы можете вывести баланс FLOWER, нажав на кнопку "вывести баланс".';
+        
+        last_print = `Ваша фракция замещена. Вы можете вывести баланс FLOWER, нажав на кнопку "вывести баланс".`
+        
       }
-
-      if (currentBalance.status == 'process') {
-        toPrint += '\n🟡 фракции в обороте';
+      
+      if (currentBalance.status == "process") {
+        toPrint += `\n🟡 фракции в обороте`
         toPrint += '\n------------------------------';
         toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
-
-        toPrint += `\nДоступно: ${currentBalance.compensator_amount.replace('FLOWER', 'FLOWER')}`;
+        
+        toPrint += `\nДоступно: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nДоход: +${income}%`;
-        toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace('FLOWER', 'FLOWER')}`;
-        toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4)} FLOWER`;// ${params.host.quote_symbol}
-
-        last_print = 'Ваша фракция находится в обороте. В случае её требования, FLOWER поступят на баланс, когда фракция будет замещена.';
+        toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
+        toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
+        
+        last_print = `Ваша фракция находится в обороте. В случае её требования, FLOWER поступят на баланс, когда фракция будет замещена.`
+        
       }
+      
 
+      
       // toPrint += `\nШтраф моментальной продажи: ${((parseFloat(currentBalance.available) / parseFloat(currentBalance.purchase_amount)) * 100 - 100).toFixed(1)}%`;
       // toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount}`;
       // toPrint += `\n\t\tУбыток: -${(parseFloat(currentBalance.available) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } ${params.host.quote_symbol}`;
+      
 
       toPrint += '\n------------------------------';
-      toPrint += `\n${last_print}`;
-
+      toPrint += `\n${last_print}`
+      
       // toPrint += `\nПрогноз дохода: +${params.incomeStep}% через ${timestampToDHMS(forecast.forecastedTimeForHalfRotate)}`
+      
     }
 
     try {
+
       // eslint-disable-next-line max-len
       if (nextIndex === undefined || fresh === true) await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       else {
-        try {
-          await ctx.deleteMessage();
-        } catch (e) {}
+        try{
+          await ctx.deleteMessage()
+        } catch(e){}
         await ctx.replyWithHTML(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       }
-      // ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
-    } catch (e) {
-      ctx.reply(e.message);
-      console.log('ERROR: ', e.messace);
+        //ctx.editMessageText(toPrint, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+
+    } catch(e){
+      ctx.reply(e.message)
+      console.log('ERROR: ', e.messace)
     }
+
   } else {
     const buttons = [];
     // buttons.push(Markup.button.callback('Назад', `backto helixs`));
     // if (nextIndex > 0)
-    await ctx.reply('У вас нет прав требования FLOWER. Для получения прав, заложите FLOWER в любой клуб.'); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+      await ctx.reply(`У вас нет прав требования FLOWER. Для получения прав, заложите FLOWER в любой клуб.`); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
     // await printHelixs(bot, ctx, user);
   }
 }
 
+
+
 async function cancelSellAction(bot, ctx, user, hostname, balanceId) {
   const bal = await getOneUserHelixBalance(bot, hostname, user.eosname, balanceId);
 
-  try {
-    await ctx.deleteMessage();
-    const eos = await bot.uni.getEosPassInstance(user.wif);
+    try {
+      await ctx.deleteMessage();
+      const eos = await bot.uni.getEosPassInstance(user.wif);
 
-    await eos.transact({
-      actions: [{
-        account: 'unicore',
-        name: 'cancelsellba',
-        authorization: [{
-          actor: user.eosname,
-          permission: 'active',
+      await eos.transact({
+        actions: [{
+          account: 'unicore',
+          name: 'cancelsellba',
+          authorization: [{
+            actor: user.eosname,
+            permission: 'active',
+          }],
+          data: {
+            username: user.eosname,
+            host: hostname,
+            balance_id: balanceId,
+          },
         }],
-        data: {
-          username: user.eosname,
-          host: hostname,
-          balance_id: balanceId,
-        },
-      }],
-    }, {
-      blocksBehind: 3,
-      expireSeconds: 30,
-    });
+      }, {
+        blocksBehind: 3,
+        expireSeconds: 30,
+      })
 
-    if (parseFloat(bal.solded_for) > 0) {
-      ctx.reply(`Замещение фракций отменено, вы получили ${bal.solded_for.replace('FLOWER', 'FLOWER')}`);
-    } else {
-      ctx.reply('Замещение фракций отменено');
+      if (parseFloat(bal.solded_for) > 0){
+        ctx.reply(`Замещение фракций отменено, вы получили ${bal.solded_for.replace("FLOWER", "FLOWER")}`)
+      } else {
+        ctx.reply(`Замещение фракций отменено`)  
+      }
+      
+      
+      await printUserBalances(bot, ctx, user, hostname);
+
+      
+    } catch (e) {
+      ctx.replyWithHTML(`Произошла ошибка при отмене замещении фракций: ${e.message}`);
     }
 
-    await printUserBalances(bot, ctx, user, hostname);
-  } catch (e) {
-    ctx.replyWithHTML(`Произошла ошибка при отмене замещении фракций: ${e.message}`);
-  }
 }
 async function withdrawAction(bot, ctx, user, hostname, balanceId) {
   const bal = await getOneUserHelixBalance(bot, hostname, user.eosname, balanceId);
 
-  try {
-    await ctx.deleteMessage();
-    if (bal.win == 1) {
-      await internalWithdrawAction(bot, user, hostname, balanceId);
-      ctx.reply(`Вы получили ${bal.available.replace('FLOWER', 'FLOWER')} с чистой прибылью ${bal.root_percent / 10000}%`);
-    } else {
-      if (bal.last_recalculated_win_pool_id > bal.global_pool_id && bal.pool_num > 2) {
-        await sellBalance(bot, user, hostname, balanceId);
-
-        ctx.reply(`Ваш баланс фракций поставлен на замещение. Когда замещение будет завершено, вы получите ${bal.compensator_amount.replace('FLOWER', 'FLOWER')}`);
+    try {
+      await ctx.deleteMessage();
+      if (bal.win == 1) {
+        
+        await internalWithdrawAction(bot, user, hostname, balanceId)
+        ctx.reply(`Вы получили ${bal.available.replace("FLOWER", "FLOWER")} с чистой прибылью ${bal.root_percent / 10000}%`);
+      
       } else {
-        await internalWithdrawAction(bot, user, hostname, balanceId);
-        ctx.reply(`Вы получили ${bal.available.replace('FLOWER', 'FLOWER')}`);
+
+        if (bal.last_recalculated_win_pool_id > bal.global_pool_id && bal.pool_num > 2){
+          await sellBalance(bot, user, hostname, balanceId)
+          
+          ctx.reply(`Ваш баланс фракций поставлен на замещение. Когда замещение будет завершено, вы получите ${bal.compensator_amount.replace("FLOWER", "FLOWER")}`);
+
+        } else {
+          await internalWithdrawAction(bot, user, hostname, balanceId)
+          ctx.reply(`Вы получили ${bal.available.replace("FLOWER", "FLOWER")}`);
+        }
       }
+      
+      await printUserBalances(bot, ctx, user, hostname);
+
+      // TODO get partner/withdraw balance and notify
+      await withdrawPartnerRefBalance(bot, user.eosname);
+      
+    } catch (e) {
+      if (e.message == "assertion failure with message: Cannot withdraw not refreshed balance. Refresh Balance first and try again." || e.message == "assertion failure with message: Cannot sell not refreshed balance. Refresh Balance first and try again.")
+        ctx.replyWithHTML(`Оупс! Что-то изменилось! Пожалуйста, обновите ваш баланс.`);
+      else
+        ctx.replyWithHTML(`Произошла системная ошибка при требовании. Пожалуйста, обратитесь в поддержку @knouni_bot с сообщением: ${e.message}`);
     }
 
-    await printUserBalances(bot, ctx, user, hostname);
-
-    // TODO get partner/withdraw balance and notify
-    await withdrawPartnerRefBalance(bot, user.eosname);
-  } catch (e) {
-    if (e.message == 'assertion failure with message: Cannot withdraw not refreshed balance. Refresh Balance first and try again.' || e.message == 'assertion failure with message: Cannot sell not refreshed balance. Refresh Balance first and try again.') ctx.replyWithHTML('Оупс! Что-то изменилось! Пожалуйста, обновите ваш баланс.');
-    else ctx.replyWithHTML(`Произошла системная ошибка при требовании. Пожалуйста, обратитесь в поддержку @knouni_bot с сообщением: ${e.message}`);
-  }
 }
 
 async function notifyNewCycle(bot, hostname) {
@@ -1070,32 +1137,38 @@ async function notifyNewCycle(bot, hostname) {
 
 async function notifyNewTable(bot, hostname) {
   const users = await getSubscribers(bot, hostname);
-
+  
   const params = await getHelixParams(bot, hostname);
-  let text = `Внимание! Открыт новый стол распределения фракций ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace('FLOWER', 'FLOWER')}! Дешевле уже не будет.`;
+  let text = `Внимание! Открыт новый стол распределения фракций ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
 
   const balances = await getAllHelixBalances(bot, hostname);
+    
 
   // eslint-disable-next-line no-restricted-syntax
   for (const user of users) {
-    const bals = balances.filter((b) => b.owner == user.eosname);
-    const win_bals = bals.filter((b) => b.win == 1);
-
+    let bals = balances.filter(b => b.owner == user.eosname)
+    let win_bals = bals.filter(b => b.win == 1)
+    
     if (win_bals.length > 0) {
-      text += '\n\nКлуб предлагает заложить ваши фракции с прибылью от +5%. ';
-      await sendMessageToUser(bot, user, { text });
-    } else {
-      text += '\n\nЗаложите фракцию и получите долю в фондах выбранного кооперативного участка.';
-      await sendMessageToUser(bot, user, { text });
-    }
 
+      text += `\n\nКлуб предлагает заложить ваши фракции с прибылью от +5%. `
+      await sendMessageToUser(bot, user, { text });
+
+    } else {
+      text += `\n\nЗаложите фракцию и получите долю в фондах выбранного кооперативного участка.`
+      await sendMessageToUser(bot, user, { text });
+
+    }
+    
     // eslint-disable-next-line no-await-in-loop
+    
   }
 }
 
+
 async function autoHostRefresh(bot) {
   const helixs = await getHelixsList(bot);
-  console.log('on auto update');
+  console.log("on auto update")
   // eslint-disable-next-line no-restricted-syntax
   for (const helix of helixs) {
     // try {
@@ -1106,8 +1179,9 @@ async function autoHostRefresh(bot) {
     // }
 
     const [onupdate] = await lazyFetchAllTableInternal(bot.eosapi, 'eosio', 'eosio', 'onupdate', helix.username, helix.username, 1);
-    console.log(onupdate);
+    console.log(onupdate)
     if (onupdate.update_balances_is_finish == 1) {
+
       // eslint-disable-next-line no-await-in-loop
       const oldParams = await getDbHost(bot.instanceName, helix.username);
 
@@ -1177,33 +1251,40 @@ async function getEstimateSystemIncome(bot, hostname, params) {
   // eslint-disable-next-line max-len
   let freeFlowPercent = ((parseFloat(targetRates[2].system_income) - parseFloat(targetRates[1].system_income)) / parseFloat(targetRates[1].live_balance_for_sale)).toFixed(1) * 100;
 
-  const current_hfund_income = parseFloat(targetRates[0].system_income) / 1000000 * params.host.hfund_percent;
-  console.log('targetRates[0]: ', targetRates[0]);
-  console.log('currentPool: ', params.currentPool);
-  let current_fractionary_box = 0;
-  let fraction_income_per_month = 0;
-  let target_business_income = 0.5;
-
+  let current_hfund_income = parseFloat(targetRates[0].system_income) / 1000000 * params.host.hfund_percent
+  console.log("targetRates[0]: ", targetRates[0])
+  console.log("currentPool: ", params.currentPool)
+  let current_fractionary_box = 0
+  let fraction_income_per_month = 0
+  let target_business_income = 0.5
+  
   if (params.currentPool.pool_num - 1 == 0) {
-    current_fractionary_box = 0;
-  } else {
-    current_fractionary_box = parseFloat(targetRates[0].total_in_box) - parseFloat(params.currentPool.remain);
-    target_business_income = 0.05;// 5% на cредства DAC распределяется на всех фракционеров
-
-    fraction_income_per_month = (current_hfund_income * target_business_income / 1000000 * params.host.hfund_percent / current_fractionary_box * 100).toFixed(4);
-    console.log('fraction_income_per_month: ', fraction_income_per_month);
+    current_fractionary_box = 0
   }
-  console.log('CURRENT DAC INCOME: ', current_hfund_income);
-  console.log('current_fractionary_box', current_fractionary_box, params.host.hfund_percent);
+  else {
+  
+    current_fractionary_box = parseFloat(targetRates[0].total_in_box) - parseFloat(params.currentPool.remain)
+    target_business_income = 0.05;//5% на cредства DAC распределяется на всех фракционеров
+
+    fraction_income_per_month = (current_hfund_income * target_business_income / 1000000 * params.host.hfund_percent / current_fractionary_box * 100).toFixed(4)
+    console.log("fraction_income_per_month: ", fraction_income_per_month)
+
+  }
+  console.log("CURRENT DAC INCOME: ", current_hfund_income)
+  console.log("current_fractionary_box", current_fractionary_box, params.host.hfund_percent)
+
 
   // let factIncome = 100.0000 //месяц (поставляем из блокчейна)
-  const untilFullRotate = parseFloat(params.currentPool.remain) + parseFloat(targetRates[1].live_balance_for_sale);
+  let untilFullRotate = parseFloat(params.currentPool.remain) + parseFloat(targetRates[1].live_balance_for_sale)
   // console.log('untilFullRotate: ', untilFullRotate)
-
+  
   // let estimatePercent = (factIncome / untilFullRotate) * 100
   // console.log('estimatePercent: ', estimatePercent)
   // console.log(params.currentPool)
-  console.log(targetRates);
+  console.log(targetRates)
+  
+
+
 
   const growth = parseFloat(targetRates[2].sell_rate) / parseFloat(targetRates[0].buy_rate);
   // eslint-disable-next-line max-len
@@ -1215,7 +1296,7 @@ async function getEstimateSystemIncome(bot, hostname, params) {
   // eslint-disable-next-line max-len
   const partnersAmount = (parseFloat(targetRates[0].live_balance_for_sale) / parseFloat(targetRates[0].pool_cost)) * systemIncomeDiff;
 
-  const freeRefPercent = ((partnersAmount / userProfit / (100 / params.incomeStep)) * 100).toFixed(2);
+  const freeRefPercent = ((partnersAmount / userProfit) * 100).toFixed(1);
 
   const systemPercent = (parseFloat(systemRates[0].value) / 10000).toFixed(1);
   let systemFlow = 0;
@@ -1232,9 +1313,11 @@ async function getEstimateSystemIncome(bot, hostname, params) {
     system_flow: systemFlow,
     free_ref_percent: freeRefPercent,
     until_full_rotate: untilFullRotate,
-    fraction_income_per_month,
+    fraction_income_per_month: fraction_income_per_month
   };
 }
+
+
 
 async function printHelixs(bot, ctx, user, nextIndex, hostname) {
   const helixs = await getHelixsList(bot);
@@ -1257,7 +1340,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     const totalInHelix = `${(parseFloat(myTail.totalUserInTail) + parseFloat(balances.totalBalances) + ((Number(userPower.power) / parseFloat(totalShares)) * parseFloat(params.host.quote_amount))).toFixed(4)} ${params.host.quote_symbol}`;
 
     const estimateSysIncome = await getEstimateSystemIncome(bot, params.host.ahost, params);
-    const forecast = await getForecast(bot, params.host.ahost, params);
+    const forecast = await getForecast(bot, params.host.ahost, params)
 
     const buttons = [];
 
@@ -1270,56 +1353,57 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     buttons.push(Markup.button.callback(' ❇️ Заложить FLOWER', `deposit ${params.host.username}`));
 
     // let incomeForecast = await calculateEstimateIncome(bot, hostname, params)
-    const fractions_on_sale = await getBalancesOnSale(bot, params.host.username, user.eosname, params);
-    console.log('balances on sale: ', fractions_on_sale);
-    // let current_step = 1 + (params.currentPool.pool_num - 1) / 2
-    const current_step = params.currentPool.pool_num;
-
+    let fractions_on_sale = await getBalancesOnSale(bot, params.host.username, user.eosname, params)
+    console.log("balances on sale: ", fractions_on_sale)
+    // let current_step = 1 + (params.currentPool.pool_num - 1) / 2 
+    let current_step = params.currentPool.pool_num
+    
     let toPrint = '';
     toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username}}`;
+    toPrint += `\n<a href="${currentHelix.purpose}">программа</a> клуба`;
+    
     toPrint += '\n------------------------------';
-    toPrint += `\n${currentHelix.purpose}\n`;
-
     // toPrint += `\n\n`;
     // toPrint += `\n\t\t\t`;
-
+    
     // toPrint += `\n${currentHelix.title}`;
     // toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
     toPrint += `\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
-
+    
     // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
     // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
-    toPrint += `\n\tДо закрытия стола: ${params.currentPool.remain.replace('FLOWER', 'FLOWER')}`;
-
-    toPrint += '\n\tПрогноз дохода: ';
+    toPrint += `\n\tДо закрытия стола: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
+    
+    toPrint += `\n\tПрогноз дохода: `;
     toPrint += `\n\t\t\t +${params.incomeStep}% за закрытый стол;`;
     toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 
     if (params.host.referral_percent > 0) {
       toPrint += '\n\tПартнёрская программа: ';
-      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\tL${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(3)}%`)}`;
+      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\tL${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
     }
 
     toPrint += '\n------------------------------';
     // toPrint += `\nВаш вклад: ${totalInHelix}`;
-    toPrint += '\nℹ️ Фактическая доходность может отличаться от прогнозной. Доходность зависит от спроса на фракции и эффективности кооперации в клубе.';
+    toPrint += `\nℹ️ Фактическая доходность может отличаться от прогнозной. Доходность зависит от спроса на фракции и эффективности кооперации в клубе.`;
 
     // TODO если есть опыт - обновить и вывести опытный поток
     // Если что-то начислено - обновить карточку и сообщить отдельным сообщением
     //
-    try {
+    try{
+
       if (hostname) {
-        await ctx.editMessageText(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else if (nextIndex === undefined) {
-        await ctx.replyWithHTML(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+        await ctx.replyWithHTML(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else {
-        await ctx.editMessageText(toPrint, { disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize() });
+        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       }
-    } catch (e) {
-      console.log('on CATCH!');
+    } catch(e){
+      console.log('on CATCH!')
     }
   }
 }
@@ -1347,6 +1431,7 @@ async function exitTailAction(bot, hostname, user, tailid) {
   });
 }
 
+
 async function payStatus(bot, hostname, user, status, amount) {
   const eos = await bot.uni.getEosPassInstance(user.wif);
 
@@ -1360,9 +1445,9 @@ async function payStatus(bot, hostname, user, status, amount) {
       }],
       data: {
         from: user.eosname,
-        to: 'unicore',
+        to: "unicore",
         quantity: amount,
-        memo: `800-${hostname}-${status}`,
+        memo: `800-${hostname}-${status}`
       },
     }],
   }, {
@@ -1370,6 +1455,7 @@ async function payStatus(bot, hostname, user, status, amount) {
     expireSeconds: 30,
   });
 }
+
 
 async function printTail(bot, user, hostname) {
   const tail = await getTail(bot, user.eosname, hostname);
@@ -1439,5 +1525,5 @@ module.exports = {
   getBalancesOnSale,
   payStatus,
   getAllHelixBalances,
-  getPartnerStatus,
+  getPartnerStatus
 };

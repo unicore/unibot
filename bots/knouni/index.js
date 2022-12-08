@@ -10,6 +10,9 @@ const {
 
 const {getAIAnswer} = require('./ai.js')
 
+const PayForStatus = 3 //FLOWER
+
+
 const {
   getHelixParams,
   getUserHelixBalances,
@@ -27,6 +30,7 @@ const {
   getCurrentUserDeposit,
   getCondition,
   exitFromTail,
+  getPartnerStatus
 } = require('./core');
 
 const { sendMessageToUser, sendMessageToAll } = require('./messages');
@@ -166,7 +170,7 @@ const quizDefinition = [
 ];
 
 async function catchRequest(bot, user, ctx, text) {
-  const reply = 'Пожалуйста, подождите.. Мне потребуется некоторое время на создание разумного ответа. Я сразу свяжусь с вами, когда ответ будет найден!';
+  const reply = 'Пожалуйста, подождите.. Мне потребуется некоторое время на создание разумного ответа. Я сразу свяжусь с вами, когда ответ будет найден!\n\nА пока, ознакомьтесь: \n- /news - запросы людей и мои ответы\n- /wallet - ваш кошелёк';
   // const menu = Markup.keyboard(['🏁 закрыть запрос'], { columns: 2 }).resize(); // , '🪙 кошелёк'
 
   await sendMessageToUser(bot, user, { text: reply });//, menu
@@ -270,7 +274,7 @@ module.exports.init = async (botModel, bot) => {
           console.log("on else")
           user.request_chat_id = false;
           user.request_channel_id = false;
-          if (!user.requests_count)
+          // if (!user.requests_count)
             user.requests_count = 3;
 
           if (!user.eosname) {
@@ -285,7 +289,7 @@ module.exports.init = async (botModel, bot) => {
 
         if (user.requests_count > 0) {
           const clearMenu = Markup.removeKeyboard();
-          // buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
+          // buttons.push(Markup.button.callback('🔄 купить лицензию', 'buystatus ${json.stringify({})}'));
 
 
           const id = await sendMessageToUser(bot, { id: user.id }, {   video: {
@@ -312,7 +316,7 @@ module.exports.init = async (botModel, bot) => {
           // welcome_text += `\n🟢 Как создать HTTP-запрос в Javascript?;`
           welcome_text += `\n🟢 Как заработать миллион?`
           welcome_text += `\n🟢 Посоветуй фильм`
-
+          
           welcome_text += `\n\nОграничения:`
           welcome_text += `\n🔴 Могу иногда генерировать неверную информацию`;
           welcome_text += `\n🔴 Могу иногда создавать вредные инструкции или предвзятый контент`;
@@ -334,11 +338,11 @@ module.exports.init = async (botModel, bot) => {
           // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         } else {
           const clearMenu = Markup.removeKeyboard();
-          buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
+          buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${json.stringify({})}`));
 
           // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
           // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
-          await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов купите лицензию за 100 RUB в месяц:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+          await ctx.reply('К сожалению, у вас не осталось советов. Для получения советов подпишитесь на меня всего за 189 рублей в месяц:', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         }
       }
     } else {
@@ -352,6 +356,194 @@ module.exports.init = async (botModel, bot) => {
     user.state = 'newrequest';
     await saveUser(bot.instanceName, user);
   }
+
+ bot.action('deposit', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    // await ctx.deleteMessage();
+    // console.log("купить билет")
+    // await setBuyMenu(ctx)
+    // await buyTicket(bot, user, ctx, 'USDT.TRC20');
+  });
+
+  async function buyTicket(bot, user, ctx, currency, json) {
+    await ctx.deleteMessage()
+
+    try {
+      const params = {
+        username: user.eosname,
+        currency,
+        type: 'subscribe',
+        hostname: bot.getEnv().CORE_HOST,
+        botName: bot.instanceName,
+        meta: json
+      };
+      const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
+
+      const result = await axios.post(
+        path,
+        params,
+      );
+      
+      await ctx.reply(`Подписка на меня - правильное решение! Вы получите советника по всем вопросам всего за несколько долларов в месяц.`)
+
+      if (result.data.status === 'ok') {
+        await ctx.replyWithHTML(`В качестве оплаты временно принимаются только USDT (TRC-20). Прочитайте <a href="https://dacom.io/60279ba5d0454f5cac5f4c782d412988">инструкцию</a> и отправьте ${parseFloat(json.cost).toFixed(4)} USDT на ваш персональный адрес:`, { disable_web_page_preview: true });
+        await ctx.reply(`${result.data.address}`);
+      } else {
+        ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
+        console.log(result.data);
+      }
+    } catch (e) {
+      console.log(e);
+      ctx.reply('Произошла ошибка на получении адреса. Попробуйте позже. ');
+    }
+  }
+
+  bot.command('news', async (ctx) => {
+
+    await ctx.replyWithHTML(`Канал запросов и моих советов: ${bot.getEnv().CV_CHANNEL_LINK}`);  
+  });
+
+  bot.command('close', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    const isAdminUser = isAdmin(bot, user.id);
+    
+    if (isAdminUser && ctx.update.message.reply_to_message) { // Если это ответ на чье-то сообщение
+      const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id, bot.getEnv().CV_CHANNEL);
+      console.log("find msg: ", msg)
+      await ctx.reply('what close?')
+      
+      if (msg.id) {
+        const status = await getPartnerStatus(bot, "core", user.eosname)
+        const question_owner = await getUser(bot.instanceName, msg.id);
+        user.state = "newrequest";
+        user.request_chat_id = false;
+        user.requests_count -= 1;
+        await saveUser(bot.instanceName, user)
+        let text = `Ваш запрос закрыт. `
+
+        if (status.level == -1){
+          if (user.requests_count > 0)
+            text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 189 рублей и получите неограниченное количество советов.`
+          else text += `У вас не осталось советов.\n\nОформите подписку всего за 189 рублей для того, чтобы получать мои советы.`
+        } 
+
+        console.log("on send")
+        let extra = {}
+        const buttons = [];
+  
+        if (status.level == -1) {
+          buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${JSON.stringify({})}`));
+          extra = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+
+        } 
+
+        await sendMessageToUser(bot, { id: msg.id }, { text }, extra);
+        
+        
+        if (user.requests_count > 0)
+          await sendMessageToUser(bot, { id: msg.id }, { text: '> введите ваш запрос:' });
+        
+      }
+
+    }
+  });
+
+
+  function getStatusByNumber(number) {
+    let status;
+    let status2;
+    if (number == 1) {
+      status = 'adviser';
+      status2 = '🐨 советник';
+    } else if (number == 2) {
+      status = 'assistant';
+      status2 = '🐼 ассистент';
+    } 
+
+    return { status, status2 };
+  }
+
+
+  bot.action(/buystatus (.+)?/gi, async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+    // console.log('BOT!: ', bot.getEnv())
+    const json = JSON.parse(ctx.match[1]);
+    // console.log('JSON', json);
+    let text = '';
+    // text += `Ваш статус: кот 🐈\n`
+    const buttons = [];
+    if (!json.s) {
+      // text += 'Статус - это подписка на доход ваших партнеров. Когда партнер получает прибыль, тогда получаете прибыль и вы.\n\n';
+      // text += 'гость - у вас есть всего 3 совета\n';
+      // text += 'волк 🐺 - доход до 3го уровня партнеров\n';
+      // text += 'тигр 🐯 - доход до 4го уровня партнеров\n';
+      // text += 'лев 🦁 - доход до 5го уровня партнеров\n';
+      // text += 'медведь 🐻 - доход до 6го уровня партнеров\n';
+      // text += 'дракон 🐲 - доход со всех уровней партнеров\n';
+      text += '\nВыберите уровень подписки: ';
+      text += '\n🐨 советник - 3 USDT / месяц - у вас неограниченное количество советов по любым вопросам;';
+      // text += '\n🐼 ассистент - 100 USDT / месяц - я помогу вам создавать посты на любые темы в неограниченном количестве;';
+      
+      buttons.push(Markup.button.callback('🐨 советник', `buystatus ${JSON.stringify({ s: 1, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🐼 ассистент', `buystatusact ${JSON.stringify({ s: 2, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🐺 волк', `buystatus ${JSON.stringify({ s: 3, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🐯 тигр', `buystatus ${JSON.stringify({ s: 4, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🦁 лев', `buystatus ${JSON.stringify({ s: 5, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🐻 медведь', `buystatus ${JSON.stringify({ s: 6, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('🐲 дракон', `buystatus ${JSON.stringify({ s: 7, du: 1, di: 1 })}`));
+      await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+    } else {
+      let status = '';
+      if (json.s === 1) {
+        status = '🐨 советник';
+      } 
+      // else if (json.s === 2) {
+      //   status = '🐼 панда';
+      // } else if (json.s === 3) {
+      //   status = '🐺 волк';
+      // } else if (json.s === 4) {
+      //   status = '🐯 тигр';
+      // } else if (json.s === 5) {
+      //   status = '🦁 лев';
+      // } else if (json.s === 6) {
+      //   status = '🐻 медведь';
+      // } else if (json.s === 7) {
+      //   status = '🐲 дракон';
+      // }
+
+      text += `Выбранный статус: ${status}\n`;
+      text += `Продолжительность: ${json.du} мес\n`;
+      text += `Стоимость: ${(PayForStatus * json.s * json.du * json.di).toFixed(4)} FLOWER\n`;
+      text += `Скидка: -${100 - json.di * 100}%\n\n`;
+
+      text += 'Выберите продолжильность: ';
+
+      buttons.push(Markup.button.callback('назад', `buystatus ${JSON.stringify({})}`));
+
+      buttons.push(Markup.button.callback(`${json.du === 1 ? '✅' : ''} 1 мес (-0%)`, `buystatus ${JSON.stringify({ ...json, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 3 ? '✅' : ''} 3 мес (-10%)`, `buystatus ${JSON.stringify({ ...json, du: 3, di: 0.9 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 6 ? '✅' : ''} 6 мес (-20%)`, `buystatus ${JSON.stringify({ ...json, du: 6, di: 0.8 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 9 ? '✅' : ''} 9 мес (-30%)`, `buystatus ${JSON.stringify({ ...json, du: 9, di: 0.7 })}`));
+      buttons.push(Markup.button.callback(`${json.du === 12 ? '✅' : ''} 12 мес (-50%)`, `buystatus ${JSON.stringify({ ...json, du: 12, di: 0.5 })}`));
+      buttons.push(Markup.button.callback('продолжить', `buystatusact ${JSON.stringify({ ...json })}`));
+
+      // await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      try {
+        await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      } catch (e) {
+        console.log('e', e);
+      }
+    }
+    // await buyStatus(bot, user, json);
+  });
+
+  bot.command('wallet', async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.message.from.id);
+    if (user)
+      await printWallet(bot, user);
+  });
+
 
   bot.command('restart_all', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
@@ -404,14 +596,14 @@ module.exports.init = async (botModel, bot) => {
 
     if (user.requests_count > 0) {
       menu = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
-      await ctx.reply(`Ваш запрос закрыт. Осталось запросов: ${user.requests_count}.\n\nДля пополнения запросов станьте пайщиком Цифрового Кооператива: @digital_earth_bot`, menu);
+      await ctx.reply(`Ваш запрос закрыт. Осталось советов: ${user.requests_count}.\n\nДля пополнения советов станьте пайщиком Цифрового Кооператива: @digital_earth_bot`, menu);
     } else {
       const clearMenu = Markup.removeKeyboard();
       await ctx.reply('Ваш запрос закрыт.', clearMenu, { reply_markup: { remove_keyboard: true } });
       const buttons = [];
-      buttons.push(Markup.button.callback('🔄 обновить запросы', 'refreshrequests'));
+      buttons.push(Markup.button.callback('🔄 обновить запросы', `buystatus ${json.stringify({})}`));
 
-      await ctx.reply('К сожалению, вас не осталось запросов. Для получения запросов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
+      await ctx.reply('К сожалению, вас не осталось советов. Для получения советов станьте пайщиком цифрового кооператива: @digital_earth_bot и нажмите кнопку "обновить запросы".', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
     }
   });
 
@@ -523,6 +715,68 @@ module.exports.init = async (botModel, bot) => {
       }
     }
   });
+
+
+
+  // bot.action('buystatus ', async (ctx) => {
+  //   const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+  //   await buyTicket(bot, user, ctx, 'USDT.TRC20');
+  //   // await addRequestAction(bot, user, ctx);
+  // });
+
+
+
+  bot.action(/buystatusact (.+)?/gi, async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
+    const json = JSON.parse(ctx.match[1]);
+
+    const number = parseInt(json.s);
+
+    const statuses = getStatusByNumber(json.s);
+    console.log(statuses);
+    const cost = (PayForStatus * json.s * json.du * json.di).toFixed(4);
+
+    let text = '';
+    
+    const buttons = [];
+
+    text += `Выбранный статус: ${statuses.status2}\n`;
+    text += `Продолжительность: ${json.du} мес\n\n`;
+
+    text += `Стоимость: ${cost} USDT\n`;
+
+    text += `Выберите метод оплаты:`
+    buttons.push(Markup.button.callback('USDT', `buystatusaction ${JSON.stringify({ status: statuses.status, cost })}`));
+    buttons.push(Markup.button.callback('Visa, Mastercard', `buystatuswithcash`));
+    buttons.push(Markup.button.callback('Отмена', `buystatus ${JSON.stringify({ ...json })}`));
+
+    await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+
+    // await buyStatus(bot, user, json);
+  });
+
+  bot.action("buystatuswithcash", async (ctx) => {
+    await ctx.reply('Оплата с банковских карт временно недоступна.')
+  });
+  
+
+  bot.action(/buystatusaction (.+)?/gi, async (ctx) => {
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
+    const json = JSON.parse(ctx.match[1]);
+    json.cost += ' FLOWER';
+
+    const myBalance = await getLiquidBalance(bot, user.eosname, 'FLOWER');
+
+    try {
+      await buyTicket(bot, user, ctx, 'USDT.TRC20', json);
+    } catch (e) {
+      await ctx.reply(`Системная ошибка на этапе получения адреса: ${e.message}`);
+    }
+
+  });
+
 
   bot.action('createrequest', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);

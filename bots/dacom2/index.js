@@ -1359,6 +1359,7 @@ module.exports.init = async (botModel, bot) => {
     try {
       const params = {
         username: user.eosname,
+        botName: bot.instanceName,
         currency,
         hostname: host,
         chat: {

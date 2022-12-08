@@ -1575,6 +1575,9 @@ module.exports.init = async (botModel, bot) => {
         username: user.eosname,
         currency,
         type: 'issue',
+        botName: bot.instanceName,
+        hostname: bot.getEnv().CORE_HOST,
+        meta: {}
       };
       const path = `${bot.getEnv().PAY_GATEWAY}/generate`;
 
