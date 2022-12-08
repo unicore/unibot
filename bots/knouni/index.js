@@ -267,6 +267,7 @@ module.exports.init = async (botModel, bot) => {
           // }
           await saveUser(bot.instanceName, user);
         } else {
+          console.log("on else")
           user.request_chat_id = false;
           user.request_channel_id = false;
           if (!user.requests_count)
@@ -286,8 +287,6 @@ module.exports.init = async (botModel, bot) => {
           const clearMenu = Markup.removeKeyboard();
           // buttons.push(Markup.button.callback('🔄 купить лицензию', 'refreshrequests'));
 
-          await ctx.reply('Привет!', clearMenu, { reply_markup: { remove_keyboard: true } });
-          
 
           const id = await sendMessageToUser(bot, { id: user.id }, {   video: {
                 duration: 5,
@@ -306,6 +305,28 @@ module.exports.init = async (botModel, bot) => {
                 file_unique_id: 'AgADmicAApNmgUg',
                 file_size: 4252145
             }}, clearMenu);
+            
+          let welcome_text = 'Привет! Я ваш карманный AI для сопровождения по жизни. Отправьте мне любой запрос и получите разумный совет.\n\nПримеры запросов: '
+          welcome_text += `\n🟢 Предложи 10 креативных идей дня рождения 10-летнего ребенка`
+          welcome_text += `\n🟢 Объясни квантовые вычисления простыми словами`
+          // welcome_text += `\n🟢 Как создать HTTP-запрос в Javascript?;`
+          welcome_text += `\n🟢 Как заработать миллион?`
+          welcome_text += `\n🟢 Посоветуй фильм`
+
+          welcome_text += `\n\nОграничения:`
+          welcome_text += `\n🔴 Могу иногда генерировать неверную информацию`;
+          welcome_text += `\n🔴 Могу иногда создавать вредные инструкции или предвзятый контент`;
+          // welcome_text += `\n🔴 Могу иногда ругаться матом`;
+          welcome_text += `\n🔴 У меня ограниченные знания мира и событий после 2021 года`;
+
+
+
+          // welcome_text += `\n🔘 `
+          // welcome_text += `Посоветуй фильм`
+
+          await ctx.reply(welcome_text, clearMenu, { reply_markup: { remove_keyboard: true } });
+          
+
 
           await addRequestAction(bot, user, ctx)
           // await ctx.reply('> Задайте ваш вопрос:', request);
@@ -436,13 +457,22 @@ module.exports.init = async (botModel, bot) => {
 
             await saveUser(bot.instanceName, user);
             // //TODO AI
-            // let response = await getAIAnswer(bot, text)
-            // console.log("AI RESPONCE: ", response.data.choices)
+            
+            // try{
+            //   let response = await getAIAnswer(bot, text)
+            //   console.log("AI RESPONCE: ", response.status, response.statusText)
+            //   if (response.status == 200){
+            //     await ctx.reply(response.data.choices[0].text)
+            //   } else {
 
-            // // response.data.choices[0].text
-            // await ctx.reply(response.data.choices[0].text)
+            //     await ctx.reply(`Ошибка 1: `, response.statusText)  
+            //   }
+            // } catch(e){
+              
+            //   await ctx.reply(`Пожалуйста, сформулируйте вопрос короче.`)  
+            // }
+            
 
-            // ctx.reply('Сообщение отправлено');
           } else {
             // console.log("HERE 3")
             const request = Markup.keyboard(['🆕 cоздать запрос'], { columns: 1 }).resize();
