@@ -414,33 +414,44 @@ module.exports.init = async (botModel, bot) => {
       if (msg.id) {
         const status = await getPartnerStatus(bot, "core", user.eosname)
         const question_owner = await getUser(bot.instanceName, msg.id);
-        user.state = "newrequest";
-        user.request_chat_id = false;
-        user.requests_count -= 1;
-        await saveUser(bot.instanceName, user)
-        let text = `Ваш запрос закрыт. `
+        if (question_owner) {
+          
+          user.state = "newrequest";
+          user.request_chat_id = false;
 
-        if (status.level == -1){
+          user.requests_count -= 1;
+          await saveUser(bot.instanceName, user)
+          let text = `Ваш запрос закрыт. `
+
+          if (status.level == -1){
+            if (user.requests_count > 0)
+              text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
+            else text += `У вас не осталось советов.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
+          } 
+
+          console.log("on send")
+          let extra = {}
+          const buttons = [];
+    
+          if (status.level == -1) {
+            buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${JSON.stringify({})}`));
+            extra = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+
+          } 
+
+          await sendMessageToUser(bot, { id: msg.id }, { text }, extra);
+          
+          
           if (user.requests_count > 0)
-            text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
-          else text += `У вас не осталось советов.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
-        } 
+            await sendMessageToUser(bot, { id: msg.id }, { text: '> введите ваш запрос:' });
+          
+          // await ctx.deleteMessage(ctx.update.message.message_id)
 
-        console.log("on send")
-        let extra = {}
-        const buttons = [];
-  
-        if (status.level == -1) {
-          buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${JSON.stringify({})}`));
-          extra = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
+          await ctx.reply(`Запрос закрыт`, { reply_to_message_id: ctx.update.message.message_id })
 
-        } 
-
-        await sendMessageToUser(bot, { id: msg.id }, { text }, extra);
-        
-        
-        if (user.requests_count > 0)
-          await sendMessageToUser(bot, { id: msg.id }, { text: '> введите ваш запрос:' });
+        } else {
+          ctx.reply(`Пользователь не найден`,{ reply_to_message_id: ctx.update.message.message_id })
+        }
         
       }
 
