@@ -177,7 +177,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   // const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
   let id 
-  if (ctx.update.message.photo) { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, ctx.update.message, { caption: text }); } else { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, { text }); }
+  if (ctx.update.message.photo || ctx.update.message.caption) { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, ctx.update.message, { caption: ctx.update.message.caption }); } else { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, { text }); }
 
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
@@ -648,7 +648,7 @@ module.exports.init = async (botModel, bot) => {
             // console.log('resend back to: ', msg);
             let id
 
-            if (ctx.update.message.photo) { id = await sendMessageToUser(bot, { id: msg.id }, ctx.update.message, { caption: text }); } else { id = await sendMessageToUser(bot, { id: msg.id }, { text }); }
+            if (ctx.update.message.photo || ctx.update.message.caption) { id = await sendMessageToUser(bot, { id: msg.id }, ctx.update.message, { caption: ctx.update.message.caption }); } else { id = await sendMessageToUser(bot, { id: msg.id }, { text }); }
 
             // const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
@@ -676,8 +676,8 @@ module.exports.init = async (botModel, bot) => {
             let id
             console.log(ctx.update.message)
             console.log("SEND!")
-            if (ctx.update.message.photo) { 
-              id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, ctx.update.message, { caption: text, reply_to_message_id: user.request_chat_id });
+            if (ctx.update.message.photo || ctx.update.message.caption) { 
+              id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, ctx.update.message, { caption: ctx.update.message.caption, reply_to_message_id: user.request_chat_id });
             } else { 
               id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id: user.request_chat_id}); 
             }
