@@ -175,7 +175,10 @@ async function catchRequest(bot, user, ctx, text) {
 
   await sendMessageToUser(bot, user, { text: reply });//, menu
 
-  const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+  // const id = await sendMessageToUser(bot, { id: bot.getEnv().CV_CHANNEL }, { text });
+  let id 
+  if (ctx.update.message.photo) { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, ctx.update.message, { caption: text }); } else { id = await sendMessageToUser(bot, { id:  bot.getEnv().CV_CHANNEL }, { text }); }
+
 
   await insertMessage(bot.instanceName, user, bot.getEnv().CV_CHANNEL, text, id, 'CV');
 
@@ -338,7 +341,7 @@ module.exports.init = async (botModel, bot) => {
           // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации. Попробуйте! Опишите вашу ситуацию, сформулируйте вопрос, и получите разумный ответ: ', Markup.inlineKeyboard(buttons, { columns: 1 }).resize());
         } else {
           const clearMenu = Markup.removeKeyboard();
-          buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${json.stringify({})}`));
+          buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${JSON.stringify({})}`));
 
           // await ctx.reply('Меня зовут Кно, я ваш персональный помощник 🧙🏻‍♂️', clearMenu, { reply_markup: { remove_keyboard: true } });
           // await ctx.reply('Мой искусственный интеллект помогает принять решение в сложной жизненной ситуации.');
@@ -643,7 +646,11 @@ module.exports.init = async (botModel, bot) => {
 
           if (msg && msg.message_id) {
             // console.log('resend back to: ', msg);
-            const id = await sendMessageToUser(bot, { id: msg.id }, { text });
+            let id
+
+            if (ctx.update.message.photo) { id = await sendMessageToUser(bot, { id: msg.id }, ctx.update.message, { caption: text }); } else { id = await sendMessageToUser(bot, { id: msg.id }, { text }); }
+
+            // const id = await sendMessageToUser(bot, { id: msg.id }, { text });
 
             await insertMessage(bot.instanceName, user, user.id, text, 'question', id);
           }
@@ -664,7 +671,17 @@ module.exports.init = async (botModel, bot) => {
             // console.log("user: ", user)
             console.log('try to send: ', bot.getEnv().CHAT_CHANNEL, 'reply_to: ', user.request_chat_id);
 
-            const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
+            // const id = await sendMessageToUser(bot, { id: bot.getEnv().CHAT_CHANNEL }, { text }, { reply_to_message_id: user.request_chat_id });
+
+            let id
+            console.log(ctx.update.message)
+            console.log("SEND!")
+            if (ctx.update.message.photo) { 
+              id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, ctx.update.message, { caption: text, reply_to_message_id: user.request_chat_id });
+            } else { 
+              id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, { text }, {reply_to_message_id: user.request_chat_id}); 
+            }
+
 
             await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
 

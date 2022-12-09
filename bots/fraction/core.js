@@ -1372,7 +1372,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     // toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
-    toPrint += `\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
+    toPrint += `\n\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
     
     // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
     // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
