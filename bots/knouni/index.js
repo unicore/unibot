@@ -274,7 +274,7 @@ module.exports.init = async (botModel, bot) => {
           console.log("on else")
           user.request_chat_id = false;
           user.request_channel_id = false;
-          // if (!user.requests_count)
+          if (!user.requests_count)
             user.requests_count = 3;
 
           if (!user.eosname) {
@@ -384,7 +384,7 @@ module.exports.init = async (botModel, bot) => {
         params,
       );
       
-      await ctx.reply(`Подписка на меня - правильное решение! Вы получите советника по всем вопросам всего за несколько долларов в месяц.`)
+      // await ctx.reply(`Подписка на меня - правильное решение! Вы получите советника по всем вопросам всего за несколько долларов в месяц.`)
 
       if (result.data.status === 'ok') {
         await ctx.replyWithHTML(`В качестве оплаты временно принимаются только USDT (TRC-20). Прочитайте <a href="https://dacom.io/60279ba5d0454f5cac5f4c782d412988">инструкцию</a> и отправьте ${parseFloat(json.cost).toFixed(4)} USDT на ваш персональный адрес:`, { disable_web_page_preview: true });
@@ -410,8 +410,6 @@ module.exports.init = async (botModel, bot) => {
     
     if (isAdminUser && ctx.update.message.reply_to_message) { // Если это ответ на чье-то сообщение
       const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id, bot.getEnv().CV_CHANNEL);
-      console.log("find msg: ", msg)
-      await ctx.reply('what close?')
       
       if (msg.id) {
         const status = await getPartnerStatus(bot, "core", user.eosname)
@@ -424,8 +422,8 @@ module.exports.init = async (botModel, bot) => {
 
         if (status.level == -1){
           if (user.requests_count > 0)
-            text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 189 рублей и получите неограниченное количество советов.`
-          else text += `У вас не осталось советов.\n\nОформите подписку всего за 189 рублей для того, чтобы получать мои советы.`
+            text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
+          else text += `У вас не осталось советов.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
         } 
 
         console.log("on send")
@@ -473,6 +471,10 @@ module.exports.init = async (botModel, bot) => {
     let text = '';
     // text += `Ваш статус: кот 🐈\n`
     const buttons = [];
+    
+    const status = await getPartnerStatus(bot, bot.getEnv().CORE_HOST, user.eosname)
+    
+
     if (!json.s) {
       // text += 'Статус - это подписка на доход ваших партнеров. Когда партнер получает прибыль, тогда получаете прибыль и вы.\n\n';
       // text += 'гость - у вас есть всего 3 совета\n';
@@ -481,18 +483,26 @@ module.exports.init = async (botModel, bot) => {
       // text += 'лев 🦁 - доход до 5го уровня партнеров\n';
       // text += 'медведь 🐻 - доход до 6го уровня партнеров\n';
       // text += 'дракон 🐲 - доход со всех уровней партнеров\n';
-      text += '\nВыберите уровень подписки: ';
-      text += '\n🐨 советник - 3 USDT / месяц - у вас неограниченное количество советов по любым вопросам;';
-      // text += '\n🐼 ассистент - 100 USDT / месяц - я помогу вам создавать посты на любые темы в неограниченном количестве;';
+      text += `\n${status.level <= 1 ? '✅' : '☑️'} <b>гость</b> - бесплатно - 3 совета по любым запросам в месяц;`;
+      text += `\n${status.level == 2 ? '✅' : '☑️'} <b>советник</b> - 3 USDT / месяц - неограниченное количество советов в месяц;`;
+      // text += '\n☑️ <b>ассистент</b> - 100 USDT / месяц - я выполняю ваши поручения;';
+      // text += '\n☑️ <b>эксперт</b> - 1000 USD / месяц - я собираю экспертный совет из людей и машин для развития вашего бизнеса;';
+      // text += `\n\n<a href='${bot.getEnv().STATUS_EXPLANATIONS}'>подробнее</a>`
+      // buttons.push(Markup.button.callback('гость', `buystatus ${JSON.stringify({ s: -1, du: 1, di: 1 })}`));
+      text += '\n\nВыберите уровень доступа: ';
       
-      buttons.push(Markup.button.callback('🐨 советник', `buystatus ${JSON.stringify({ s: 1, du: 1, di: 1 })}`));
-      // buttons.push(Markup.button.callback('🐼 ассистент', `buystatusact ${JSON.stringify({ s: 2, du: 1, di: 1 })}`));
-      // buttons.push(Markup.button.callback('🐺 волк', `buystatus ${JSON.stringify({ s: 3, du: 1, di: 1 })}`));
+      buttons.push(Markup.button.callback('советник', `buystatus ${JSON.stringify({ s: 1, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('ассистент', `buystatusact ${JSON.stringify({ s: 2, du: 1, di: 1 })}`));
+      // buttons.push(Markup.button.callback('эксперт', `buystatus ${JSON.stringify({ s: 3, du: 1, di: 1 })}`));
       // buttons.push(Markup.button.callback('🐯 тигр', `buystatus ${JSON.stringify({ s: 4, du: 1, di: 1 })}`));
       // buttons.push(Markup.button.callback('🦁 лев', `buystatus ${JSON.stringify({ s: 5, du: 1, di: 1 })}`));
       // buttons.push(Markup.button.callback('🐻 медведь', `buystatus ${JSON.stringify({ s: 6, du: 1, di: 1 })}`));
       // buttons.push(Markup.button.callback('🐲 дракон', `buystatus ${JSON.stringify({ s: 7, du: 1, di: 1 })}`));
-      await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+      try{
+        await ctx.editMessageText(text, {disable_web_page_preview: true, parse_mode: 'html', ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+      } catch(e){
+
+      }
     } else {
       let status = '';
       if (json.s === 1) {
@@ -514,7 +524,7 @@ module.exports.init = async (botModel, bot) => {
 
       text += `Выбранный статус: ${status}\n`;
       text += `Продолжительность: ${json.du} мес\n`;
-      text += `Стоимость: ${(PayForStatus * json.s * json.du * json.di).toFixed(4)} FLOWER\n`;
+      text += `Стоимость: ${(PayForStatus * json.s * json.du * json.di).toFixed(4)} USDT\n`;
       text += `Скидка: -${100 - json.di * 100}%\n\n`;
 
       text += 'Выберите продолжильность: ';
@@ -530,7 +540,7 @@ module.exports.init = async (botModel, bot) => {
 
       // await ctx.reply(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       try {
-        await ctx.editMessageText(text, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+        await ctx.editMessageText(text, {parse_mode: 'html', ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } catch (e) {
         console.log('e', e);
       }

@@ -377,15 +377,19 @@ async function printWallet(bot, user, ctx) {
 
     text += '\n---------------------------------';
     text += `\n| Имя аккаунта: ${user.eosname}`;
-    text += `\n| Ваш статус: `;
+    text += `\n| Уровень доступа: `;
 
     text += `\n|\t\t\t\t\t${status.level == -1 ? (user.requests_count > 0 ? '✅' : '❌') : '☑️'} гость`
     
     if (status.level == -1 || status.level == 0)
-      text += `\n|\t\t\t\t\t\t\t\t -> осталось запросов: ${user.requests_count}`
-    
+      text += `\n|\t\t\t\t\t -> осталось запросов: ${user.requests_count}`
+
     text += `\n|\t\t\t\t\t${status.level == 1 ? '✅' : '☑️'} советник`
+    // text += `\n|\t\t\t\t\t - отвечаю на запросы`
+    // text += `\n|\t\t\t\t\t${status.level > 1 ? '✅' : '☑️'} советник`
     // text += `\n|\t\t\t\t\t${status.level == 2 ? '✅' : '☑️'} ассистент`
+    // text += `\n|\t\t\t\t\t${status.level == 3 ? '✅' : '☑️'} эксперт`
+    // text += `\n|\t\t\t\t\t - п`
     
     if (status.level > 0)
       text += `\n|\t\t\t\t\t до ${status.expiration}`
