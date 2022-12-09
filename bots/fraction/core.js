@@ -1296,7 +1296,8 @@ async function getEstimateSystemIncome(bot, hostname, params) {
   // eslint-disable-next-line max-len
   const partnersAmount = (parseFloat(targetRates[0].live_balance_for_sale) / parseFloat(targetRates[0].pool_cost)) * systemIncomeDiff;
 
-  const freeRefPercent = ((partnersAmount / userProfit) * 100).toFixed(1);
+  // const freeRefPercent = ((partnersAmount / userProfit) * 100).toFixed(1);
+  const freeRefPercent = ((partnersAmount / userProfit / (100 / params.incomeStep)) * 100).toFixed(2);
 
   const systemPercent = (parseFloat(systemRates[0].value) / 10000).toFixed(1);
   let systemFlow = 0;
@@ -1360,9 +1361,10 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     
     let toPrint = '';
     toPrint += `\n<b>${currentHelix.title.toUpperCase()}</b> {${currentHelix.username}}`;
-    toPrint += `\n${currentHelix.purpose}`;
     
     toPrint += '\n------------------------------';
+    toPrint += `\n${currentHelix.purpose}`;
+    
     // toPrint += `\n\n`;
     // toPrint += `\n\t\t\t`;
     
@@ -1383,7 +1385,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
 
     if (params.host.referral_percent > 0) {
       toPrint += '\n\tПартнёрская программа: ';
-      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\tL${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(2)}%`)}`;
+      toPrint += `${params.host.levels.map((el, index) => `\n\t\t\t\t\t\t\t\t\tL${index + 1}: ${parseFloat(((Number(el) * (estimateSysIncome.free_ref_percent / 10000) * (params.host.referral_percent / 10000))) / 100 / 100).toFixed(3)}%`)}`;
     }
 
     toPrint += '\n------------------------------';
