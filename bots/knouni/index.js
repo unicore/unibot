@@ -412,20 +412,21 @@ module.exports.init = async (botModel, bot) => {
       const msg = await getMessage(bot.instanceName, ctx.update.message.reply_to_message.forward_from_message_id || ctx.update.message.reply_to_message.message_id, bot.getEnv().CV_CHANNEL);
       
       if (msg.id) {
-        const status = await getPartnerStatus(bot, "core", user.eosname)
         const question_owner = await getUser(bot.instanceName, msg.id);
+        const status = await getPartnerStatus(bot, "core", question_owner.eosname)
+        
         if (question_owner) {
-          
-          user.state = "newrequest";
-          user.request_chat_id = false;
 
-          user.requests_count -= 1;
-          await saveUser(bot.instanceName, user)
+          question_owner.state = "newrequest";
+          question_owner.request_chat_id = false;
+
+          question_owner.requests_count -= 1;
+          await saveUser(bot.instanceName, question_owner)
           let text = `Ваш запрос закрыт. `
 
           if (status.level == -1){
-            if (user.requests_count > 0)
-              text += `Советов осталось: ${user.requests_count}.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
+            if (question_owner.requests_count > 0)
+              text += `Советов осталось: ${question_owner.requests_count}.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
             else text += `У вас не осталось советов.\n\nОформите подписку всего за 3 USDT в месяц и получите неограниченное количество советов.`
           } 
 
@@ -433,16 +434,15 @@ module.exports.init = async (botModel, bot) => {
           let extra = {}
           const buttons = [];
     
-          if (status.level == -1) {
+          if (status.level < 1) {
             buttons.push(Markup.button.callback('🔄 оформить подписку', `buystatus ${JSON.stringify({})}`));
             extra = Markup.inlineKeyboard(buttons, { columns: 1 }).resize()
-
           } 
 
           await sendMessageToUser(bot, { id: msg.id }, { text }, extra);
           
           
-          if (user.requests_count > 0)
+          if (question_owner.requests_count > 0)
             await sendMessageToUser(bot, { id: msg.id }, { text: '> введите ваш запрос:' });
           
           // await ctx.deleteMessage(ctx.update.message.message_id)
