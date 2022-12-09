@@ -1403,7 +1403,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
         await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       }
     } catch(e){
-      console.log('on CATCH!')
+      console.log('on CATCH!', e)
     }
   }
 }
