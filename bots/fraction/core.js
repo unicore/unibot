@@ -1396,11 +1396,11 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     try{
 
       if (hostname) {
-        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+        await ctx.editMessageText(toPrint, {parse_mode: 'html', disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else if (nextIndex === undefined) {
-        await ctx.replyWithHTML(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+        await ctx.replyWithHTML(toPrint, {parse_mode: 'html', disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       } else {
-        await ctx.editMessageText(toPrint, {disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
+        await ctx.editMessageText(toPrint, {parse_mode: 'html', disable_web_page_preview: true, ...Markup.inlineKeyboard(buttons, { columns: 2 }).resize()});
       }
     } catch(e){
       console.log('on CATCH!', e)

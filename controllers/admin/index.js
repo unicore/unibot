@@ -40,7 +40,7 @@ module.exports.listBots = async () => {
 module.exports.getBot = async (req) => {
   const { name } = req.body;
   const bot = await Bot.findOne({ name });
-
+  console.log("on get bot: ", name, bot)
   return {
     data: {
       name: bot.name,

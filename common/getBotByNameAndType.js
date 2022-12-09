@@ -1,7 +1,7 @@
 const Bot = require('../models/Bot');
 
 module.exports.getBotByNameAndType = async (botName, botType) => {
-  console.log("getBotByNameAndType: ", botName, botType)
+  
   const bot = await Bot.findOne({ name: botName, mode: botType, isActive: true });
 
   if (!bot) {
