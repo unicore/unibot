@@ -778,8 +778,8 @@ async function getForecast(bot, hostname, params){
   // console.log(params)
   let currentPool = params.currentPool
   let pools = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', currentPool.id - currentPool.pool_num + 1, currentPool.id, 100);
-  console.log(currentPool)
-  
+  console.log(currentPool, currentPool.id - currentPool.pool_num + 1, currentPool.id)
+  console.log("pool: ", pools, hostname)
   const bcinfo = await bot.eosapi.getInfo({});
   const bctime = await new Date(bcinfo.head_block_time);
 
