@@ -777,7 +777,7 @@ async function refreshAllBalances(bot, hostname, baseUser, skip) {
 async function getForecast(bot, hostname, params){
   // console.log(params)
   let currentPool = params.currentPool
-  let pools = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', hostname, 'pool', currentPool.id - currentPool.pool_num + 1, currentPool.id, 100);
+  let pools = await lazyFetchAllTableInternal(bot.eosapi, 'unicore', params.host.username, 'pool', currentPool.id - currentPool.pool_num + 1, currentPool.id, 100);
   console.log(currentPool, currentPool.id - currentPool.pool_num + 1, currentPool.id)
   console.log("pool: ", pools, hostname)
   const bcinfo = await bot.eosapi.getInfo({});
