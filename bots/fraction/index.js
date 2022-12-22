@@ -75,7 +75,7 @@ const {
   printExpirience,
 } = require('./shares');
 
-const education = require('./education');
+// const education = require('./education');
 
 const {
   loadDB,
@@ -354,7 +354,9 @@ async function finishEducation(ctx) {
   await printMainMenu(ctx); // OR ask nickname
 }
 
-async function pushEducation(ctx, currentSlideIndex) {
+async function pushEducation(bot, ctx, currentSlideIndex) {
+  const education = bot.getEnv().education
+  
   const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
   if (!slide) {
     try {
@@ -636,7 +638,7 @@ module.exports.init = async (botModel, bot) => {
       // eosname = user.eosname;
       }
 
-      if (is_registered) await pushEducation(ctx, 0);
+      if (is_registered) await pushEducation(bot, ctx, 0);
       // await startQuiz(bot, ctx, user);
 
     // if (process.env.MODE === "community") {
@@ -778,7 +780,7 @@ module.exports.init = async (botModel, bot) => {
       const menu = Markup
         .keyboard(mainButtons, { columns: 2 }).resize();
 
-      // await pushEducation(ctx, 0);
+      // await pushEducation(bot, ctx, 0);
 
       await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив. Обязательно ознакомьтесь с <a href="https://dacom.io/1152812f510d47daa5875d685d887b6c">ИНСТРУКЦИЕЙ</a> по выбору клуба и участия в нём.', { disable_web_page_preview: true, ...menu });
       // let btns = []
@@ -822,7 +824,7 @@ module.exports.init = async (botModel, bot) => {
     const menu = Markup
       .keyboard(mainButtons, { columns: 2 }).resize();
 
-    // await pushEducation(ctx, 0);
+    // await pushEducation(bot, ctx, 0);
     await ctx.replyWithHTML('Краткая инструкция:\n💎 кошелёк - это ваш лицевой счёт для хранения универсальной учётной единицы благ (FLOWER). Получите FLOWER, совершив паевый взнос в Кооператив из кошелька.\n❇️ заложить FLOWER - выберите клуб по его программе развития и совершите взнос в него;\n🛑 требовать FLOWER - получите блага от деятельности клуба согласно его программе развития.\n\nОзнакомьтесь: <a href="https://dacom.io">как здесь всё работает</a>', { disable_web_page_preview: true, ...menu });
 
     await printWallet(bot, user);
@@ -1514,11 +1516,11 @@ module.exports.init = async (botModel, bot) => {
 
   bot.action(/pusheducation (\w+)/gi, async (ctx) => {
     const currentSlideIndex = Number(ctx.match[1]);
-    await pushEducation(ctx, currentSlideIndex);
+    await pushEducation(bot, ctx, currentSlideIndex);
   });
 
   bot.hears('Начать ознакомление', async (ctx) => {
-    await pushEducation(ctx, 0);
+    await pushEducation(bot, ctx, 0);
   });
 
   bot.hears('Пропустить ознакомление', async (ctx) => {
