@@ -338,7 +338,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Условия для Агентов', 'https://intellect.run/c8d5400639914f39a54f1496fbe40dd9'))
 
-        // if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
+        if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       } else {
       // buttons.push(Markup.button.url('Зачем это нужно', 'https://t.me/intellect_news/557'))
       // buttons.push(Markup.button.url('Как это работает', 'https://t.me/intellect_news/557'))
@@ -346,7 +346,7 @@ async function pushEducation(bot, ctx, currentSlideIndex) {
       // buttons.push(Markup.button.callback('Назад', `pusheducation ${currentSlideIndex - 1}`));
       // buttons.push(Markup.button.callback('Дальше', `pusheducation ${currentSlideIndex + 1}`));
 
-        // if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
+        if (!current_chat) { buttons.push(Markup.button.callback('Создать DAO 🚀', 'startunion')); }
       }
 
       let text = '';
@@ -600,7 +600,7 @@ module.exports.init = async (botModel, bot) => {
         // buttons.push(Markup.button.callback('каталог союзов', `listunion`));
         // buttons.push(Markup.button.callback('лента союзов', `newsunion`));
 
-        await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив 🏁 \n\nЦифровой Кооператив предоставляет сервис для запуска роботов в телеграмме с возможностью проведения краудфандинга, кооперативного управления и распределения прибыли на блокчейне.\n\n<a href="https://dacom.io/welcome">как это работает</a>', { disable_web_page_preview: true, ...menu });
+        await ctx.replyWithHTML('Добро пожаловать в Цифровой Кооператив 🏁 \n\nЦифровой Кооператив предоставляет сервис для запуска роботов в телеграмме с возможностью проведения краудфандинга, кооперативного управления и распределения прибыли на блокчейне.\n\n', { disable_web_page_preview: true, ...menu });//<a href="https://dacom.io/welcome">как это работает</a>
 
         // const t = 'Меня зовут Оператор. Я обслуживаю клубы нео-предпринимателей на платформе.';
         // buttons.push(Markup.button.callback('⏺ Регистрация', `startreg`));

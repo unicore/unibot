@@ -1356,7 +1356,7 @@ module.exports.init = async (botModel, bot) => {
     const hostname = ctx.match[1];
     const nextId = parseInt(ctx.match[2], 10);
 
-    await printTasks(ctx, user, hostname, nextId);
+    await printTasks(bot, ctx, user, hostname, nextId);
   });
 
   // eslint-disable-next-line no-unused-vars
@@ -1640,7 +1640,7 @@ module.exports.init = async (botModel, bot) => {
   bot.hears('действия', async (ctx) => {
     // await checkForExistBCAccount(bot, ctx);
     const user = await getUser(bot.instanceName, ctx.update.message.from.id);
-    printTasks(ctx, user);
+    printTasks(bot, ctx, user);
   });
 
   bot.action(/buywith (\w+)/gi, async (ctx) => {

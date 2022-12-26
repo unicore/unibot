@@ -1,3 +1,5 @@
+const { lazyFetchAllTableInternal } = require('./utils/apiTable');
+
 /* eslint-disable */
 async function generateTaskOutput(task) {
     let output = `Сила: ${task.badge.power} POWER   |   Цветки: ${task.for_each}\n___________________\n`;
@@ -19,12 +21,12 @@ async function generateTaskOutput(task) {
 
 
 
-async function printTasks(ctx, user, hostname, next_id){
+async function printTasks(bot, ctx, user, hostname, next_id){
   if (!hostname)
-    hostname = "core"
+    hostname = bot.getEnv().CORE_HOST
 
-  let reports = await get_reports(user.eosname, hostname)
-  let tasks = await get_tasks(user.eosname, hostname, reports)
+  let reports = await get_reports(bot, user.eosname, hostname)
+  let tasks = await get_tasks(bot, user.eosname, hostname, reports)
   // const reports = await bot.uni.coreContract.getReports(user.eosname)
   // const tasks = await bot.uni.coreContract.getTasks(user.eosname, reports)
 
@@ -54,7 +56,7 @@ async function printTasks(ctx, user, hostname, next_id){
 
 
 function get_reports(bot, username, hostname){
-    return lazyFetchAllTableInternal(bot.eosapi, "unicore", hostname, 'reports3', username, username, 100, 4, 'i64')
+    return lazyFetchAllTableInternal(bot.eosapi, "unicore", hostname, 'reports3', username, username, 1000, 4, 'i64')
 }
 
 async function get_tasks(bot, username, hostname, reports) {
@@ -104,5 +106,6 @@ async function get_tasks(bot, username, hostname, reports) {
 
 
 module.exports = {
-    generateTaskOutput
+    generateTaskOutput,
+    printTasks
 }
