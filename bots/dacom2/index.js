@@ -1019,6 +1019,17 @@ module.exports.init = async (botModel, bot) => {
 
   async function startUnion(bot, ctx) {
     const res = await ctx.getChatAdministrators();
+
+    const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
+
+    const isAdminUser = isAdmin(bot, user.id);
+
+    if (!isAdminUser){
+      ctx.reply('Для получения лицензии на запуск DAO в телеграмме, пожалуйста, обратитесь в поддержку: @knouni_bot')
+      return
+    }
+
+
     let bot_is_admin = false;
 
     res.map((user) => {
