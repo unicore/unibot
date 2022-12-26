@@ -1,4 +1,5 @@
 const { lazyFetchAllTableInternal } = require('./utils/apiTable');
+const {saveUser } = require('./db')
 
 /* eslint-disable */
 async function generateTaskOutput(task) {

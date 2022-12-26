@@ -625,11 +625,11 @@ async function printWallet(bot, user) {
   // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // } else {
-  buttons.push(Markup.button.callback('совершить взнос ⤴️', 'deposit'));
-  buttons.push(Markup.button.callback('создать вывод ⤵️', 'prewithdrawbalance'));
-  buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
-  buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
-  buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
+  // buttons.push(Markup.button.callback('купить фракцию ⤴️', 'deposit'));
+  // buttons.push(Markup.button.callback('продать фракцию ⤵️', 'prewithdrawbalance'));
+  // buttons.push(Markup.button.callback('внутренний перевод ➡️', 'transfer'));
+  // buttons.push(Markup.button.callback('моя структура 🔀', 'mypartners'));
+  // buttons.push(Markup.button.callback('повысить статус 🔼', `buystatus ${JSON.stringify({})}`));
 
   // }
 

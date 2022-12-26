@@ -355,7 +355,7 @@ async function finishEducation(ctx) {
 }
 
 async function pushEducation(bot, ctx, currentSlideIndex) {
-  const education = bot.getEnv().education
+  const education = bot.getEnv().education || []
   
   const slide = education.find((el, index) => Number(index) === Number(currentSlideIndex));
   if (!slide) {

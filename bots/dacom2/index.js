@@ -282,7 +282,7 @@ async function finishEducation(bot, ctx, id) {
     .keyboard(mainButtons, { columns: 2 }).resize();
 
   let t = '';
-  t += '\nУчастники этого чата получили возможность создавать и достигать совместные цели. Попробуйте! Для создания цели напишите сообщение с тегом #goal в этом чате.\n';
+  t += '\nУчастники этого чата получили возможность создавать и достигать совместные цели. \n';
 
   t += '\nПоказать это сообщение: /help,';
   // t += `\nСоздать проект: напишите сообщение с тегом #project`
@@ -2080,7 +2080,11 @@ module.exports.init = async (botModel, bot) => {
         const exist = await getUnion(bot.instanceName, ctx.update.message.chat.id.toString());
 
         if (exist.type !== 'unionChat') {
-          await ctx.reply('Ошибка! Постановка целей доступна только в главном чате союза.', { reply_to_message_id: ctx.message.message_id });
+          try{
+
+            await ctx.reply('Ошибка! Постановка целей доступна только в главном чате союза.', { reply_to_message_id: ctx.message.message_id });
+          } catch(e){}
+
           return;
         }
 
