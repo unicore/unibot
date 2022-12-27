@@ -931,7 +931,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     if (parseFloat(currentBalance.available) >= parseFloat(currentBalance.purchase_amount)) {
       toPrint += `\n🟢 входящее предложение`
       toPrint += '\n------------------------------';
-      toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+      toPrint += `\nЭтап покупки: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
       
       toPrint += `\nДоступно: ${currentBalance.available.replace("FLOWER", "FLOWER")}`;
       toPrint += `\nДоход: +${income}%`;
@@ -939,7 +939,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.available) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
       
       toPrint += '\n------------------------------';
-      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего стола распределения фракций.`
+      toPrint += `\nКлуб предлагает заместить вашу фракцию с прибылью +${income}%. Предложение активно до открытия следующего этапа распределения фракций.`
       
       
       // toPrint += `\nПрогноз дохода: +${params.incomeStep}% через ${timestampToDHMS(forecast.forecastedTimeForRotate)} секунд`;
@@ -952,7 +952,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
         toPrint += `\n🔴 на замещении`
         last_print = `Ваша фракция находится на замещении фракционерами. Вы можете выводить баланс FLOWER по мере их поступления.`
         toPrint += '\n------------------------------';
-        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
+        toPrint += `\nЭтап покупки: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'}`;
         toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
         
@@ -961,7 +961,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       if (currentBalance.status == "solded") {
         toPrint += `\n🔵 замещение завершено`
         toPrint += '\n------------------------------';
-        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+        toPrint += `\nЭтап покупки: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
         toPrint += `\nНа замещении: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nПолучено: ${currentBalance.solded_for.replace("FLOWER", "FLOWER")}`;
         // toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
@@ -974,7 +974,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
       if (currentBalance.status == "process") {
         toPrint += `\n🟡 фракции в обороте`
         toPrint += '\n------------------------------';
-        toPrint += `\nСтол вклада: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
+        toPrint += `\nЭтап покупки: ${current_step} ${currentBalance.pool_color === 'white' ? '⚪️' : '⚫️'} `;
         
         toPrint += `\nДоступно: ${currentBalance.compensator_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\nДоход: +${income}%`;
@@ -1120,7 +1120,7 @@ async function notifyNewCycle(bot, hostname) {
         // eslint-disable-next-line no-await-in-loop
         await refreshAllBalances(bot, hostname, user, true);
 
-        text += `\nВнимание! Объявляется новый цикл развития кассы ${hostname.toUpperCase()}. Всем участникам рекомендуется забрать свои взносы из раздела "мои вклады" кассы.\n\nВклады, совершившие добро, могут быть перевложены своим остатком в очередь, и автоматически зайти в первые два стола последующих циклов.`;
+        text += `\nВнимание! Объявляется новый цикл развития кассы ${hostname.toUpperCase()}. Всем участникам рекомендуется забрать свои взносы из раздела "мои вклады" кассы.\n\nВклады, совершившие добро, могут быть перевложены своим остатком в очередь, и автоматически зайти в первые два этапа последующих циклов.`;
 
         // eslint-disable-next-line no-await-in-loop,max-len
         await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
@@ -1147,7 +1147,7 @@ async function notifyNewTable(bot, hostname) {
   for (const user of users) {
     let bals = balances.filter(b => b.owner == user.eosname)
     let win_bals = bals.filter(b => b.win == 1)
-    let text = `Внимание! Открыт новый стол распределения NFT-фракций бизнеса ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
+    let text = `Внимание! Открыт новый этап распределения NFT-фракций бизнеса ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
   
     if (win_bals.length > 0) {
 
@@ -1372,14 +1372,14 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     // toPrint += `\nКлуб фракционеров телеграма`
     // toPrint += `\nЦвет: ${params.currentPool.color === 'white' ? '⚪️ белый' : '⚫️ чёрный'}`;
     // toPrint += `\nПрогнозируемая доходность: +${forecast.forecastedPercentIncomePerMonth}% в месяц`;
-    toPrint += `\n\nСтол: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
+    toPrint += `\n\nЭтап: ${current_step} ${params.currentPool.color === 'white' ? '⚪️' : '⚫️'} `;
     
     // toPrint += `\nНа распределении: ${(params.currentPool.remain_quants / params.helix.quants_precision + parseFloat(fractions_on_sale.fractions_on_sale)).toFixed(0)} FRACTION`;
     // toPrint += `\nКурс конвертации: ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")} / FRACTION`;
-    toPrint += `\n\tДо закрытия стола: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
+    toPrint += `\n\tДо закрытия этапа: ${params.currentPool.remain.replace("FLOWER", "FLOWER")}`;
     
     toPrint += `\n\tПрогноз дохода: `;
-    toPrint += `\n\t\t\t +${params.incomeStep}% за закрытый стол;`;
+    toPrint += `\n\t\t\t +${params.incomeStep}% за закрытый этап;`;
     // toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 
@@ -1477,7 +1477,7 @@ async function printTail(bot, user, hostname) {
     text += 'У вас нет взносов, участвующих в очереди.';
   }
 
-  text += '\n\nПервый взнос с начала очереди автоматически попадает в первые два стола каждого нового цикла, пока взнос не будет исчерпан.';
+  text += '\n\nПервый взнос с начала очереди автоматически попадает в первые два этапа каждого нового цикла, пока взнос не будет исчерпан.';
 
   // eslint-disable-next-line max-len
   await sendMessageToUser(bot, user, { text }, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
