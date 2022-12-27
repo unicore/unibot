@@ -905,7 +905,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
 
     else {
 
-      buttons.push(Markup.button.callback('🛑 Требовать', `prewithdrawaction ${hostname} ${currentBalance.id}`));
+      buttons.push(Markup.button.callback('🛑 продать', `prewithdrawaction ${hostname} ${currentBalance.id}`));
     }
 
     // buttons.push(Markup.button.callback('Вывести прибыль', `withdrawaction ${hostname} ${currentBalance.id}`));
@@ -981,7 +981,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
         toPrint += `\n\t\tНоминал: ${currentBalance.purchase_amount.replace("FLOWER", "FLOWER")}`;
         toPrint += `\n\t\tПрибыль: +${(parseFloat(currentBalance.compensator_amount) - parseFloat(currentBalance.purchase_amount)).toFixed(4) } FLOWER`;//${params.host.quote_symbol}
         
-        last_print = `Ваша фракция находится в обороте. В случае её требования, FLOWER поступят на баланс, когда фракция будет замещена.`
+        last_print = `Ваша фракция находится в обороте. В случае её продажи, FLOWER поступят на баланс, когда фракция будет замещена.`
         
       }
       
@@ -1020,7 +1020,7 @@ async function printUserBalances(bot, ctx, user, hostname, nextIndex, fresh) {
     const buttons = [];
     // buttons.push(Markup.button.callback('Назад', `backto helixs`));
     // if (nextIndex > 0)
-      await ctx.reply(`У вас нет прав требования FLOWER. Для получения прав, заложите FLOWER в любой клуб.`); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
+      await ctx.reply(`У вас нет NFT-фракций. Кпите NFT-фракцию бизнеса и возвращайтесь за прибылью.`); // Markup.inlineKeyboard(buttons, { columns: 2 }).resize()
     // await printHelixs(bot, ctx, user);
   }
 }
@@ -1100,7 +1100,7 @@ async function withdrawAction(bot, ctx, user, hostname, balanceId) {
       if (e.message == "assertion failure with message: Cannot withdraw not refreshed balance. Refresh Balance first and try again." || e.message == "assertion failure with message: Cannot sell not refreshed balance. Refresh Balance first and try again.")
         ctx.replyWithHTML(`Оупс! Что-то изменилось! Пожалуйста, обновите ваш баланс.`);
       else
-        ctx.replyWithHTML(`Произошла системная ошибка при требовании. Пожалуйста, обратитесь в поддержку @knouni_bot с сообщением: ${e.message}`);
+        ctx.replyWithHTML(`Произошла системная ошибка при продаже. Пожалуйста, обратитесь в поддержку @knouni_bot с сообщением: ${e.message}`);
     }
 
 }
@@ -1380,7 +1380,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     
     toPrint += `\n\tПрогноз дохода: `;
     toPrint += `\n\t\t\t +${params.incomeStep}% за закрытый стол;`;
-    toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
+    // toPrint += `\n\t\t\t +${estimateSysIncome.fraction_income_per_month}% в месяц;`;
     // toPrint += `\nДобро противоцветных: -${params.lossFactor}%`;
 
     if (params.host.referral_percent > 0) {

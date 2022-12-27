@@ -1042,21 +1042,21 @@ module.exports.init = async (botModel, bot) => {
 
     if (balance) {
       if (balance.win == 1) {
-        buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
+        buttons.push(Markup.button.callback('Продать', `withdrawaction ${hostname} ${balance.id}`));
         buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
         ctx.reply(`Вы уверены, что хотите продать фракции на сумму ${balance.available.replace('FLOWER', 'FLOWER')} с чистой прибылью ${balance.root_percent / 10000}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
       } else {
         if (balance.last_recalculated_win_pool_id > balance.global_pool_id && balance.pool_num > 2) {
-          buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
+          buttons.push(Markup.button.callback('Продать', `withdrawaction ${hostname} ${balance.id}`));
           buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
           ctx.reply(`Вы уверены, что хотите отложенно продать фракции на сумму ${balance.compensator_amount.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         } else {
-          buttons.push(Markup.button.callback('Требовать', `withdrawaction ${hostname} ${balance.id}`));
+          buttons.push(Markup.button.callback('Продать', `withdrawaction ${hostname} ${balance.id}`));
           buttons.push(Markup.button.callback('Отменить', 'cancelwithdrawaction'));
 
-          ctx.reply(`Вы уверены, что хотите затребовать возврат фракций на сумму ${balance.available.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
+          ctx.reply(`Вы уверены, что хотите продать NFT-фракцию на сумму ${balance.available.replace('FLOWER', 'FLOWER')}?`, Markup.inlineKeyboard(buttons, { columns: 2 }).resize());
         }
       }
     } else ctx.reply('Баланс не найден');
@@ -1065,7 +1065,7 @@ module.exports.init = async (botModel, bot) => {
   bot.action('cancelwithdrawaction', async (ctx) => {
     const user = await getUser(bot.instanceName, ctx.update.callback_query.from.id);
 
-    ctx.editMessageText('Требование фракций отменено');
+    ctx.editMessageText('Продажа фракций отменена');
   });
 
   bot.action(/withdrawaction (\w+)\s(\w+)?/gi, async (ctx) => {
