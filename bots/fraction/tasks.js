@@ -49,7 +49,7 @@ async function printTasks(bot, ctx, user, hostname, next_id){
     
   } else {
 
-    await ctx.replyWithHTML("Доступных заданий пока нет. Приходите позже")
+    await ctx.replyWithHTML("Доступных заданий пока нет. Приходите позже.")
     // saveUser(bot.instanceName, user)
   }
 }
