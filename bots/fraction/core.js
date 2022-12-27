@@ -1139,8 +1139,7 @@ async function notifyNewTable(bot, hostname) {
   const users = await getSubscribers(bot, hostname);
   
   const params = await getHelixParams(bot, hostname);
-  let text = `Внимание! Открыт новый стол распределения фракций ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
-
+  
   const balances = await getAllHelixBalances(bot, hostname);
     
 
@@ -1148,14 +1147,15 @@ async function notifyNewTable(bot, hostname) {
   for (const user of users) {
     let bals = balances.filter(b => b.owner == user.eosname)
     let win_bals = bals.filter(b => b.win == 1)
-    
+    let text = `Внимание! Открыт новый стол распределения NFT-фракций бизнеса ${hostname.toUpperCase()} по курсу ${params.currentPool.quant_cost.replace("FLOWER", "FLOWER")}! Дешевле уже не будет.`
+  
     if (win_bals.length > 0) {
 
-      text += `\n\nКлуб предлагает заложить ваши фракции с прибылью от +5%. `
+      text += `\n\nКупите NFT-фракции с доходностью от +5%.`
       await sendMessageToUser(bot, user, { text });
 
     } else {
-      text += `\n\nЗаложите фракцию и получите долю в фондах выбранного кооперативного участка.`
+      text += `\n\nКупите NFT-фракции с доходностью от +5%.`
       await sendMessageToUser(bot, user, { text });
 
     }
@@ -1351,7 +1351,7 @@ async function printHelixs(bot, ctx, user, nextIndex, hostname) {
     }
 
     // buttons.push(Markup.button.callback('Купить', `select ${currentHelix.username}`));
-    buttons.push(Markup.button.callback(' ❇️ Заложить FLOWER', `deposit ${params.host.username}`));
+    buttons.push(Markup.button.callback(' ❇️ купить NFT-фракцию', `deposit ${params.host.username}`));
 
     // let incomeForecast = await calculateEstimateIncome(bot, hostname, params)
     let fractions_on_sale = await getBalancesOnSale(bot, params.host.username, user.eosname, params)
