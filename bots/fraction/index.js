@@ -909,7 +909,7 @@ module.exports.init = async (botModel, bot) => {
     await saveUser(bot.instanceName, user);
 
     if (isAdminUser && message) {
-      const count = await sendMessageToAll({ text: message });
+      const count = await sendMessageToAll(bot, { text: message });
       await ctx.replyWithHTML(`Отправлено ${count} партнёрам`);
     } else {
       await ctx.replyWithHTML('Недостаточно прав');

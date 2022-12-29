@@ -35,6 +35,7 @@ async function sendMessageToAll(bot, message, extra) {
   const collection = db.collection(`helixUsers_${bot.instanceName}`);
   const users = await collection.find({}).toArray();
 
+  
   if (!extra) {
     // eslint-disable-next-line no-param-reassign
     extra = Markup
@@ -43,6 +44,7 @@ async function sendMessageToAll(bot, message, extra) {
 
   // eslint-disable-next-line no-restricted-syntax
   for (const user of users) {
+
     if ('text' in message) await bot.telegram.sendMessage(user.id, message.text, extra);
     if ('photo' in message) await bot.telegram.sendPhoto(user.id, message.photo[2].file_id, { caption: message.caption });
     if ('voice' in message) await bot.telegram.sendVoice(user.id, message.voice.file_id);
