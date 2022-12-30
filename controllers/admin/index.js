@@ -146,6 +146,7 @@ module.exports.changeBotMode = async (req) => {
     knouni2: 1,
     fraction: 1,
     unicode: 1,
+    signal: 1,
   };
   const {
     name,

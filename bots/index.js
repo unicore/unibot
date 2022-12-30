@@ -13,6 +13,7 @@ const WalletBot = require('./wallet');
 const Knouni2Bot = require('./knouni2');
 const fractionBot = require('./fraction');
 const unicodeBot = require('./unicode');
+const signalBot = require('./signal');
 
 const BOTS = {
   base: BaseBot,
@@ -30,6 +31,7 @@ const BOTS = {
   knouni2: Knouni2Bot,
   fraction: fractionBot,
   unicode: unicodeBot,
+  signal: signalBot
 };
 
 module.exports.initBot = (botModel, name, telegrafBot) => {
