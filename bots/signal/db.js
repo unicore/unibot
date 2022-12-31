@@ -307,6 +307,25 @@ async function getSubscribers(bot, hostname) {
   return [];
 }
 
+
+async function getSubscribers(bot) {
+  try {
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomUsers_${bot.instanceName}`);
+    let users;
+
+    // eslint-disable-next-line max-len
+    users = await collection.find({ activated: true }).toArray();
+
+    return users;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+
+  return [];
+}
+
 // eslint-disable-next-line camelcase
 async function insertMessage(suffix, user, from, message, message_id, type) {
   try {
@@ -442,6 +461,70 @@ async function getTickets(suffix, user) {
   }
 }
 
+async function insertSignal(suffix, message_id, user, signal){
+  try {
+    
+    const db = await loadDB();
+
+    const collection = db.collection(`dacomSignals_${suffix}`);
+    
+    await collection.updateOne(
+      { 
+        user_id: user.id,
+        symbol: signal.symbol,
+        sellOnEx: signal.sellOnEx,
+        buyOnEx: signal.buyOnEx
+      },
+      { $set: {
+        
+        user_id: user.id,
+        symbol: signal.symbol,
+        sellOnEx: signal.sellOnEx,
+        buyOnEx: signal.buyOnEx,
+        message_id,
+        ...signal,
+
+      } },
+      { upsert: true },
+    );
+
+    // await collection.insertOne({
+    //   // eslint-disable-next-line camelcase
+    //   message_id, user_id: user.id, ...signal, time: new Date()
+    // });
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+
+async function removeSignal(suffix, user, symbol, sellOnEx, buyOnEx){
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomSignals_${suffix}`);
+
+    await collection.deleteOne({ user_id: user.id, symbol, sellOnEx, buyOnEx });
+
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
+async function getSignals(suffix, user){
+  try {
+    const db = await loadDB();
+    const collection = db.collection(`dacomSignals_${suffix}`);
+
+    console.log("USER: ", user.id)
+    const signals = await collection.find({ user_id: user.id }).toArray();
+
+    return signals;
+  } catch (e) {
+    console.log('error: ', e.message);
+  }
+}
+
 module.exports = {
   loadDB,
   getUserHelixBalance,
@@ -472,4 +555,7 @@ module.exports = {
   insertWithdraw,
   updateWithdraw,
   getWithdraw,
+  insertSignal,
+  getSignals,
+  removeSignal
 };

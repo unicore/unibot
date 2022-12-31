@@ -10,7 +10,7 @@ module.exports = {
     watch: ['./bots/helix/'],
     instances: 1,
   },
-   {
+  {
     name: 'SignalBotWorker',
     script: './bots/signal/worker.js',
     watch: ['./bots/signal/'],

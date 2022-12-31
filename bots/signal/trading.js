@@ -1,7 +1,10 @@
 require('dotenv').config()
 const { MainClient } = require('binance');
+var moment = require('moment'); // require
+moment.locale('ru');
 
-const {sendMessageToAll} = require('./messages')
+const {sendMessageToUser} = require('./messages')
+const {timestampToDHMS} = require('./utils/time')
 
 const blacklist = [
   "SDUSDT"
@@ -305,6 +308,7 @@ const { RestClient } = require("okx-api")
 const { HbApi } = require('huobi-api-js')
 const api = require('kucoin-node-api')
 
+const {insertSignal, getSignals, removeSignal, getSubscribers} = require("./db")
 
 
 async function getKucoinRates(bot){
@@ -549,24 +553,133 @@ function compare(bot, binance, bybit, firstEx, secondEx) {
 }
 
 async function prepareReport(bot, data, firstEx, secondEx) {
+  let users = await getSubscribers(bot)
+
   
-  
-  for( m of data ) {
+  for( signal of data ) {
+    signal.symbol = signal.binance.symbol
 
     let report = ""
-    report += `Символ: ${m.binance.symbol}\n`
-    report += `Прибыль: ${parseFloat(m.diff).toFixed(2)}%\n`
-    report +=  `Купить на ${m.buyOnEx} по курсу ${m.buy_price}\n`
-    report +=  `Продать на ${m.sellOnEx} по курсу ${m.sell_price}\n`
+    report += `Символ: ${signal.binance.symbol}\n`
+    report += `Прибыль: ${parseFloat(signal.diff).toFixed(2)}%\n`
+    report +=  `Купить на ${signal.buyOnEx} по курсу ${signal.buy_price}\n`
+    report +=  `Продать на ${signal.sellOnEx} по курсу ${signal.sell_price}\n`
     
     // console.log(report)
     // console.log(firstEx, secondEx)
-    // console.log(m)
-    await sendMessageToAll(bot, {text: report})  
+    // console.log(signal)
+    for (const user of users) {
+
+      let signals = await getSignals(bot.instanceName, user)
+      // console.log("signals: ", signals)
+      let sig = signals.find(s => s.symbol == signal.symbol && s.sellOnEx == signal.sellOnEx && s.buyOnEx == signal.buyOnEx)
+      
+      // console.log("SIG: ", sig)
+      
+      
+
+      if (sig) {
+        //EDIT MESSAGE
+        let t = moment(sig.moment)
+        let now = moment()
+
+        let interval = (now - t) / 1000
+
+        //зеленый - свежий сигнал
+        //желтый - больше 3х минут и меньше 5
+        //красный - больше 5 минут
+
+        let mark = '🟢' 
+        if (interval > bot.getEnv().YELLOW_INTERVAL && interval < bot.getEnv().RED_INTERVAL){
+          mark = '🟡'
+        } else if (interval > bot.getEnv().RED_INTERVAL){
+          mark = '🔴'
+        }
+        
+
+        report = `${mark} ${t.fromNow()}\n` + report
+        // console.log("T1", t, sig.moment)
+        // console.log("SIGNAL: ", sig.symbol, sig.sellOnEx, sig.buyOnEx)
+        // console.log("t-now: ", now - t )
+        if (interval < bot.getEnv().SKIP_INTERVAL) {
+          //skip
+          // console.log("SKIP")  
+
+        } else if (interval > bot.getEnv().SKIP_INTERVAL) {
+          if (!sig.message_id){
+            // console.log("FIRST SEND")
+            let message_id = (await bot.telegram.sendMessage(user.id, report)).message_id;
+            //UPDATE SIGNAL
+            await insertSignal(bot.instanceName, message_id, user, signal)  
+          } else {
+            //EDIT MESSAGE
+            // console.log("EDIT")
+            try{
+              await bot.telegram.editMessageText(user.id, sig.message_id, null, report)
+            } catch(e){}
+          }
+        }        
+        
+
+        
+
+        
+      } else {
+        
+        let t = moment(new Date())
+        // console.log("T2", t)
+        report = `☑️ ${t.fromNow()}\n` + report
+        
+        signal.moment = new Date()
+
+        // let message_id = await sendMessageToUser(bot, user, {text: report})  
+        await insertSignal(bot.instanceName, null, user, signal)  
+      } 
+
+      // else {
+        
+      // }
+
+      
+    }
+    
   
   }
 
-  // data.map(m => {
+
+  for (const user of users) {
+      //сигналы у пользователя
+      let signals = await getSignals(bot.instanceName, user)
+      //проверить каждый из них на присутствие в массиве новых сигналов
+      //если их нет - удалить из бд и диалога с пользователем
+      
+
+      for (signal of signals) {
+        // console.log("on delete signal: ", data)
+        let exist = data.find(s => s.symbol == signal.symbol && s.sellOnEx == signal.sellOnEx && s.buyOnEx == signal.buyOnEx)
+        if (!exist) {
+          try{
+            console.log("on remove signal: ", user.id, signal.symbol, signal.sellOnEx, signal.buyOnEx)
+            await removeSignal(bot.instanceName, user, signal.symbol, signal.sellOnEx, signal.buyOnEx)
+            
+            try{await bot.telegram.deleteMessage(user.id, signal.message_id)} catch(e){}
+            
+          } catch(e){console.log("error on delete: ", e)}
+        }
+      }
+
+
+      // let missed = signals.filter(e=>!a2.includes(e));
+
+  }
+
+
+  //TODO
+  //MAP existed signals and delete message which their signal
+
+
+  //
+  // data.map(signal => {
     
     
   // })
@@ -585,7 +698,7 @@ async function getAllRates(bot) {
   
   let okx = await getOkxRates(bot)
   let huobi = await getHbRates(bot)
-  let bybit = await getBybitRates(bot)
+  // let bybit = await getBybitRates(bot)
   let kucoin = await getKucoinRates(bot)
 
   console.log(new Date())
@@ -600,11 +713,11 @@ async function getAllRates(bot) {
   //   from: 'huobi',
   //   to: 'okx'
   // })
-
-  await prepareReport(bot, HuobiOkx, 'huobi', 'okx')  
+  if(HuobiOkx.length > 0)
+    await prepareReport(bot, HuobiOkx, 'huobi', 'okx')  
   
   // console.log("\nBYBIT - OKX")
-  let BybitOkx = await compare(bot, bybit, okx, 'bybit', 'okx')
+  // let BybitOkx = await compare(bot, bybit, okx, 'bybit', 'okx')
   
   // data.push({
   //   data: BybitOkx,
@@ -612,7 +725,7 @@ async function getAllRates(bot) {
   //   to: 'okx'
   // })
 
-  await prepareReport(bot, BybitOkx, 'bybit', 'okx')  
+  // await prepareReport(bot, BybitOkx, 'bybit', 'okx')  
   
   // console.log("\nKUKOIN - OKX")
   let KucoinOkx = await compare(bot, kucoin, okx, 'kucoin', 'okx')
@@ -622,11 +735,12 @@ async function getAllRates(bot) {
   //   from: 'kucoin',
   //   to: 'okx'
   // })
-  await prepareReport(bot, KucoinOkx, 'kucoin', 'okx')  
+  if(KucoinOkx.length > 0)
+    await prepareReport(bot, KucoinOkx, 'kucoin', 'okx')  
 
   
   // console.log("\nHUOBI - BYBIT")
-  let HuobiBybit = await compare(bot, huobi, bybit, 'huobi', 'bybit')
+  // let HuobiBybit = await compare(bot, huobi, bybit, 'huobi', 'bybit')
   
   // data.push({
   //   data: HuobiBybit,
@@ -634,7 +748,7 @@ async function getAllRates(bot) {
   //   to: 'bybit'
   // })
 
-  await prepareReport(bot, HuobiBybit, 'huobi', 'bybit')  
+  // await prepareReport(bot, HuobiBybit, 'huobi', 'bybit')  
   
   // console.log("\nKUKOIN - HUOBI")
   let KucoinHuobi = await compare(bot, kucoin, huobi, "kucoin", "huobi")
@@ -645,11 +759,11 @@ async function getAllRates(bot) {
   //   to: 'huobi'
   // })
 
-
-  await prepareReport(bot, KucoinHuobi, 'kucoin', 'huobi')  
+  if(KucoinHuobi.length > 0)
+    await prepareReport(bot, KucoinHuobi, 'kucoin', 'huobi')  
 
   // console.log("\nBYBIT - KUCOIN")
-  let BybitKucoin = await compare(bot, bybit, okx, 'bybit', 'kucoin')
+  // let BybitKucoin = await compare(bot, bybit, okx, 'bybit', 'kucoin')
   
   // data.push({
   //   data: BybitKucoin,
@@ -659,7 +773,7 @@ async function getAllRates(bot) {
 
 
 
-  await prepareReport(bot, BybitKucoin, 'bybit', 'kucoin')  
+  // await prepareReport(bot, BybitKucoin, 'bybit', 'kucoin')  
   
 
   // console.log(data)
