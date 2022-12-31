@@ -552,20 +552,26 @@ function compare(bot, binance, bybit, firstEx, secondEx) {
   return filtered
 }
 
+
+function constructBaseReport(signal){
+  let base_report = `Символ: ${signal.binance.symbol}\n`
+  base_report += `Прибыль: ${parseFloat(signal.diff).toFixed(2)}%\n`
+  base_report +=  `Купить на ${signal.buyOnEx} по курсу ${signal.buy_price}\n`
+  base_report +=  `Продать на ${signal.sellOnEx} по курсу ${signal.sell_price}\n`
+  
+  return base_report
+}
+
 async function prepareReport(bot, data, firstEx, secondEx) {
   let users = await getSubscribers(bot)
 
-  
+  let report = ''
+  let base_report = ""
+    
   for( signal of data ) {
     signal.symbol = signal.binance.symbol
-
-    let report = ""
-    report += `Символ: ${signal.binance.symbol}\n`
-    report += `Прибыль: ${parseFloat(signal.diff).toFixed(2)}%\n`
-    report +=  `Купить на ${signal.buyOnEx} по курсу ${signal.buy_price}\n`
-    report +=  `Продать на ${signal.sellOnEx} по курсу ${signal.sell_price}\n`
-    
-    // console.log(report)
+    base_report = constructBaseReport(signal)
+    // console.log(base_report)
     // console.log(firstEx, secondEx)
     // console.log(signal)
     for (const user of users) {
@@ -597,7 +603,7 @@ async function prepareReport(bot, data, firstEx, secondEx) {
         }
         
 
-        report = `${mark} ${t.fromNow()}\n` + report
+        report = `${mark} ${t.fromNow()}\n` + base_report
         // console.log("T1", t, sig.moment)
         // console.log("SIGNAL: ", sig.symbol, sig.sellOnEx, sig.buyOnEx)
         // console.log("t-now: ", now - t )
@@ -628,7 +634,7 @@ async function prepareReport(bot, data, firstEx, secondEx) {
         
         let t = moment(new Date())
         // console.log("T2", t)
-        report = `☑️ ${t.fromNow()}\n` + report
+        report = `🟡 ${t.fromNow()}\n` + base_report
         
         signal.moment = new Date()
 
@@ -662,7 +668,14 @@ async function prepareReport(bot, data, firstEx, secondEx) {
             console.log("on remove signal: ", user.id, signal.symbol, signal.sellOnEx, signal.buyOnEx)
             await removeSignal(bot.instanceName, user, signal.symbol, signal.sellOnEx, signal.buyOnEx)
             
-            try{await bot.telegram.deleteMessage(user.id, signal.message_id)} catch(e){}
+            let t = moment(signal.moment)
+            base_report = constructBaseReport(signal)
+            report = `⚫️ ${t.fromNow()}\n` + base_report
+            
+            try{
+              await bot.telegram.editMessageText(user.id, signal.message_id, null, report)
+            } catch(e){}
+            // try{await bot.telegram.deleteMessage(user.id, signal.message_id)} catch(e){}
             
           } catch(e){console.log("error on delete: ", e)}
         }
