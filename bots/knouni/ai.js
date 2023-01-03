@@ -4,7 +4,7 @@ const { Configuration, OpenAIApi } = require("openai");
 async function getAIAnswer(bot, text){
   console.log("start AI")
   const configuration = new Configuration({
-    apiKey: process.env.OPEN_AI_KEY,
+    apiKey: bot.getEnv().OPEN_AI_KEY,
   });
   console.log("config finish")
   const openai = new OpenAIApi(configuration);
