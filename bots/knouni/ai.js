@@ -13,10 +13,10 @@ async function getAIAnswer(bot, text){
   const response = await openai.createCompletion({
     model: "text-davinci-003",
     prompt: text,
-    temperature: 1,
+    temperature: 0.9,
     max_tokens: 4000,
     top_p: 1,
-    frequency_penalty: 0.0,
+    frequency_penalty: 0.1,
     presence_penalty: 0.8,
     stop: [" Human:", " AI:"],
   });

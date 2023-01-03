@@ -193,6 +193,7 @@ async function catchRequest(bot, user, ctx, text) {
 
   await insertRequest(bot.instanceName, user, id, text);
   
+
   //TODO AI
 
 }
@@ -277,8 +278,8 @@ module.exports.init = async (botModel, bot) => {
           console.log("on else")
           user.request_chat_id = false;
           user.request_channel_id = false;
-          if (!user.requests_count)
-            user.requests_count = 3;
+          // if (!user.requests_count)
+          //   user.requests_count = 3;
 
           if (!user.eosname) {
             user.eosname = await generateAccount(bot, ctx, false, user.ref);
@@ -688,19 +689,25 @@ module.exports.init = async (botModel, bot) => {
             await saveUser(bot.instanceName, user);
             // //TODO AI
             
-            // try{
-            //   let response = await getAIAnswer(bot, text)
-            //   console.log("AI RESPONCE: ", response.status, response.statusText)
-            //   if (response.status == 200){
-            //     await ctx.reply(response.data.choices[0].text)
-            //   } else {
+            try{
+              let response = await getAIAnswer(bot, text)
+              console.log("AI RESPONCE: ", response.status, response.statusText)
+              if (response.status == 200){
 
-            //     await ctx.reply(`Ошибка 1: `, response.statusText)  
-            //   }
-            // } catch(e){
+                await ctx.reply(response.data.choices[0].text)
+
+                id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, { text: response.data.choices[0].text }, {reply_to_message_id: user.request_chat_id}); 
+
+                await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, text, id, 'chat');
+
+              } else {
+
+                await ctx.reply(`Ошибка 1: `, response.statusText)  
+              }
+            } catch(e){
               
-            //   await ctx.reply(`Пожалуйста, сформулируйте вопрос короче.`)  
-            // }
+              await ctx.reply(`Пожалуйста, сформулируйте вопрос короче.`)  
+            }
             
 
           } else {
@@ -730,6 +737,29 @@ module.exports.init = async (botModel, bot) => {
             if (user && !user.request_chat_id) {
               console.log('catch forwarded messsage to chat: ', ctx.update.message.message_id);
               user.request_chat_id = ctx.update.message.message_id;
+
+              try{
+                let response = await getAIAnswer(bot, ctx.update.message.text)
+                console.log("AI RESPONCE: ", response.status, response.statusText)
+                if (response.status == 200){
+
+                  await ctx.reply(response.data.choices[0].text)
+
+                  id = await sendMessageToUser(bot, { id:  bot.getEnv().CHAT_CHANNEL }, { text: response.data.choices[0].text }, {reply_to_message_id: user.request_chat_id}); 
+                  await insertMessage(bot.instanceName, user, bot.getEnv().CHAT_CHANNEL, response.data.choices[0].text, id, 'chat');
+
+                  id = await sendMessageToUser(bot, { id:  user.id }, { text: response.data.choices[0].text }); 
+                                    
+                  
+                } else {
+
+                  await ctx.reply(`Ошибка 1: `, response.statusText)  
+                }
+              } catch(e){
+                console.log(e)
+                await ctx.reply(`Пожалуйста, сформулируйте вопрос короче.`)  
+              }
+              
               await saveUser(bot.instanceName, user);
             }
           }
